@@ -1,0 +1,133 @@
+<div class="progress-modal" (click)="close.emit()">
+  <div class="progress-container" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="progress-header">
+      <div>
+        <h2>Gestão de Progresso</h2>
+        <p>{{ contract.contract_number }} - {{ contract.title }}</p>
+      </div>
+      <button class="close-btn" (click)="close.emit()">×</button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>A carregar progresso...</p>
+    </div>
+
+    <!-- Content -->
+    <div *ngIf="!loading && progress" class="progress-content">
+      
+      <!-- Messages -->
+      <div *ngIf="successMessage" class="message message--success">
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="message message--error">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Current Progress -->
+      <div class="current-progress-section">
+        <div class="progress-display">
+          <div class="progress-circle">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+              <circle 
+                cx="50" cy="50" r="45" 
+                fill="none" 
+                stroke="url(#gradient)" 
+                stroke-width="8"
+                stroke-linecap="round"
+                [attr.stroke-dasharray]="283"
+                [attr.stroke-dashoffset]="283 - (283 * progress.current.current_progress / 100)"
+                transform="rotate(-90 50 50)"
+              />
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#6366f1"/>
+                  <stop offset="100%" style="stop-color:#a855f7"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="progress-value">{{ progress.current.current_progress | number:'1.0-1' }}%</div>
+          </div>
+        </div>
+
+        <div class="progress-metrics">
+          <div class="metric">
+            <span class="metric-label">Baseado no Tempo</span>
+            <span class="metric-value">{{ progress.current.time_based_progress | number:'1.0-1' }}%</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Baseado em Pagamentos</span>
+            <span class="metric-value">{{ progress.current.payment_based_progress | number:'1.0-1' }}%</span>
+          </div>
+          <div class="metric" *ngIf="progress.current.last_update">
+            <span class="metric-label">Última Atualização</span>
+            <span class="metric-value">{{ progress.current.last_update.updated_at | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Update Form -->
+      <div class="update-section">
+        <h3>Atualizar Progresso</h3>
+        
+        <div class="form-group">
+          <label>Novo Progresso (%)</label>
+          <input 
+            type="range" 
+            [(ngModel)]="newProgress" 
+            min="0" 
+            max="100" 
+            step="0.5"
+            class="progress-slider"
+          >
+          <div class="slider-value">{{ newProgress | number:'1.0-1' }}%</div>
+        </div>
+
+        <div class="form-group">
+          <label>Notas (opcional)</label>
+          <textarea 
+            [(ngModel)]="newNotes" 
+            rows="3" 
+            placeholder="Descreva o progresso alcançado..."
+            class="form-textarea"
+          ></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button (click)="calculateAutomatic()" [disabled]="saving" class="btn-secondary">
+            🔄 Recalcular Automático
+          </button>
+          <button (click)="updateProgress()" [disabled]="saving" class="btn-primary">
+            {{ saving ? 'A guardar...' : 'Atualizar Progresso' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="history-section">
+        <h3>Histórico de Atualizações</h3>
+        
+        <div *ngIf="progress.history.length === 0" class="empty-history">
+          <p>Nenhuma atualização registada</p>
+        </div>
+
+        <div *ngFor="let update of progress.history" class="history-item">
+          <div class="history-header">
+            <div class="history-percentage">{{ update.percentage | number:'1.0-1' }}%</div>
+            <span class="history-type" [ngClass]="getUpdateTypeClass(update.type)">
+              {{ getUpdateTypeLabel(update.type) }}
+            </span>
+          </div>
+          <div class="history-content">
+            <p *ngIf="update.notes" class="history-notes">{{ update.notes }}</p>
+            <p class="history-date">{{ update.updated_at | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

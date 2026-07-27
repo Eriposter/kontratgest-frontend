@@ -1,0 +1,205 @@
+<div class="login-page">
+  
+  <!-- Fundo com Gradiente e Padrão -->
+  <div class="login-bg">
+    <div class="login-bg-pattern"></div>
+    <div class="login-bg-glow login-bg-glow--1"></div>
+    <div class="login-bg-glow login-bg-glow--2"></div>
+    <div class="login-bg-glow login-bg-glow--3"></div>
+  </div>
+
+  <!-- Conteúdo -->
+  <div class="login-container">
+    
+    <!-- Coluna Esquerda: Branding (visível em desktop) -->
+    <div class="login-branding">
+      <div class="login-branding-content">
+        <!-- Logo -->
+        <div class="login-logo">
+          <div class="login-logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <h1 class="login-logo-text">Kontrat<span>Gest</span></h1>
+        </div>
+
+        <h2 class="login-branding-title">
+          Gestão Inteligente de Contratos
+        </h2>
+        <p class="login-branding-subtitle">
+          Plataforma completa para gestão de contratos, cauções, pagamentos e compliance — desenhada para o mercado angolano.
+        </p>
+
+        <!-- Features -->
+        <div class="login-features">
+          <div class="login-feature">
+            <div class="login-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="login-feature-title">Compliance Automático</p>
+              <p class="login-feature-desc">Alertas de certidões AGT, INSS e cauções a expirar</p>
+            </div>
+          </div>
+
+          <div class="login-feature">
+            <div class="login-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="login-feature-title">Motor Financeiro</p>
+              <p class="login-feature-desc">IVA, retenções, multi-moeda e registo BNA</p>
+            </div>
+          </div>
+
+          <div class="login-feature">
+            <div class="login-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+            </div>
+            <div>
+              <p class="login-feature-title">Setor Público & Privado</p>
+              <p class="login-feature-desc">Concursos, Tribunal de Contas, URAs e mais</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="login-branding-footer">
+          <p>© 2026 KontratGest. Todos os direitos reservados.</p>
+          <p class="login-branding-footer-sub">Feito com ❤️ em Angola</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna Direita: Formulário -->
+    <div class="login-form-wrapper">
+      <div class="login-form-container" [class.shake]="shakeForm">
+        
+        <!-- Logo Mobile -->
+        <div class="login-logo-mobile">
+          <div class="login-logo-icon login-logo-icon--sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <h1 class="login-logo-text login-logo-text--sm">Kontrat<span>Gest</span></h1>
+        </div>
+
+        <!-- Cabeçalho do Formulário -->
+        <div class="login-form-header">
+          <h2 class="login-form-title">Bem-vindo de volta</h2>
+          <p class="login-form-subtitle">Introduza as suas credenciais para aceder ao sistema</p>
+        </div>
+
+        <!-- Formulário -->
+        <form (ngSubmit)="onSubmit()" class="login-form" autocomplete="on">
+          
+          <!-- Campo Email -->
+          <div class="login-field">
+            <label class="login-label" for="email">Email</label>
+            <div class="login-input-wrapper">
+              <svg class="login-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+              </svg>
+              <input 
+                id="email"
+                type="email" 
+                [(ngModel)]="email" 
+                name="email" 
+                required
+                autocomplete="email"
+                class="login-input"
+                [class.login-input--error]="errorMessage"
+                placeholder="seu.email@empresa.ao"
+              >
+            </div>
+          </div>
+
+          <!-- Campo Password -->
+          <div class="login-field">
+            <div class="login-label-row">
+              <label class="login-label" for="password">Password</label>
+              <button type="button" class="login-forgot" (click)="showPassword = !showPassword">
+                {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+              </button>
+            </div>
+            <div class="login-input-wrapper">
+              <svg class="login-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+              <input 
+                id="password"
+                [type]="showPassword ? 'text' : 'password'" 
+                [(ngModel)]="password" 
+                name="password" 
+                required
+                autocomplete="current-password"
+                class="login-input"
+                [class.login-input--error]="errorMessage"
+                placeholder="••••••••"
+              >
+              <button type="button" class="login-toggle-password" (click)="togglePassword()">
+                <svg *ngIf="!showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <svg *ngIf="showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Mensagem de Erro -->
+          <div *ngIf="errorMessage" class="login-error">
+            <svg class="login-error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <!-- Botão de Login -->
+          <button 
+            type="submit" 
+            [disabled]="isLoading"
+            class="login-button"
+          >
+            <span *ngIf="!isLoading" class="login-button-content">
+              Entrar no Sistema
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+              </svg>
+            </span>
+            <span *ngIf="isLoading" class="login-button-content">
+              <svg class="login-spinner" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
+              A autenticar...
+            </span>
+          </button>
+        </form>
+
+        <!-- Separador -->
+        <div class="login-divider">
+          <span class="login-divider-text">Acesso protegido por encriptação SSL</span>
+        </div>
+
+        <!-- Info de Segurança -->
+        <div class="login-security">
+          <svg class="login-security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+          <p>Os seus dados estão protegidos e encriptados</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

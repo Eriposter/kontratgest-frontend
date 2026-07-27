@@ -1,0 +1,303 @@
+<div class="entities-page animate-fade-in">
+  
+  <!-- Cabeçalho -->
+  <div class="entities-header">
+    <div>
+      <h1 class="entities-title">Entidades</h1>
+      <p class="entities-subtitle">Gestão de fornecedores, empreiteiros e contrapartes</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Nova Entidade
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="entities-filters">
+    <div class="filter-search">
+      <svg class="filter-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery" 
+        (keyup.enter)="onSearch()"
+        placeholder="Pesquisar por nome, NIF ou email..." 
+        class="filter-search-input"
+      >
+    </div>
+
+    <select [(ngModel)]="selectedType" (change)="onFilterChange()" class="filter-select">
+      <option value="">Todos os tipos</option>
+      <option value="supplier">Fornecedores</option>
+      <option value="contractor">Empreiteiros</option>
+      <option value="consultant">Consultores</option>
+      <option value="client">Clientes</option>
+      <option value="public_entity">Entidades Públicas</option>
+    </select>
+
+    <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="filter-select">
+      <option value="active">Ativos</option>
+      <option value="suspended">Suspensos</option>
+      <option value="">Todos</option>
+    </select>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>A carregar entidades...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p>{{ error }}</p>
+    <button (click)="loadEntities()" class="btn-secondary">Tentar novamente</button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && entities.length === 0" class="empty-state">
+    <div class="empty-icon">🏢</div>
+    <h3>Nenhuma entidade encontrada</h3>
+    <p>Tente ajustar os filtros ou crie uma nova entidade</p>
+    <button (click)="openCreateModal()" class="btn-primary">Criar Entidade</button>
+  </div>
+
+  <!-- Tabela -->
+  <div *ngIf="!loading && !error && entities.length > 0" class="entities-table-wrapper">
+    <table class="entities-table">
+      <thead>
+        <tr>
+          <th>Entidade</th>
+          <th>Tipo</th>
+          <th>NIF</th>
+          <th>Contacto</th>
+          <th>Compliance</th>
+          <th>Estado</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let entity of entities" class="entity-row">
+          <td>
+            <div class="entity-info">
+              <div class="entity-details">
+                <p class="entity-name">{{ entity.identification.name }}</p>
+                <p class="entity-legal">{{ entity.identification.legal_name }}</p>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="entity-type-badge">{{ getTypeLabel(entity.type) }}</span>
+          </td>
+          <td>
+            <span class="entity-nif">{{ entity.identification.nif }}</span>
+          </td>
+          <td>
+            <div class="entity-contact">
+              <p class="entity-email">{{ entity.contact.email || '—' }}</p>
+              <p class="entity-phone">{{ entity.contact.phone || '—' }}</p>
+            </div>
+          </td>
+          <td>
+            <span class="compliance-badge" [ngClass]="getComplianceStatus(entity).class">
+              {{ getComplianceStatus(entity).label }}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="'status--' + entity.status">
+              {{ entity.status === 'active' ? 'Ativo' : 'Suspenso' }}
+            </span>
+          </td>
+          <!-- Na coluna de ações -->
+<td class="text-right">
+  <div class="entity-actions">
+    <button class="action-btn" (click)="viewDetails(entity)" title="Ver detalhes">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+      </svg>
+    </button>
+    <button class="action-btn" (click)="editEntity(entity)" title="Editar">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+      </svg>
+    </button>
+    <button 
+      class="action-btn status-toggle" 
+      [class.suspend]="entity.status === 'active'" 
+      [class.reactivate]="entity.status === 'suspended'"
+      (click)="toggleStatus(entity)" 
+      [title]="entity.status === 'active' ? 'Suspender' : 'Reativar'">
+      <svg *ngIf="entity.status === 'active'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+      </svg>
+      <svg *ngIf="entity.status === 'suspended'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+    </button>
+  </div>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginação -->
+  <div *ngIf="!loading && entities.length > 0" class="pagination">
+    <div class="pagination-info">
+      Mostrando {{ entities.length }} de {{ totalEntities }} entidades
+    </div>
+    <div class="pagination-controls">
+      <button 
+        (click)="goToPage(currentPage - 1)" 
+        [disabled]="currentPage === 1"
+        class="pagination-btn"
+      >
+        ← Anterior
+      </button>
+      
+      <div class="pagination-pages">
+        <button 
+          *ngFor="let page of [].constructor(totalPages); let i = index" 
+          (click)="goToPage(i + 1)"
+          [class.active]="currentPage === i + 1"
+          class="pagination-page"
+        >
+          {{ i + 1 }}
+        </button>
+      </div>
+
+      <button 
+        (click)="goToPage(currentPage + 1)" 
+        [disabled]="currentPage === totalPages"
+        class="pagination-btn"
+      >
+        Próxima →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalhes -->
+<div *ngIf="showDetailModal && selectedEntity" class="modal-overlay" (click)="closeDetailModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Detalhes da Entidade</h2>
+      <button class="modal-close" (click)="closeDetailModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- Conteúdo do modal de detalhes (mantido igual) -->
+      <div class="detail-section">
+        <h3>Identificação</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Nome</label>
+            <p>{{ selectedEntity.identification.name }}</p>
+          </div>
+          <div class="detail-item">
+            <label>Razão Social</label>
+            <p>{{ selectedEntity.identification.legal_name || '—' }}</p>
+          </div>
+          <div class="detail-item">
+            <label>NIF</label>
+            <p>{{ selectedEntity.identification.nif }}</p>
+          </div>
+          <div class="detail-item">
+            <label>Tipo</label>
+            <p>{{ getTypeLabel(selectedEntity.type) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Contacto</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Email</label>
+            <p>{{ selectedEntity.contact.email || '—' }}</p>
+          </div>
+          <div class="detail-item">
+            <label>Telefone</label>
+            <p>{{ selectedEntity.contact.phone || '—' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Endereço</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Morada</label>
+            <p>{{ selectedEntity.address.street || '—' }}</p>
+          </div>
+          <div class="detail-item">
+            <label>Cidade</label>
+            <p>{{ selectedEntity.address.city || '—' }}</p>
+          </div>
+          <div class="detail-item">
+            <label>Província</label>
+            <p>{{ selectedEntity.address.province_label || '—' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Compliance</h3>
+        <div class="compliance-details">
+          <div class="compliance-item">
+            <div class="compliance-header">
+              <span class="compliance-label">Certidão AGT</span>
+              <span class="compliance-badge" [ngClass]="selectedEntity.compliance.certificates.agt.is_valid ? 'compliance--ok' : 'compliance--expired'">
+                {{ selectedEntity.compliance.certificates.agt.is_valid ? 'Válida' : 'Expirada' }}
+              </span>
+            </div>
+            <p class="compliance-date">
+              Expira em: {{ selectedEntity.compliance.certificates.agt.expiry | date:'dd/MM/yyyy' }}
+              <span *ngIf="selectedEntity.compliance.certificates.agt.days_until_expiry !== null" class="compliance-days">
+                ({{ selectedEntity.compliance.certificates.agt.days_until_expiry }} dias)
+              </span>
+            </p>
+          </div>
+
+          <div class="compliance-item">
+            <div class="compliance-header">
+              <span class="compliance-label">Certidão INSS</span>
+              <span class="compliance-badge" [ngClass]="selectedEntity.compliance.certificates.inss.is_valid ? 'compliance--ok' : 'compliance--expired'">
+                {{ selectedEntity.compliance.certificates.inss.is_valid ? 'Válida' : 'Expirada' }}
+              </span>
+            </div>
+            <p class="compliance-date">
+              Expira em: {{ selectedEntity.compliance.certificates.inss.expiry | date:'dd/MM/yyyy' }}
+              <span *ngIf="selectedEntity.compliance.certificates.inss.days_until_expiry !== null" class="compliance-days">
+                ({{ selectedEntity.compliance.certificates.inss.days_until_expiry }} dias)
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeDetailModal()">Fechar</button>
+      <button class="btn-primary" (click)="editEntity(selectedEntity)">Editar Entidade</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Único para Criação/Edição -->
+<div *ngIf="showFormModal" class="modal-overlay" (click)="closeFormModal()">
+  <div class="modal-content modal-content--large" (click)="$event.stopPropagation()">
+    <app-entity-form 
+      [entity]="editingEntity"
+      (close)="closeFormModal()"
+      (saved)="onEntitySaved()">
+    </app-entity-form>
+  </div>
+</div>

@@ -1,0 +1,261 @@
+<div class="space-y-8 animate-fade-in">
+  
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="flex flex-col items-center gap-4">
+      <div class="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+      <p class="text-surface-500 text-sm">A carregar dados do dashboard...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-xl p-6 flex items-center gap-4">
+    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+      <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+    </div>
+    <div class="flex-1">
+      <p class="text-sm font-semibold text-red-900">{{ error }}</p>
+      <p class="text-xs text-red-700 mt-0.5">Verifica se o backend está a correr na porta 8000.</p>
+    </div>
+    <button (click)="loadDashboard()" class="px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition">
+      Tentar novamente
+    </button>
+  </div>
+
+  <!-- Conteúdo (só aparece quando temos dados) -->
+  <ng-container *ngIf="overview && !loading">
+    
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-purple-800 rounded-2xl p-8 text-white shadow-xl">
+      <div class="absolute inset-0 opacity-10">
+        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+      </div>
+      
+      <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-xs font-medium mb-4">
+            <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+            Sistema Operacional
+          </div>
+          <h1 class="text-3xl font-bold tracking-tight">{{ getGreeting() }}, {{ user?.name?.split(' ')[0] }} 👋</h1>
+          <p class="text-primary-100 mt-2 text-base">Aqui está o resumo atualizado do teu sistema.</p>
+        </div>
+        
+        <div class="flex gap-3">
+          <button class="px-5 py-2.5 bg-white text-primary-700 rounded-lg font-semibold hover:bg-primary-50 transition-all shadow-lg hover:shadow-xl">
+            Ver Relatórios
+          </button>
+          <button (click)="loadDashboard()" class="px-5 py-2.5 bg-white/10 backdrop-blur-sm text-white rounded-lg font-semibold hover:bg-white/20 transition-all border border-white/20">
+            Atualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards de Métricas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <!-- Card 1: Contratos Ativos -->
+      <div class="card p-6 group hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-sm font-medium text-surface-500">Contratos Ativos</p>
+            <p class="text-3xl font-bold text-surface-900 mt-2 tracking-tight">{{ overview.contracts.active }}</p>
+          </div>
+          <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="mt-5 pt-5 border-t border-surface-100 flex items-center justify-between">
+          <span class="text-xs text-surface-500">{{ overview.contracts.pending_approval }} pendentes aprovação</span>
+          <button class="text-xs font-medium text-primary-600 hover:text-primary-700">Ver →</button>
+        </div>
+      </div>
+
+      <!-- Card 2: Valor Total -->
+      <div class="card p-6 group hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-sm font-medium text-surface-500">Valor em Contrato</p>
+            <p class="text-3xl font-bold text-surface-900 mt-2 tracking-tight">
+              {{ formatCurrency(overview.contracts.total_value) }}
+            </p>
+          </div>
+          <div class="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="mt-5 pt-5 border-t border-surface-100 flex items-center justify-between">
+          <span class="text-xs text-surface-500">{{ formatCurrency(overview.payments.paid_this_month) }} pagos este mês</span>
+          <button class="text-xs font-medium text-primary-600 hover:text-primary-700">Detalhes →</button>
+        </div>
+      </div>
+
+      <!-- Card 3: Cauções a Expirar -->
+      <div class="card p-6 group hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-sm font-medium text-surface-500">Cauções a Expirar</p>
+            <p class="text-3xl font-bold text-surface-900 mt-2 tracking-tight">{{ overview.guarantees.expiring_soon.length }}</p>
+          </div>
+          <div class="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="mt-5 pt-5 border-t border-surface-100 flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <span *ngIf="overview.guarantees.expiring_soon.length > 0" class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+            <span class="text-xs font-medium" [class.text-amber-700]="overview.guarantees.expiring_soon.length > 0" [class.text-surface-500]="overview.guarantees.expiring_soon.length === 0">
+              {{ overview.guarantees.expiring_soon.length > 0 ? 'Requer atenção' : 'Tudo em ordem' }}
+            </span>
+          </div>
+          <button class="text-xs font-medium text-primary-600 hover:text-primary-700">Gerir →</button>
+        </div>
+      </div>
+
+      <!-- Card 4: Pagamentos em Atraso -->
+      <div class="card p-6 group hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-sm font-medium text-surface-500">Pagamentos em Atraso</p>
+            <p class="text-3xl font-bold text-surface-900 mt-2 tracking-tight">{{ overview.payments.overdue.length }}</p>
+          </div>
+          <div class="p-3 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl shadow-lg shadow-red-500/20 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="mt-5 pt-5 border-t border-surface-100 flex items-center justify-between">
+          <span class="text-xs font-semibold text-red-600">{{ formatCurrency(overview.payments.total_overdue_amount) }} pendentes</span>
+          <button class="text-xs font-medium text-primary-600 hover:text-primary-700">Resolver →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secção Principal: 2 colunas -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Alertas de Compliance (2/3) -->
+      <div class="lg:col-span-2 card overflow-hidden">
+        <div class="px-6 py-5 border-b border-surface-100 flex justify-between items-center">
+          <div>
+            <h3 class="text-lg font-bold text-surface-900">Alertas de Compliance</h3>
+            <p class="text-sm text-surface-500 mt-0.5">Entidades com certidões a expirar ou expiradas</p>
+          </div>
+          <button class="px-3 py-1.5 text-xs font-semibold text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
+            Ver todos
+          </button>
+        </div>
+        
+        <div class="divide-y divide-surface-100 max-h-96 overflow-y-auto">
+          <!-- Estado vazio -->
+          <div *ngIf="overview.compliance.entities_expiring_certificates.length === 0" class="px-6 py-12 text-center">
+            <div class="w-16 h-16 mx-auto rounded-full bg-emerald-50 flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <p class="text-sm font-medium text-surface-900">Tudo em conformidade!</p>
+            <p class="text-xs text-surface-500 mt-1">Nenhuma entidade com certidões a expirar.</p>
+          </div>
+
+          <!-- Lista de alertas -->
+          <div *ngFor="let entity of overview.compliance.entities_expiring_certificates" 
+               class="px-6 py-4 flex items-center justify-between hover:bg-surface-50/50 transition-colors group">
+            <div class="flex items-center gap-4">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center shadow-md"
+                   [ngClass]="(entity.days_until_agt_expiry !== null && entity.days_until_agt_expiry < 0) || (entity.days_until_inss_expiry !== null && entity.days_until_inss_expiry < 0) 
+                              ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/20' 
+                              : 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/20'">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <p class="text-sm font-semibold text-surface-900">{{ entity.name }}</p>
+                  <span *ngIf="(entity.days_until_agt_expiry !== null && entity.days_until_agt_expiry < 0) || (entity.days_until_inss_expiry !== null && entity.days_until_inss_expiry < 0)"
+                        class="px-2 py-0.5 bg-red-100 text-red-700 rounded-md text-xs font-semibold">Expirada</span>
+                  <span *ngIf="(entity.days_until_agt_expiry !== null && entity.days_until_agt_expiry >= 0) || (entity.days_until_inss_expiry !== null && entity.days_until_inss_expiry >= 0)"
+                        class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-md text-xs font-semibold">A expirar</span>
+                </div>
+                <p class="text-xs text-surface-500 mt-0.5">
+                  NIF: {{ entity.nif }} • 
+                  <span *ngIf="entity.days_until_agt_expiry !== null">
+                    AGT: {{ entity.days_until_agt_expiry < 0 ? 'Expirou há ' + (-entity.days_until_agt_expiry) + ' dias' : 'Expira em ' + entity.days_until_agt_expiry + ' dias' }}
+                  </span>
+                </p>
+              </div>
+            </div>
+            <button class="px-4 py-2 text-xs font-semibold text-white bg-surface-900 hover:bg-surface-800 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+              Ver Detalhes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Atividade Recente (1/3) -->
+      <div class="card overflow-hidden">
+        <div class="px-6 py-5 border-b border-surface-100">
+          <h3 class="text-lg font-bold text-surface-900">Atividade Recente</h3>
+          <p class="text-sm text-surface-500 mt-0.5">Últimas ações no sistema</p>
+        </div>
+        
+        <div class="p-6 max-h-96 overflow-y-auto">
+          <!-- Estado vazio -->
+          <div *ngIf="overview.recent_activities.length === 0" class="text-center py-8">
+            <p class="text-sm text-surface-500">Sem atividade recente</p>
+          </div>
+
+          <div *ngIf="overview.recent_activities.length > 0" class="relative space-y-6">
+            <div class="absolute left-[18px] top-2 bottom-2 w-px bg-surface-200"></div>
+
+            <div *ngFor="let activity of overview.recent_activities; let i = index" class="relative flex gap-4">
+              <div class="relative z-10 w-9 h-9 rounded-full flex items-center justify-center shadow-md ring-4 ring-white"
+                   [ngClass]="{
+                     'bg-gradient-to-br from-emerald-500 to-teal-600': activity.event === 'created',
+                     'bg-gradient-to-br from-blue-500 to-indigo-600': activity.event === 'updated',
+                     'bg-gradient-to-br from-purple-500 to-pink-600': activity.event === 'deleted',
+                     'bg-gradient-to-br from-amber-500 to-orange-600': activity.event !== 'created' && activity.event !== 'updated' && activity.event !== 'deleted'
+                   }">
+                <svg *ngIf="activity.event === 'created'" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <svg *ngIf="activity.event === 'updated'" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                <svg *ngIf="activity.event === 'deleted'" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <svg *ngIf="activity.event !== 'created' && activity.event !== 'updated' && activity.event !== 'deleted'" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div class="flex-1 pt-1">
+                <p class="text-sm font-semibold text-surface-900">{{ activity.description }}</p>
+                <p class="text-xs text-surface-500 mt-0.5">{{ activity.entity_name }} • {{ activity.subject_type }}</p>
+                <p class="text-xs text-surface-400 mt-1">{{ activity.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

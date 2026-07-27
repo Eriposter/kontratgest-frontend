@@ -1,0 +1,413 @@
+<!-- contract-form.html -->
+<div class="contract-form">
+  <!-- Header -->
+  <div class="form-header">
+    <div>
+      <h2>{{ isEdit ? 'Editar Contrato' : 'Novo Contrato' }}</h2>
+      <p>Preencha os dados do contrato em {{ totalSteps }} passos</p>
+    </div>
+    <button class="close-btn" (click)="close.emit()">×</button>
+  </div>
+
+  <!-- Steps Indicator -->
+  <div class="steps-indicator">
+    <div 
+      *ngFor="let step of [1,2,3,4]; let i = index" 
+      class="step" 
+      [class.active]="currentStep === step" 
+      [class.completed]="currentStep > step"
+      (click)="goToStep(step)"
+    >
+      <div class="step-number">
+        <span *ngIf="currentStep <= step">{{ step }}</span>
+        <svg *ngIf="currentStep > step" class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <span class="step-label">{{ getStepTitle(step) }}</span>
+      <div class="step-progress" *ngIf="currentStep === step"></div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Form Content -->
+  <form (ngSubmit)="onSubmit()" class="form-content">
+    
+    <!-- Step 1: Identificação -->
+    <div *ngIf="currentStep === 1" class="form-step">
+      <h3 class="step-title">Dados do Contrato</h3>
+
+      <div class="form-row">
+        <div class="form-group form-group--full">
+          <label>Título do Contrato *</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formData.title" 
+            name="title" 
+            required 
+            class="form-input" 
+            placeholder="Ex: Empreitada de Construção do Edifício Sede"
+          >
+        </div>
+      </div>
+
+      <div class="form-row two-cols">
+        <div class="form-group">
+          <label>Tipo de Contrato *</label>
+          <select [(ngModel)]="formData.contract_type_id" name="contract_type_id" required class="form-select">
+            <option value="">Selecionar tipo...</option>
+            <option *ngFor="let type of contractTypes" [value]="type.code">{{ type.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Modelo de Pagamento *</label>
+          <select [(ngModel)]="formData.payment_model" name="payment_model" required class="form-select">
+            <option *ngFor="let model of paymentModels" [value]="model.value">{{ model.label }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group form-group--full">
+          <label>Objeto do Contrato</label>
+          <textarea 
+            [(ngModel)]="formData.object" 
+            name="object" 
+            class="form-textarea" 
+            rows="3" 
+            placeholder="Descrição do objeto do contrato..."
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group form-group--full">
+          <label>Descrição</label>
+          <textarea 
+            [(ngModel)]="formData.description" 
+            name="description" 
+            class="form-textarea" 
+            rows="2" 
+            placeholder="Descrição adicional..."
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Contraparte -->
+    <div *ngIf="currentStep === 2" class="form-step">
+      <h3 class="step-title">Contraparte</h3>
+
+      <div class="form-row">
+        <div class="form-group form-group--full">
+          <label>Selecionar Entidade *</label>
+          <select [(ngModel)]="formData.counterparty_id" name="counterparty_id" required class="form-select" [disabled]="isLoading">
+            <option value="">Selecionar entidade...</option>
+            <option *ngFor="let entity of entities" [value]="entity.id">
+              {{ entity.identification.name }} (NIF: {{ entity.identification.nif }})
+            </option>
+          </select>
+          <p class="form-hint" *ngIf="isLoading">A carregar entidades...</p>
+        </div>
+      </div>
+
+      <!-- Info da entidade selecionada -->
+      <div *ngIf="formData.counterparty_id" class="entity-preview">
+        <div class="entity-preview-icon">🏢</div>
+        <div class="entity-preview-info">
+          <p class="entity-preview-name">{{ getEntityName(formData.counterparty_id) }}</p>
+          <p class="entity-preview-hint">A entidade selecionada será a contraparte deste contrato</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Financeiro -->
+    <div *ngIf="currentStep === 3" class="form-step">
+      <h3 class="step-title">Dados Financeiros</h3>
+
+      <div class="form-row three-cols">
+        <div class="form-group">
+          <label>Moeda *</label>
+          <select [(ngModel)]="formData.currency" name="currency" (change)="onCurrencyChange()" required class="form-select">
+            <option *ngFor="let curr of currencies" [value]="curr.value">{{ curr.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Valor Total *</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formData.total_amount" 
+            name="total_amount" 
+            required 
+            min="0.01"
+            step="0.01"
+            class="form-input" 
+            placeholder="0.00"
+          >
+        </div>
+
+        <div class="form-group" *ngIf="formData.currency !== 'AOA'">
+          <label>Taxa de Câmbio (BNA)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formData.exchange_rate" 
+            name="exchange_rate" 
+            min="0"
+            step="0.000001"
+            class="form-input" 
+            placeholder="Taxa de câmbio"
+          >
+        </div>
+      </div>
+
+      <!-- Alerta BNA -->
+      <div *ngIf="formData.requires_bna_registration" class="alert alert--info">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div>
+          <p class="alert-title">Registo no BNA Necessário</p>
+          <p class="alert-text">Contratos em moeda estrangeira requerem registo no Banco Nacional de Angola.</p>
+        </div>
+      </div>
+
+      <div class="form-row" *ngIf="formData.requires_bna_registration">
+        <div class="form-group form-group--full">
+          <label>Número de Registo BNA</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formData.bna_registration_number" 
+            name="bna_registration_number" 
+            class="form-input" 
+            placeholder="Ex: BNA/REG/2026/12345"
+          >
+        </div>
+      </div>
+
+      <h3 class="step-title">Impostos</h3>
+
+      <div class="form-row two-cols">
+        <div class="form-group">
+          <label>IVA (%)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formData.vat_rate" 
+            name="vat_rate" 
+            min="0" 
+            max="100"
+            step="0.01"
+            class="form-input"
+          >
+        </div>
+
+        <div class="form-group">
+          <label>Retenção na Fonte (%)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formData.withholding_tax_rate" 
+            name="withholding_tax_rate" 
+            min="0" 
+            max="100"
+            step="0.01"
+            class="form-input"
+          >
+        </div>
+      </div>
+
+      <!-- Resumo Financeiro -->
+      <div class="financial-summary">
+        <div class="financial-row">
+          <span>Valor Base</span>
+          <span class="financial-amount">{{ formData.total_amount | number:'1.2-2' }} {{ formData.currency }}</span>
+        </div>
+        <div class="financial-row" *ngIf="formData.vat_rate > 0">
+          <span>IVA ({{ formData.vat_rate }}%)</span>
+          <span class="financial-amount financial-amount--positive">+ {{ getVatAmount() | number:'1.2-2' }} {{ formData.currency }}</span>
+        </div>
+        <div class="financial-row" *ngIf="formData.withholding_tax_rate > 0">
+          <span>Retenção ({{ formData.withholding_tax_rate }}%)</span>
+          <span class="financial-amount financial-amount--negative">- {{ getWithholdingAmount() | number:'1.2-2' }} {{ formData.currency }}</span>
+        </div>
+        <div class="financial-row financial-row--total">
+          <span>Valor Líquido</span>
+          <span class="financial-amount">{{ getNetAmount() | number:'1.2-2' }} {{ formData.currency }}</span>
+        </div>
+      </div>
+
+      <h3 class="step-title">Vigência</h3>
+
+      <div class="form-row three-cols">
+        <div class="form-group">
+          <label>Data de Início *</label>
+          <input 
+            type="date" 
+            [(ngModel)]="formData.start_date" 
+            (change)="onDatesChange()"
+            name="start_date" 
+            required 
+            class="form-input"
+          >
+        </div>
+
+        <div class="form-group">
+          <label>Data de Fim</label>
+          <input 
+            type="date" 
+            [(ngModel)]="formData.end_date" 
+            (change)="onDatesChange()"
+            name="end_date" 
+            class="form-input"
+          >
+        </div>
+
+        <div class="form-group">
+          <label>Duração (meses)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formData.duration_months" 
+            name="duration_months" 
+            readonly
+            class="form-input form-input--readonly"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Data de Assinatura</label>
+          <input 
+            type="date" 
+            [(ngModel)]="formData.signature_date" 
+            name="signature_date" 
+            class="form-input"
+          >
+        </div>
+      </div>
+
+      <label class="checkbox-label">
+        <input type="checkbox" [(ngModel)]="formData.tribunal_de_contas_visto" name="tribunal_de_contas_visto">
+        <span>Sujeito a Visto do Tribunal de Contas</span>
+      </label>
+    </div>
+
+    <!-- Step 4: Plano de Pagamento -->
+    <div *ngIf="currentStep === 4" class="form-step">
+      <h3 class="step-title">Plano de Pagamento</h3>
+      <p class="step-description">Defina os marcos de pagamento do contrato. A soma das percentagens deve ser 100%.</p>
+
+      <div *ngIf="formData.payment_schedules.length === 0" class="empty-schedules">
+        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p>Nenhum marco de pagamento definido</p>
+        <span>Clique no botão abaixo para adicionar</span>
+      </div>
+
+      <div *ngFor="let schedule of formData.payment_schedules; let i = index" class="schedule-item">
+        <div class="schedule-header">
+          <span class="schedule-number">{{ i + 1 }}</span>
+          <span class="schedule-title">Marco de Pagamento</span>
+          <button type="button" (click)="removePaymentSchedule(i)" class="remove-btn">×</button>
+        </div>
+
+        <div class="form-row three-cols">
+          <div class="form-group">
+            <label>Nome do Marco *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="schedule.milestone_name" 
+              [name]="'milestone_' + i"
+              class="form-input" 
+              placeholder="Ex: Adiantamento, Fase 1"
+            >
+          </div>
+
+          <div class="form-group">
+            <label>Percentagem (%)</label>
+            <input 
+              type="number" 
+              [(ngModel)]="schedule.percentage" 
+              [name]="'percentage_' + i"
+              min="0" 
+              max="100"
+              step="0.01"
+              class="form-input"
+            >
+          </div>
+
+          <div class="form-group">
+            <label>Data de Vencimento</label>
+            <input 
+              type="date" 
+              [(ngModel)]="schedule.due_date" 
+              [name]="'due_date_' + i"
+              class="form-input"
+            >
+          </div>
+        </div>
+      </div>
+
+      <button type="button" (click)="addPaymentSchedule()" class="add-btn">
+        <svg class="add-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Adicionar Marco de Pagamento
+      </button>
+
+      <!-- Resumo de percentagens -->
+      <div *ngIf="formData.payment_schedules.length > 0" class="percentage-summary" 
+        [class.percentage-summary--ok]="getTotalPercentage() === 100" 
+        [class.percentage-summary--warning]="getTotalPercentage() > 0 && getTotalPercentage() < 100"
+        [class.percentage-summary--error]="getTotalPercentage() > 100">
+        <span>Total: {{ getTotalPercentage() | number:'1.0-2' }}%</span>
+        <span *ngIf="getTotalPercentage() === 100" class="percentage-ok">✓ Completo</span>
+        <span *ngIf="getTotalPercentage() > 0 && getTotalPercentage() < 100" class="percentage-warning">⏳ A completar</span>
+        <span *ngIf="getTotalPercentage() > 100" class="percentage-error">✗ Ultrapassou 100%</span>
+        <span *ngIf="getTotalPercentage() === 0" class="percentage-info">Defina as percentagens</span>
+      </div>
+
+      <!-- Notas Internas -->
+      <h3 class="step-title">Notas Internas</h3>
+      <div class="form-row">
+        <div class="form-group form-group--full">
+          <textarea 
+            [(ngModel)]="formData.internal_notes" 
+            name="internal_notes" 
+            class="form-textarea" 
+            rows="3" 
+            placeholder="Notas internas (não visíveis para a contraparte)..."
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="form-footer">
+      <button type="button" (click)="close.emit()" class="btn-secondary">Cancelar</button>
+      
+      <div class="form-actions">
+        <button type="button" *ngIf="currentStep > 1" (click)="previousStep()" class="btn-secondary">
+          ← Anterior
+        </button>
+        
+        <button type="button" *ngIf="currentStep < totalSteps" (click)="nextStep()" class="btn-primary">
+          Próximo →
+        </button>
+        
+        <button type="submit" *ngIf="currentStep === totalSteps" [disabled]="isSaving" class="btn-primary">
+          <span *ngIf="!isSaving">{{ isEdit ? 'Atualizar' : 'Criar' }} Contrato</span>
+          <span *ngIf="isSaving">A guardar...</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

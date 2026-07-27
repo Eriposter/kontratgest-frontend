@@ -1,0 +1,277 @@
+<div class="detail-overlay" (click)="close.emit()">
+  <div class="detail-container" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="detail-header">
+      <div class="detail-header-top">
+        <div class="detail-title-section">
+          <span class="detail-number">{{ contract.contract_number }}</span>
+          <h2 class="detail-title">{{ contract.title }}</h2>
+          <span class="status-badge" [ngClass]="getStatusInfo(contract.status).class">
+            {{ getStatusInfo(contract.status).icon }} {{ getStatusInfo(contract.status).label }}
+          </span>
+        </div>
+        <div class="header-actions">
+    <button class="close-btn" (click)="close.emit()">×</button>
+  </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-section" *ngIf="contract.dates.start && contract.dates.end">
+        <div class="progress-info">
+          <span class="progress-label">Progresso do Contrato</span>
+          <span class="progress-value">{{ getProgressPercentage() }}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
+        </div>
+        <div class="progress-dates">
+          <span>{{ contract.dates.start | date:'dd/MM/yyyy' }}</span>
+          <span *ngIf="contract.dates.end">{{ contract.dates.end | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <br>
+        <button (click)="openProgressModal()" class="btn-icon" title="Gerir Progresso">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+      </svg>
+    </button>
+      </div>
+
+      <!-- Action Messages -->
+      <div *ngIf="actionMessage" class="action-message action-message--success">
+        {{ actionMessage }}
+      </div>
+      <div *ngIf="actionError" class="action-message action-message--error">
+        {{ actionError }}
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="detail-tabs">
+      <button 
+        (click)="activeTab = 'overview'" 
+        [class.active]="activeTab === 'overview'"
+        class="tab-btn"
+      >
+        Visão Geral
+      </button>
+      <button 
+        (click)="activeTab = 'financial'" 
+        [class.active]="activeTab === 'financial'"
+        class="tab-btn"
+      >
+        Financeiro
+      </button>
+      <button 
+        (click)="activeTab = 'compliance'" 
+        [class.active]="activeTab === 'compliance'"
+        class="tab-btn"
+      >
+        Compliance
+      </button>
+      <button 
+        (click)="activeTab = 'schedules'" 
+        [class.active]="activeTab === 'schedules'"
+        class="tab-btn"
+      >
+        Pagamentos
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="detail-body">
+      
+      <!-- Overview Tab -->
+      <div *ngIf="activeTab === 'overview'" class="tab-content">
+        <div class="info-grid">
+          <div class="info-section">
+            <h3>Identificação</h3>
+            <div class="info-row">
+              <span class="info-label">Tipo de Contrato</span>
+              <span class="info-value">{{ contract.type.name }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Contraparte</span>
+              <span class="info-value">{{ contract.counterparty.name }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">NIF</span>
+              <span class="info-value mono">{{ contract.counterparty.nif }}</span>
+            </div>
+            <div class="info-row" *ngIf="contract.object">
+              <span class="info-label">Objeto</span>
+              <span class="info-value">{{ contract.object }}</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Vigência</h3>
+            <div class="info-row">
+              <span class="info-label">Data de Início</span>
+              <span class="info-value">{{ contract.dates.start | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-row" *ngIf="contract.dates.end">
+              <span class="info-label">Data de Fim</span>
+              <span class="info-value">{{ contract.dates.end | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-row" *ngIf="contract.dates.duration_months">
+              <span class="info-label">Duração</span>
+              <span class="info-value">{{ contract.dates.duration_months }} meses</span>
+            </div>
+            <div class="info-row" *ngIf="contract.dates.signature">
+              <span class="info-label">Data de Assinatura</span>
+              <span class="info-value">{{ contract.dates.signature | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Pagamento</h3>
+            <div class="info-row">
+              <span class="info-label">Modelo</span>
+              <span class="info-value">{{ contract.payment.model_label }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Total Pago</span>
+              <span class="info-value highlight">
+                {{ contract.financial.currency_symbol }} {{ formatCurrency(contract.payment.total_paid, contract.financial.currency) }}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Saldo</span>
+              <span class="info-value">
+                {{ contract.financial.currency_symbol }} {{ formatCurrency(contract.payment.balance, contract.financial.currency) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Tab -->
+      <div *ngIf="activeTab === 'financial'" class="tab-content">
+        <div class="financial-summary">
+          <div class="financial-row financial-row--total">
+            <span>Valor Total do Contrato</span>
+            <span class="financial-amount">
+              {{ contract.financial.currency_symbol }} {{ formatCurrency(contract.financial.total_amount, contract.financial.currency) }}
+            </span>
+          </div>
+          <div class="financial-row">
+            <span>IVA ({{ contract.financial.vat_rate }}%)</span>
+            <span class="financial-amount">
+              + {{ contract.financial.currency_symbol }} {{ formatCurrency(contract.financial.vat_amount, contract.financial.currency) }}
+            </span>
+          </div>
+          <div class="financial-row">
+            <span>Retenção na Fonte ({{ contract.financial.withholding_tax_rate }}%)</span>
+            <span class="financial-amount financial-amount--negative">
+              - {{ contract.financial.currency_symbol }} {{ formatCurrency(contract.financial.withholding_tax_amount, contract.financial.currency) }}
+            </span>
+          </div>
+          <div class="financial-row financial-row--net">
+            <span>Valor Líquido</span>
+            <span class="financial-amount">
+              {{ contract.financial.currency_symbol }} {{ formatCurrency(contract.financial.net_amount, contract.financial.currency) }}
+            </span>
+          </div>
+          <div class="financial-row" *ngIf="contract.financial.exchange_rate">
+            <span>Taxa de Câmbio</span>
+            <span class="financial-amount">{{ contract.financial.exchange_rate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compliance Tab -->
+      <div *ngIf="activeTab === 'compliance'" class="tab-content">
+        <div class="compliance-grid">
+          <div class="compliance-card" [class.compliance-card--warn]="contract.compliance.requires_bna && !contract.compliance.bna_number">
+            <div class="compliance-icon">🏦</div>
+            <div class="compliance-content">
+              <h4>Registo BNA</h4>
+              <p *ngIf="contract.compliance.bna_number" class="compliance-ok">
+                Registado: {{ contract.compliance.bna_number }}
+              </p>
+              <p *ngIf="!contract.compliance.bna_number && contract.compliance.requires_bna" class="compliance-warn">
+                Requer registo no BNA (moeda estrangeira)
+              </p>
+              <p *ngIf="!contract.compliance.requires_bna" class="compliance-info">
+                Não aplicável (contrato em AOA)
+              </p>
+            </div>
+          </div>
+
+          <div class="compliance-card" [class.compliance-card--warn]="contract.compliance.tribunal_visto && !contract.compliance.tribunal_visto_number">
+            <div class="compliance-icon">⚖️</div>
+            <div class="compliance-content">
+              <h4>Tribunal de Contas</h4>
+              <p *ngIf="contract.compliance.tribunal_visto_number" class="compliance-ok">
+                Visto: {{ contract.compliance.tribunal_visto_number }}
+              </p>
+              <p *ngIf="!contract.compliance.tribunal_visto_number && contract.compliance.tribunal_visto" class="compliance-warn">
+                Pendente de visto
+              </p>
+              <p *ngIf="!contract.compliance.tribunal_visto" class="compliance-info">
+                Não sujeito a visto
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedules Tab -->
+      <div *ngIf="activeTab === 'schedules'" class="tab-content">
+        <div *ngIf="contract.payment.schedules && contract.payment.schedules.length > 0" class="schedules-list">
+          <div *ngFor="let schedule of contract.payment.schedules; let i = index" class="schedule-item">
+            <div class="schedule-sequence">{{ i + 1 }}</div>
+            <div class="schedule-content">
+              <p class="schedule-name">{{ schedule.milestone_name }}</p>
+              <p class="schedule-date" *ngIf="schedule.due_date">
+                Vencimento: {{ schedule.due_date | date:'dd/MM/yyyy' }}
+              </p>
+            </div>
+            <div class="schedule-amount">
+              <span *ngIf="schedule.percentage">{{ schedule.percentage }}%</span>
+              <span *ngIf="schedule.amount">{{ contract.financial.currency_symbol }} {{ formatCurrency(schedule.amount, contract.financial.currency) }}</span>
+              <span *ngIf="!schedule.percentage && !schedule.amount">{{ contract.financial.currency_symbol }} {{ formatCurrency(schedule.calculated_amount, contract.financial.currency) }}</span>
+            </div>
+            <span class="schedule-status" [ngClass]="'schedule-status--' + schedule.status">
+              {{ schedule.status }}
+            </span>
+          </div>
+        </div>
+        <div *ngIf="!contract.payment.schedules || contract.payment.schedules.length === 0" class="empty-tab">
+          <p>Nenhum plano de pagamento definido</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer com Ações -->
+    <div class="detail-footer">
+      <button class="btn-secondary" (click)="close.emit()">Fechar</button>
+      
+      <div class="footer-actions">
+        <button *ngIf="canSubmit()" (click)="submitForApproval()" [disabled]="isLoading" class="btn-primary">
+          Submeter para Aprovação
+        </button>
+        <button *ngIf="canApprove()" (click)="approveContract()" [disabled]="isLoading" class="btn-success">
+          Aprovar Contrato
+        </button>
+        <button *ngIf="canActivate()" (click)="activateContract()" [disabled]="isLoading" class="btn-primary">
+          Ativar Contrato
+        </button>
+        <button *ngIf="canSuspend()" (click)="suspendContract()" [disabled]="isLoading" class="btn-warning">
+          Suspender
+        </button>
+        <button *ngIf="canTerminate()" (click)="terminateContract()" [disabled]="isLoading" class="btn-danger">
+          Rescindir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-contract-progress
+  *ngIf="showProgressModal"
+  [contract]="contract"
+  (close)="closeProgressModal()"
+  (updated)="onProgressUpdated()">
+</app-contract-progress>
