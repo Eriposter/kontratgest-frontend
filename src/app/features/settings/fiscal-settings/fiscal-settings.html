@@ -1,0 +1,100 @@
+<div class="fiscal-section">
+  
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>A carregar configurações fiscais...</p>
+  </div>
+
+  <div *ngIf="!loading" class="fiscal-content">
+    
+    <!-- Messages -->
+    <div *ngIf="successMessage" class="message message--success">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="message message--error">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Header -->
+    <div class="fiscal-header-card">
+      <div class="header-icon">💰</div>
+      <div class="header-info">
+        <h2>Configurações Fiscais Angolanas</h2>
+        <p>Configure as taxas de impostos aplicáveis aos seus contratos e pagamentos. Estas taxas serão aplicadas automaticamente com base no tipo de operação.</p>
+      </div>
+    </div>
+
+    <!-- Configurações por Categoria -->
+    <div *ngFor="let category of getConfigurationsByCategory() | keyvalue" class="fiscal-category">
+      <div class="category-header">
+        <h3>{{ category.key }}</h3>
+        <p>{{ category.value.length }} taxa{{ category.value.length > 1 ? 's' : '' }} configurada{{ category.value.length > 1 ? 's' : '' }}</p>
+      </div>
+
+      <div class="configurations-grid">
+        <div 
+          *ngFor="let config of category.value" 
+          class="config-card"
+          [class.inactive]="!config.is_active"
+        >
+          <div class="config-header">
+            <div class="config-icon">{{ getIconForCode(config.code) }}</div>
+            <div class="config-info">
+              <h4>{{ config.name }}</h4>
+              <p class="config-code">{{ config.code }}</p>
+            </div>
+            <label class="toggle-switch">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="config.is_active"
+                (change)="saveConfiguration(config)"
+                [disabled]="saving[config.id]"
+              >
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <p class="config-description">{{ config.description }}</p>
+
+          <div class="config-rate">
+            <label>Taxa (%)</label>
+            <div class="rate-input-wrapper">
+              <input 
+                type="number" 
+                [(ngModel)]="config.rate"
+                (blur)="saveConfiguration(config)"
+                min="0"
+                max="100"
+                step="0.01"
+                class="rate-input"
+                [disabled]="saving[config.id]"
+              >
+              <span class="rate-suffix">%</span>
+            </div>
+          </div>
+
+          <div *ngIf="config.applies_to && config.applies_to.length > 0" class="config-applies">
+            <span class="applies-label">Aplica-se a:</span>
+            <div class="applies-tags">
+              <span *ngFor="let type of config.applies_to" class="applies-tag">
+                {{ type }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nota informativa -->
+    <div class="info-note">
+      <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <div>
+        <p class="info-title">Nota Importante</p>
+        <p class="info-text">As taxas fiscais são aplicadas automaticamente com base no tipo de entidade e operação. Consulte sempre a legislação angolana em vigor para confirmar as taxas aplicáveis ao seu caso.</p>
+      </div>
+    </div>
+  </div>
+</div>

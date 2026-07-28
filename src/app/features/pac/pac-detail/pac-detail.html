@@ -1,0 +1,422 @@
+<div class="detail-overlay" (click)="close.emit()">
+  <div class="detail-container" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="detail-header">
+      <div class="detail-header-top">
+        <div class="detail-title-section">
+          <div class="plan-year-badge">{{ plan.year }}</div>
+          <h2 class="detail-title">{{ plan.title }}</h2>
+          <span class="status-badge" [ngClass]="getStatusInfo(plan.status).class">
+            {{ getStatusInfo(plan.status).icon }} {{ getStatusInfo(plan.status).label }}
+          </span>
+        </div>
+        <button class="close-btn" (click)="close.emit()">×</button>
+      </div>
+
+      <!-- Execução Progress -->
+      <div class="execution-section">
+        <div class="execution-info">
+          <span class="execution-label">Execução do Plano</span>
+          <span class="execution-value" [ngClass]="getExecutionClass()">
+            {{ plan.financial.execution_percentage | number:'1.1-1' }}%
+          </span>
+        </div>
+        <div class="execution-bar">
+          <div 
+            class="execution-fill" 
+            [style.width.%]="plan.financial.execution_percentage"
+            [ngClass]="getExecutionClass()"
+          ></div>
+        </div>
+        <div class="execution-values">
+          <span>Planeado: {{ formatCurrency(plan.financial.total_planned) }}</span>
+          <span>Executado: {{ formatCurrency(plan.financial.total_executed) }}</span>
+        </div>
+      </div>
+
+      <!-- Action Messages -->
+      <div *ngIf="actionMessage" class="action-message action-message--success">
+        {{ actionMessage }}
+      </div>
+      <div *ngIf="actionError" class="action-message action-message--error">
+        {{ actionError }}
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="detail-tabs">
+      <button (click)="activeTab = 'overview'" [class.active]="activeTab === 'overview'" class="tab-btn">
+        Visão Geral
+      </button>
+      <button (click)="activeTab = 'needs'" [class.active]="activeTab === 'needs'" class="tab-btn">
+        Necessidades ({{ plan.needs_count }})
+      </button>
+      <button (click)="activeTab = 'contracts'" [class.active]="activeTab === 'contracts'" class="tab-btn">
+        Contratos
+      </button>
+      <button (click)="activeTab = 'timeline'" [class.active]="activeTab === 'timeline'" class="tab-btn">
+        Histórico
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="detail-body">
+      
+      <!-- Overview Tab -->
+      <div *ngIf="activeTab === 'overview'" class="tab-content">
+        <div class="info-grid">
+          <div class="info-section">
+            <h3>Informações do Plano</h3>
+            <div class="info-row">
+              <span class="info-label">Ano</span>
+              <span class="info-value">{{ plan.year }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Título</span>
+              <span class="info-value">{{ plan.title }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Criado por</span>
+              <span class="info-value">{{ plan.created_by || '—' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Data de Criação</span>
+              <span class="info-value">{{ plan.created_at | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Valores</h3>
+            <div class="info-row">
+              <span class="info-label">Total Planeado</span>
+              <span class="info-value highlight">{{ formatCurrency(plan.financial.total_planned) }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Total Executado</span>
+              <span class="info-value">{{ formatCurrency(plan.financial.total_executed) }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Necessidades</span>
+              <span class="info-value">{{ plan.needs_count }}</span>
+            </div>
+          </div>
+
+          <div class="info-section" *ngIf="plan.description">
+            <h3>Descrição</h3>
+            <p class="info-text">{{ plan.description }}</p>
+          </div>
+
+          <div class="info-section" *ngIf="plan.approval.approved_by">
+            <h3>Aprovação</h3>
+            <div class="info-row">
+              <span class="info-label">Aprovado por</span>
+              <span class="info-value">{{ plan.approval.approved_by }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Data de Aprovação</span>
+              <span class="info-value">{{ plan.approval.approved_at | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Needs Tab -->
+      <div *ngIf="activeTab === 'needs'" class="tab-content">
+        <div class="needs-header">
+          <h3>Necessidades de Contratação</h3>
+          <button 
+            *ngIf="plan.status === 'draft' || plan.status === 'approved'"
+            (click)="openAddNeedModal()" 
+            class="btn-primary btn-small"
+          >
+            + Adicionar Necessidade
+          </button>
+        </div>
+
+        <div *ngIf="plan.needs && plan.needs.length > 0" class="needs-list">
+          <div *ngFor="let need of plan.needs" class="need-card">
+            <div class="need-header">
+              <div class="need-type-badge">{{ need.contract_type_label }}</div>
+              <span class="need-status" [ngClass]="getNeedStatusInfo(need.status).class">
+                {{ need.status_label }}
+              </span>
+            </div>
+
+            <h4 class="need-title">{{ need.title }}</h4>
+            <p class="need-description" *ngIf="need.description">{{ need.description }}</p>
+
+            <div class="need-meta">
+              <div class="meta-item">
+                <span class="meta-label">Procedimento</span>
+                <span class="meta-value">{{ need.procedure_type_label }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Prioridade</span>
+                <span class="meta-value" [ngClass]="getPriorityInfo(need.priority).class">
+                  {{ need.priority_label }}
+                </span>
+              </div>
+              <div class="meta-item" *ngIf="need.planned_quarter">
+                <span class="meta-label">Trimestre</span>
+                <span class="meta-value">Q{{ need.planned_quarter }}</span>
+              </div>
+            </div>
+
+            <div class="need-financial">
+              <div class="financial-item">
+                <span class="financial-label">Estimado</span>
+                <span class="financial-value">{{ formatCurrency(need.estimated_amount) }}</span>
+              </div>
+              <div class="financial-item" *ngIf="need.executed_amount">
+                <span class="financial-label">Executado</span>
+                <span class="financial-value executed">{{ formatCurrency(need.executed_amount) }}</span>
+              </div>
+            </div>
+
+            <div class="need-contract" *ngIf="need.contract">
+              <span class="contract-link">
+                📄 Contrato: {{ need.contract.contract_number }}
+              </span>
+            </div>
+
+            <div class="need-actions" *ngIf="plan.status === 'draft' || plan.status === 'approved'">
+              <button (click)="editNeed(need)" class="action-btn" title="Editar">
+                ✏️
+              </button>
+              <button 
+                *ngIf="need.status === 'planned' && !need.contract"
+                (click)="openGenerateContractModal(need)" 
+                class="action-btn action-btn--success" 
+                title="Gerar Contrato"
+              >
+                📄
+              </button>
+              <button (click)="deleteNeed(need)" class="action-btn action-btn--danger" title="Eliminar">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!plan.needs || plan.needs.length === 0" class="empty-tab">
+          <p>Nenhuma necessidade adicionada</p>
+          <button 
+            *ngIf="plan.status === 'draft' || plan.status === 'approved'"
+            (click)="openAddNeedModal()" 
+            class="btn-primary"
+          >
+            Adicionar Primeira Necessidade
+          </button>
+        </div>
+      </div>
+
+      <!-- Contracts Tab -->
+      <div *ngIf="activeTab === 'contracts'" class="tab-content">
+        <div *ngIf="plan.needs && plan.needs.length > 0" class="contracts-list">
+          <div *ngFor="let need of plan.needs.filter(n => n.contract)" class="contract-item">
+            <div class="contract-icon">📄</div>
+            <div class="contract-info">
+              <p class="contract-number">{{ need.contract?.contract_number }}</p>
+              <p class="contract-title">{{ need.title }}</p>
+            </div>
+            <div class="contract-amount">
+              {{ formatCurrency(need.executed_amount || 0) }}
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!plan.needs || plan.needs.filter(n => n.contract).length === 0" class="empty-tab">
+          <p>Nenhum contrato gerado ainda</p>
+        </div>
+      </div>
+
+      <!-- Timeline Tab -->
+      <div *ngIf="activeTab === 'timeline'" class="tab-content">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-icon timeline-icon--created">📝</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Plano Criado</p>
+              <p class="timeline-date">{{ plan.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="plan.status === 'submitted' || plan.status === 'approved'" class="timeline-item">
+            <div class="timeline-icon timeline-icon--submitted">📤</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Plano Submetido</p>
+              <p class="timeline-date">{{ plan.updated_at | date:'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="plan.approval.approved_at" class="timeline-item">
+            <div class="timeline-icon timeline-icon--approved">✅</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Plano Aprovado</p>
+              <p class="timeline-date">{{ plan.approval.approved_at | date:'dd/MM/yyyy HH:mm' }}</p>
+              <p class="timeline-notes" *ngIf="plan.approval.approved_by">
+                Por: {{ plan.approval.approved_by }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer com Ações -->
+    <div class="detail-footer">
+      <button class="btn-secondary" (click)="close.emit()">Fechar</button>
+      
+      <div class="footer-actions">
+        <button 
+          *ngIf="plan.status === 'draft'" 
+          (click)="submitPlan()" 
+          [disabled]="isLoading" 
+          class="btn-primary"
+        >
+          Submeter para Aprovação
+        </button>
+        <button 
+          *ngIf="plan.status === 'submitted'" 
+          (click)="approvePlan()" 
+          [disabled]="isLoading" 
+          class="btn-success"
+        >
+          Aprovar Plano
+        </button>
+        <button 
+          *ngIf="plan.status === 'draft' || plan.status === 'submitted'" 
+          (click)="cancelPlan()" 
+          [disabled]="isLoading" 
+          class="btn-danger"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Formulário de Necessidade -->
+<div *ngIf="showNeedFormModal" class="modal-overlay" (click)="closeNeedFormModal()">
+  <div class="modal-content modal-content--medium" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ editingNeed ? 'Editar Necessidade' : 'Nova Necessidade' }}</h2>
+      <button class="close-btn" (click)="closeNeedFormModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Título *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="needFormData.title" 
+          class="form-input"
+          placeholder="Ex: Reabilitação da Rede de Distribuição"
+        >
+      </div>
+
+      <div class="form-row two-cols">
+        <div class="form-group">
+          <label>Tipo de Contrato *</label>
+          <select [(ngModel)]="needFormData.contract_type" class="form-select">
+            <option *ngFor="let type of contractTypes" [value]="type.value">{{ type.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de Procedimento *</label>
+          <select [(ngModel)]="needFormData.procedure_type" class="form-select">
+            <option *ngFor="let proc of procedureTypes" [value]="proc.value">{{ proc.label }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea 
+          [(ngModel)]="needFormData.description" 
+          rows="3" 
+          class="form-textarea"
+          placeholder="Descrição detalhada da necessidade..."
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Justificação</label>
+        <textarea 
+          [(ngModel)]="needFormData.justification" 
+          rows="2" 
+          class="form-textarea"
+          placeholder="Porque é necessária esta contratação?"
+        ></textarea>
+      </div>
+
+      <div class="form-row three-cols">
+        <div class="form-group">
+          <label>Valor Estimado (AOA) *</label>
+          <input 
+            type="number" 
+            [(ngModel)]="needFormData.estimated_amount" 
+            min="0"
+            step="0.01"
+            class="form-input"
+            placeholder="0.00"
+          >
+        </div>
+
+        <div class="form-group">
+          <label>Prioridade *</label>
+          <select [(ngModel)]="needFormData.priority" class="form-select">
+            <option *ngFor="let p of priorities" [value]="p.value">{{ p.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Trimestre Previsto</label>
+          <select [(ngModel)]="needFormData.planned_quarter" class="form-select">
+            <option [ngValue]="null">Selecionar...</option>
+            <option [ngValue]="1">Q1 (Jan-Mar)</option>
+            <option [ngValue]="2">Q2 (Abr-Jun)</option>
+            <option [ngValue]="3">Q3 (Jul-Set)</option>
+            <option [ngValue]="4">Q4 (Out-Dez)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeNeedFormModal()">Cancelar</button>
+      <button class="btn-primary" (click)="saveNeed()">
+        {{ editingNeed ? 'Atualizar' : 'Adicionar' }} Necessidade
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Gerar Contrato -->
+<div *ngIf="showGenerateContractModal && selectedNeed" class="modal-overlay" (click)="closeGenerateContractModal()">
+  <div class="modal-content modal-content--medium" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Gerar Contrato</h2>
+      <button class="close-btn" (click)="closeGenerateContractModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="alert alert--info">
+        <p>Vai criar um contrato baseado nesta necessidade do PAC:</p>
+        <p class="alert-title">{{ selectedNeed.title }}</p>
+        <p>Valor estimado: {{ formatCurrency(selectedNeed.estimated_amount) }}</p>
+      </div>
+      <p>Esta funcionalidade será implementada na próxima fase, permitindo pré-preencher o formulário de contrato com os dados da necessidade.</p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeGenerateContractModal()">Cancelar</button>
+      <button class="btn-primary" (click)="generateContract()">
+        Gerar Contrato
+      </button>
+    </div>
+  </div>
+</div>

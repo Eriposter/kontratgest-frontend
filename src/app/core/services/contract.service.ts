@@ -154,4 +154,8 @@ updateProgress(contractId: string, data: {
 calculateProgress(contractId: string): Observable<any> {
   return this.post(`contracts/${contractId}/progress/calculate`, {});
 }
+
+createFromPAC(needId: string, data: any): Observable<{ data: Contract }> {
+  return this.post<{ data: Contract }>(`pacs/needs/${needId}/generate-contract`, data);
+}
 }

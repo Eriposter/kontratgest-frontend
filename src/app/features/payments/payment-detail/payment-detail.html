@@ -1,0 +1,390 @@
+<div class="detail-overlay" (click)="close.emit()">
+  <div class="detail-container" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="detail-header">
+      <div class="detail-header-top">
+        <div class="detail-title-section">
+          <span class="detail-number">{{ payment.payment_number }}</span>
+          <h2 class="detail-title">{{ payment.payment_type_label }}</h2>
+          <span class="status-badge" [ngClass]="getStatusInfo(payment.status).class">
+            {{ getStatusInfo(payment.status).icon }} {{ getStatusInfo(payment.status).label }}
+          </span>
+        </div>
+        <button class="close-btn" (click)="close.emit()">×</button>
+      </div>
+
+      <!-- Action Messages -->
+      <div *ngIf="actionMessage" class="action-message action-message--success">
+        {{ actionMessage }}
+      </div>
+      <div *ngIf="actionError" class="action-message action-message--error">
+        {{ actionError }}
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="detail-tabs">
+      <button 
+        (click)="activeTab = 'overview'" 
+        [class.active]="activeTab === 'overview'"
+        class="tab-btn"
+      >
+        Visão Geral
+      </button>
+      <button 
+        (click)="activeTab = 'financial'" 
+        [class.active]="activeTab === 'financial'"
+        class="tab-btn"
+      >
+        Financeiro
+      </button>
+      <button 
+        (click)="activeTab = 'timeline'" 
+        [class.active]="activeTab === 'timeline'"
+        class="tab-btn"
+      >
+        Histórico
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="detail-body">
+      
+      <!-- Overview Tab -->
+      <div *ngIf="activeTab === 'overview'" class="tab-content">
+        <div class="info-grid">
+          <div class="info-section">
+            <h3>Contrato</h3>
+            <div class="info-row">
+              <span class="info-label">Número</span>
+              <span class="info-value mono">{{ payment.contract.contract_number }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Título</span>
+              <span class="info-value">{{ payment.contract.title }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Contraparte</span>
+              <span class="info-value">{{ payment.contract.counterparty.name }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">NIF</span>
+              <span class="info-value mono">{{ payment.contract.counterparty.nif }}</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Datas</h3>
+            <div class="info-row">
+              <span class="info-label">Data de Criação</span>
+              <span class="info-value">{{ payment.created_at | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-row" *ngIf="payment.dates.due">
+              <span class="info-label">Data de Vencimento</span>
+              <span class="info-value" [class.overdue]="payment.dates.is_overdue">
+                {{ payment.dates.due | date:'dd/MM/yyyy' }}
+                <span *ngIf="payment.dates.is_overdue" class="overdue-badge">
+                  Atrasado {{ payment.dates.days_overdue }}d
+                </span>
+              </span>
+            </div>
+            <div class="info-row" *ngIf="payment.dates.invoice">
+              <span class="info-label">Data da Fatura</span>
+              <span class="info-value">{{ payment.dates.invoice | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-row" *ngIf="payment.dates.payment">
+              <span class="info-label">Data de Pagamento</span>
+              <span class="info-value paid">{{ payment.dates.payment | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Pagamento</h3>
+            <div class="info-row">
+              <span class="info-label">Tipo</span>
+              <span class="info-value">{{ payment.payment_type_label }}</span>
+            </div>
+            <div class="info-row" *ngIf="payment.invoice.number">
+              <span class="info-label">Nº Fatura</span>
+              <span class="info-value mono">{{ payment.invoice.number }}</span>
+            </div>
+            <div class="info-row" *ngIf="payment.bank.reference">
+              <span class="info-label">Ref. Bancária</span>
+              <span class="info-value mono">{{ payment.bank.reference }}</span>
+            </div>
+            <div class="info-row" *ngIf="payment.bank.method">
+              <span class="info-label">Método</span>
+              <span class="info-value">{{ getPaymentMethodLabel(payment.bank.method) }}</span>
+            </div>
+          </div>
+
+          <div class="info-section" *ngIf="payment.measurement">
+            <h3>Auto de Medição</h3>
+            <div class="info-row">
+              <span class="info-label">Número</span>
+              <span class="info-value mono">{{ payment.measurement.number }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Tab -->
+      <div *ngIf="activeTab === 'financial'" class="tab-content">
+        <div class="financial-summary">
+          <div class="financial-row">
+            <span>Valor Bruto</span>
+            <span class="financial-amount">
+              {{ payment.financial.currency_symbol }} {{ formatCurrency(payment.financial.gross_amount, payment.financial.currency) }}
+            </span>
+          </div>
+          
+          <div class="financial-row">
+            <span>IVA ({{ payment.financial.vat.rate }}%)</span>
+            <span class="financial-amount financial-amount--positive">
+              + {{ payment.financial.currency_symbol }} {{ formatCurrency(payment.financial.vat.amount, payment.financial.currency) }}
+            </span>
+          </div>
+          
+          <div class="financial-row">
+            <span>Retenção na Fonte ({{ payment.financial.withholding_tax.rate }}%)</span>
+            <span class="financial-amount financial-amount--negative">
+              - {{ payment.financial.currency_symbol }} {{ formatCurrency(payment.financial.withholding_tax.amount, payment.financial.currency) }}
+            </span>
+          </div>
+          
+          <div class="financial-row" *ngIf="payment.financial.stamp_duty.amount > 0">
+            <span>Imposto de Selo ({{ payment.financial.stamp_duty.rate }}%)</span>
+            <span class="financial-amount financial-amount--negative">
+              - {{ payment.financial.currency_symbol }} {{ formatCurrency(payment.financial.stamp_duty.amount, payment.financial.currency) }}
+            </span>
+          </div>
+          
+          <div class="financial-row" *ngIf="payment.financial.retention_amount > 0">
+            <span>Retenção de Garantia</span>
+            <span class="financial-amount financial-amount--negative">
+              - {{ payment.financial.currency_symbol }} {{ formatCurrency(payment.financial.retention_amount, payment.financial.currency) }}
+            </span>
+          </div>
+
+          <div class="financial-row financial-row--total">
+            <span>Valor Líquido a Pagar</span>
+            <span class="financial-amount">
+              {{ payment.financial.currency_symbol }} {{ formatCurrency(payment.financial.net_amount, payment.financial.currency) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="tax-summary">
+          <h3>Resumo de Impostos</h3>
+          <div class="tax-item">
+            <span class="tax-label">Total de Impostos</span>
+            <span class="tax-value">
+              {{ payment.financial.currency_symbol }} {{ formatCurrency(payment.financial.total_tax, payment.financial.currency) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Tab -->
+      <div *ngIf="activeTab === 'timeline'" class="tab-content">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-icon timeline-icon--created">📝</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Pagamento Criado</p>
+              <p class="timeline-date">{{ payment.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="payment.status !== 'pending'" class="timeline-item">
+            <div class="timeline-icon" [ngClass]="{
+              'timeline-icon--approved': payment.status === 'approved' || payment.status === 'paid',
+              'timeline-icon--rejected': payment.status === 'rejected',
+              'timeline-icon--cancelled': payment.status === 'cancelled'
+            }">
+              <span *ngIf="payment.status === 'approved' || payment.status === 'paid'">✅</span>
+              <span *ngIf="payment.status === 'rejected'">❌</span>
+              <span *ngIf="payment.status === 'cancelled'">🚫</span>
+            </div>
+            <div class="timeline-content">
+              <p class="timeline-title">
+                {{ payment.status === 'approved' || payment.status === 'paid' ? 'Aprovado' : 
+                   payment.status === 'rejected' ? 'Rejeitado' : 'Cancelado' }}
+              </p>
+              <p class="timeline-date">{{ payment.updated_at | date:'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="payment.status === 'paid'" class="timeline-item">
+            <div class="timeline-icon timeline-icon--paid">💰</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Pagamento Efetuado</p>
+              <p class="timeline-date">{{ payment.dates.payment | date:'dd/MM/yyyy' }}</p>
+              <p *ngIf="payment.bank.reference" class="timeline-notes">
+                Ref: {{ payment.bank.reference }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer com Ações -->
+    <div class="detail-footer">
+      <button class="btn-secondary" (click)="close.emit()">Fechar</button>
+      
+      <div class="footer-actions">
+        <button 
+          *ngIf="payment.can_be_approved" 
+          (click)="approvePayment()" 
+          [disabled]="isLoading" 
+          class="btn-success"
+        >
+          Aprovar
+        </button>
+        <button 
+          *ngIf="payment.can_be_rejected" 
+          (click)="openRejectModal()" 
+          [disabled]="isLoading" 
+          class="btn-danger"
+        >
+          Rejeitar
+        </button>
+        <button 
+          *ngIf="payment.can_be_paid" 
+          (click)="openPaidModal()" 
+          [disabled]="isLoading" 
+          class="btn-primary"
+        >
+          Marcar como Pago
+        </button>
+        <button 
+          *ngIf="payment.can_be_cancelled" 
+          (click)="openCancelModal()" 
+          [disabled]="isLoading" 
+          class="btn-warning"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Rejeição -->
+<div *ngIf="showRejectModal" class="modal-overlay" (click)="showRejectModal = false">
+  <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Rejeitar Pagamento</h2>
+      <button class="close-btn" (click)="showRejectModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert--warning">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <p>Esta ação não pode ser desfeita. O pagamento voltará ao estado de rascunho.</p>
+      </div>
+      <div class="form-group">
+        <label>Motivo da Rejeição *</label>
+        <textarea 
+          [(ngModel)]="rejectionNotes" 
+          rows="4" 
+          placeholder="Indique o motivo da rejeição..."
+          class="form-textarea"
+          required
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showRejectModal = false">Cancelar</button>
+      <button class="btn-danger" (click)="rejectPayment()" [disabled]="isLoading">
+        {{ isLoading ? 'A rejeitar...' : 'Confirmar Rejeição' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Marcar como Pago -->
+<div *ngIf="showPaidModal" class="modal-overlay" (click)="showPaidModal = false">
+  <div class="modal-content modal-content--medium" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Marcar como Pago</h2>
+      <button class="close-btn" (click)="showPaidModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Data de Pagamento *</label>
+        <input 
+          type="date" 
+          [(ngModel)]="paidData.payment_date" 
+          class="form-input"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Método de Pagamento *</label>
+        <select [(ngModel)]="paidData.payment_method" class="form-select" required>
+          <option value="transfer">Transferência Bancária</option>
+          <option value="check">Cheque</option>
+          <option value="cash">Numerário</option>
+          <option value="credit_card">Cartão de Crédito</option>
+          <option value="other">Outro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Referência Bancária *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="paidData.bank_reference" 
+          class="form-input"
+          placeholder="Ex: TRF/2026/001234"
+          required
+        >
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showPaidModal = false">Cancelar</button>
+      <button class="btn-primary" (click)="markAsPaid()" [disabled]="isLoading">
+        {{ isLoading ? 'A registar...' : 'Confirmar Pagamento' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Cancelamento -->
+<div *ngIf="showCancelModal" class="modal-overlay" (click)="showCancelModal = false">
+  <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Cancelar Pagamento</h2>
+      <button class="close-btn" (click)="showCancelModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert--danger">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <p>Esta ação é irreversível. O pagamento será permanentemente cancelado.</p>
+      </div>
+      <div class="form-group">
+        <label>Motivo do Cancelamento *</label>
+        <textarea 
+          [(ngModel)]="cancelReason" 
+          rows="4" 
+          placeholder="Indique o motivo do cancelamento..."
+          class="form-textarea"
+          required
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showCancelModal = false">Cancelar</button>
+      <button class="btn-warning" (click)="cancelPayment()" [disabled]="isLoading">
+        {{ isLoading ? 'A cancelar...' : 'Confirmar Cancelamento' }}
+      </button>
+    </div>
+  </div>
+</div>

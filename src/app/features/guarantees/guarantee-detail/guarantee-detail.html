@@ -1,0 +1,400 @@
+<div class="detail-overlay" (click)="close.emit()">
+  <div class="detail-container" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="detail-header">
+      <div class="detail-header-top">
+        <div class="detail-title-section">
+          <span class="detail-number">{{ guarantee.guarantee_number }}</span>
+          <h2 class="detail-title">{{ guarantee.type.label }} - {{ guarantee.purpose.label }}</h2>
+          <span class="status-badge" [ngClass]="getStatusInfo(guarantee.status).class">
+            {{ getStatusInfo(guarantee.status).icon }} {{ getStatusInfo(guarantee.status).label }}
+          </span>
+        </div>
+        <button class="close-btn" (click)="close.emit()">×</button>
+      </div>
+
+      <!-- Validade Progress -->
+      <div class="validity-section" *ngIf="guarantee.status === 'active'">
+        <div class="validity-info">
+          <span class="validity-label">Validade da Caução</span>
+          <span class="validity-value" [ngClass]="getExpiryStatus().class">
+            {{ getExpiryStatus().text }}
+          </span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="getValidityProgress()" [ngClass]="getExpiryStatus().class"></div>
+        </div>
+        <div class="progress-dates">
+          <span>{{ guarantee.dates.issue | date:'dd/MM/yyyy' }}</span>
+          <span>{{ guarantee.dates.expiry | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+
+      <!-- Action Messages -->
+      <div *ngIf="actionMessage" class="action-message action-message--success">
+        {{ actionMessage }}
+      </div>
+      <div *ngIf="actionError" class="action-message action-message--error">
+        {{ actionError }}
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="detail-tabs">
+      <button 
+        (click)="activeTab = 'overview'" 
+        [class.active]="activeTab === 'overview'"
+        class="tab-btn"
+      >
+        Visão Geral
+      </button>
+      <button 
+        (click)="activeTab = 'issuer'" 
+        [class.active]="activeTab === 'issuer'"
+        class="tab-btn"
+      >
+        Emissora
+      </button>
+      <button 
+        (click)="activeTab = 'financial'" 
+        [class.active]="activeTab === 'financial'"
+        class="tab-btn"
+      >
+        Financeiro
+      </button>
+      <button 
+        (click)="activeTab = 'timeline'" 
+        [class.active]="activeTab === 'timeline'"
+        class="tab-btn"
+      >
+        Histórico
+      </button>
+
+      <button (click)="activeTab = 'documents'" [class.active]="activeTab === 'documents'" class="tab-btn">
+        📎 Documentos
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="detail-body">
+      
+      <!-- Overview Tab -->
+      <div *ngIf="activeTab === 'overview'" class="tab-content">
+        <div class="info-grid">
+          <div class="info-section">
+            <h3>Contrato Associado</h3>
+            <div class="info-row">
+              <span class="info-label">Número</span>
+              <span class="info-value mono">{{ guarantee.contract.contract_number }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Título</span>
+              <span class="info-value">{{ guarantee.contract.title }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Contraparte</span>
+              <span class="info-value">{{ guarantee.contract.counterparty.name }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">NIF</span>
+              <span class="info-value mono">{{ guarantee.contract.counterparty.nif }}</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Datas</h3>
+            <div class="info-row">
+              <span class="info-label">Data de Emissão</span>
+              <span class="info-value">{{ guarantee.dates.issue | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Data de Expiração</span>
+              <span class="info-value" [class.overdue]="guarantee.dates.is_expired">
+                {{ guarantee.dates.expiry | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Dias de Validade</span>
+              <span class="info-value">{{ guarantee.dates.validity_days }} dias</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Dias Restantes</span>
+              <span class="info-value" [ngClass]="{
+                'text-red': guarantee.dates.is_expired,
+                'text-amber': guarantee.dates.is_expiring_soon,
+                'text-green': !guarantee.dates.is_expired && !guarantee.dates.is_expiring_soon
+              }">
+                {{ guarantee.dates.days_until_expiry }} dias
+              </span>
+            </div>
+          </div>
+
+          <div class="info-section" *ngIf="guarantee.release_conditions">
+            <h3>Condições de Libertação</h3>
+            <p class="info-text">{{ guarantee.release_conditions }}</p>
+          </div>
+
+          <div class="info-section" *ngIf="guarantee.status === 'released'">
+            <h3>Libertação</h3>
+            <div class="info-row">
+              <span class="info-label">Data</span>
+              <span class="info-value">{{ guarantee.release_date | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-row" *ngIf="guarantee.release_notes">
+              <span class="info-label">Notas</span>
+              <span class="info-value">{{ guarantee.release_notes }}</span>
+            </div>
+          </div>
+
+          <div class="info-section" *ngIf="guarantee.status === 'executed'">
+            <h3>Execução</h3>
+            <div class="info-row">
+              <span class="info-label">Data</span>
+              <span class="info-value">{{ guarantee.execution_date | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Valor Executado</span>
+              <span class="info-value highlight">
+                {{ guarantee.financial.currency_symbol }} {{ formatCurrency(guarantee.execution_amount || 0, guarantee.financial.currency) }}
+              </span>
+            </div>
+            <div class="info-row" *ngIf="guarantee.execution_reason">
+              <span class="info-label">Motivo</span>
+              <span class="info-value">{{ guarantee.execution_reason }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Issuer Tab -->
+      <div *ngIf="activeTab === 'issuer'" class="tab-content">
+        <div class="issuer-card">
+          <div class="issuer-icon">🏦</div>
+          <div class="issuer-info">
+            <h3>{{ guarantee.issuer.name }}</h3>
+            <div class="issuer-details">
+              <div class="issuer-detail">
+                <span class="issuer-label">NIF</span>
+                <span class="issuer-value mono">{{ guarantee.issuer.nif }}</span>
+              </div>
+              <div class="issuer-detail" *ngIf="guarantee.issuer.contact">
+                <span class="issuer-label">Contacto</span>
+                <span class="issuer-value">{{ guarantee.issuer.contact }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Tab -->
+      <div *ngIf="activeTab === 'financial'" class="tab-content">
+        <div class="financial-summary">
+          <div class="financial-row financial-row--main">
+            <span>Valor da Caução</span>
+            <span class="financial-amount">
+              {{ guarantee.financial.currency_symbol }} {{ formatCurrency(guarantee.financial.amount, guarantee.financial.currency) }}
+            </span>
+          </div>
+          <div class="financial-row" *ngIf="guarantee.financial.currency !== 'AOA'">
+            <span>Moeda</span>
+            <span class="financial-amount">{{ guarantee.financial.currency }}</span>
+          </div>
+          <div class="financial-row" *ngIf="guarantee.financial.exchange_rate > 0">
+            <span>Taxa de Câmbio</span>
+            <span class="financial-amount">{{ guarantee.financial.exchange_rate | number:'1.2-2' }}</span>
+          </div>
+          <div class="financial-row financial-row--total" *ngIf="guarantee.financial.currency !== 'AOA'">
+            <span>Equivalente em AOA</span>
+            <span class="financial-amount">
+              {{ formatCurrency(guarantee.financial.amount_in_aoa) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="execution-section" *ngIf="guarantee.status === 'executed'">
+          <h3>Execução</h3>
+          <div class="execution-info">
+            <div class="execution-item">
+              <span class="execution-label">Valor Executado</span>
+              <span class="execution-value">
+                {{ guarantee.financial.currency_symbol }} {{ formatCurrency(guarantee.execution_amount || 0, guarantee.financial.currency) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Tab -->
+      <div *ngIf="activeTab === 'timeline'" class="tab-content">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-icon timeline-icon--created">📝</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Caução Criada</p>
+              <p class="timeline-date">{{ guarantee.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="guarantee.status === 'released'" class="timeline-item">
+            <div class="timeline-icon timeline-icon--released">✅</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Caução Libertada</p>
+              <p class="timeline-date">{{ guarantee.release_date | date:'dd/MM/yyyy' }}</p>
+              <p *ngIf="guarantee.release_notes" class="timeline-notes">
+                {{ guarantee.release_notes }}
+              </p>
+            </div>
+          </div>
+
+          <div *ngIf="guarantee.status === 'executed'" class="timeline-item">
+            <div class="timeline-icon timeline-icon--executed">⚡</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Caução Executada</p>
+              <p class="timeline-date">{{ guarantee.execution_date | date:'dd/MM/yyyy' }}</p>
+              <p class="timeline-notes">
+                Valor: {{ guarantee.financial.currency_symbol }} {{ formatCurrency(guarantee.execution_amount || 0, guarantee.financial.currency) }}
+              </p>
+              <p *ngIf="guarantee.execution_reason" class="timeline-notes">
+                Motivo: {{ guarantee.execution_reason }}
+              </p>
+            </div>
+          </div>
+
+          <div *ngIf="guarantee.dates.is_expired && guarantee.status === 'active'" class="timeline-item">
+            <div class="timeline-icon timeline-icon--expired">⏰</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Caução Expirada</p>
+              <p class="timeline-date">{{ guarantee.dates.expiry | date:'dd/MM/yyyy' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 'documents'" class="tab-content">
+        <app-document-uploader 
+          entityType="guarantee"
+          [entityId]="guarantee.id"
+          [documentTypes]="[
+            { value: 'guarantee_certificate', label: 'Certificado da Caução' },
+            { value: 'bank_letter', label: 'Carta Bancária' },
+            { value: 'insurance_policy', label: 'Apólice de Seguro' },
+            { value: 'release_document', label: 'Documento de Libertação' },
+            { value: 'execution_document', label: 'Documento de Execução' },
+            { value: 'other', label: 'Outro' }
+          ]">
+        </app-document-uploader>
+      </div>
+    </div>
+
+    <!-- Footer com Ações -->
+    <div class="detail-footer">
+      <button class="btn-secondary" (click)="close.emit()">Fechar</button>
+      
+      <div class="footer-actions">
+        <button 
+          *ngIf="guarantee.can_release" 
+          (click)="openReleaseModal()" 
+          [disabled]="isLoading" 
+          class="btn-success"
+        >
+          Libertar Caução
+        </button>
+        <button 
+          *ngIf="guarantee.can_execute" 
+          (click)="openExecuteModal()" 
+          [disabled]="isLoading" 
+          class="btn-warning"
+        >
+          Executar Caução
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Libertação -->
+<div *ngIf="showReleaseModal" class="modal-overlay" (click)="showReleaseModal = false">
+  <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Libertar Caução</h2>
+      <button class="close-btn" (click)="showReleaseModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert--info">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p>A libertação da caução significa que a garantia já não é necessária. Esta ação é irreversível.</p>
+      </div>
+      <div class="form-group">
+        <label>Notas de Libertação (opcional)</label>
+        <textarea 
+          [(ngModel)]="releaseNotes" 
+          rows="4" 
+          placeholder="Adicione notas sobre a libertação..."
+          class="form-textarea"
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showReleaseModal = false">Cancelar</button>
+      <button class="btn-success" (click)="releaseGuarantee()" [disabled]="isLoading">
+        {{ isLoading ? 'A libertar...' : 'Confirmar Libertação' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Execução -->
+<div *ngIf="showExecuteModal" class="modal-overlay" (click)="showExecuteModal = false">
+  <div class="modal-content modal-content--medium" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Executar Caução</h2>
+      <button class="close-btn" (click)="showExecuteModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert--warning">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <div>
+          <p class="alert-title">Atenção</p>
+          <p class="alert-text">A execução da caução significa que o valor será cobrado ao emitente. Esta ação é irreversível.</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Valor a Executar *</label>
+        <input 
+          type="number" 
+          [(ngModel)]="executeData.amount" 
+          min="0"
+          max="{{ guarantee.financial.amount }}"
+          step="0.01"
+          class="form-input"
+          placeholder="0.00"
+          required
+        >
+        <p class="form-hint">Valor máximo: {{ guarantee.financial.currency_symbol }} {{ formatCurrency(guarantee.financial.amount, guarantee.financial.currency) }}</p>
+      </div>
+
+      <div class="form-group">
+        <label>Motivo da Execução *</label>
+        <textarea 
+          [(ngModel)]="executeData.reason" 
+          rows="4" 
+          placeholder="Indique o motivo detalhado da execução..."
+          class="form-textarea"
+          required
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showExecuteModal = false">Cancelar</button>
+      <button class="btn-warning" (click)="executeGuarantee()" [disabled]="isLoading">
+        {{ isLoading ? 'A executar...' : 'Confirmar Execução' }}
+      </button>
+    </div>
+  </div>
+</div>

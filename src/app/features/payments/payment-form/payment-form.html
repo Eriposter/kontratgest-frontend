@@ -1,0 +1,277 @@
+<!-- payment-form.html - Versão otimizada com scroll -->
+<div class="payment-form">
+  <!-- Header -->
+  <div class="form-header">
+    <div>
+      <h2>Novo Pagamento</h2>
+      <p>Preencha os dados do pagamento</p>
+    </div>
+    <button class="close-btn" (click)="close.emit()">×</button>
+  </div>
+
+  <!-- Scroll Progress -->
+  <div class="scroll-progress">
+    <div class="scroll-progress-bar" [style.width.%]="scrollProgress"></div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Form Content com Scroll -->
+  <div class="form-scroll-container" (scroll)="onScroll($event)">
+    <form (ngSubmit)="onSubmit()" class="form-content">
+      
+      <!-- Secção 1: Contrato e Tipo -->
+      <div class="form-section">
+        <h3 class="section-title">Contrato e Tipo</h3>
+
+        <div class="form-row">
+          <div class="form-group form-group--full">
+            <label>Contrato *</label>
+            <select 
+              [(ngModel)]="formData.contract_id" 
+              (change)="onContractChange()"
+              name="contract_id" 
+              required 
+              class="form-select"
+              [disabled]="isLoading"
+            >
+              <option value="">Selecionar contrato...</option>
+              <option *ngFor="let contract of contracts" [value]="contract.id">
+                {{ contract.contract_number }} - {{ contract.title }}
+              </option>
+            </select>
+            <p class="form-hint" *ngIf="isLoading">A carregar contratos...</p>
+          </div>
+        </div>
+
+        <!-- Preview do contrato -->
+        <div *ngIf="selectedContract" class="contract-preview">
+          <div class="contract-preview-icon">📄</div>
+          <div class="contract-preview-info">
+            <p class="contract-preview-number">{{ selectedContract.contract_number }}</p>
+            <p class="contract-preview-title">{{ selectedContract.title }}</p>
+            <p class="contract-preview-counterparty">{{ selectedContract.counterparty?.name }}</p>
+          </div>
+        </div>
+
+        <div class="form-row two-cols">
+          <div class="form-group">
+            <label>Tipo de Pagamento *</label>
+            <select 
+              [(ngModel)]="formData.payment_type" 
+              (change)="onPaymentTypeChange()"
+              name="payment_type" 
+              required 
+              class="form-select"
+            >
+              <option *ngFor="let type of paymentTypes" [value]="type.value">{{ type.label }}</option>
+            </select>
+          </div>
+
+          <div class="form-group" *ngIf="formData.payment_type === 'measurement'">
+            <label>Auto de Medição</label>
+            <select 
+              [(ngModel)]="formData.measurement_id" 
+              (change)="onMeasurementChange()"
+              name="measurement_id" 
+              class="form-select"
+              [disabled]="measurements.length === 0"
+            >
+              <option value="">Selecionar auto...</option>
+              <option *ngFor="let measurement of measurements" [value]="measurement.id">
+                {{ measurement.measurement_number }} - {{ formatCurrency(measurement.financial?.net_amount || 0) }} AOA
+              </option>
+            </select>
+            <p class="form-hint" *ngIf="measurements.length === 0 && selectedContract">
+              Não há autos de medição aprovados para este contrato
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secção 2: Valores -->
+      <div class="form-section">
+        <h3 class="section-title">Valores e Impostos</h3>
+
+        <div class="form-row">
+          <div class="form-group form-group--full">
+            <label>Valor Bruto *</label>
+            <input 
+              type="number" 
+              [(ngModel)]="formData.gross_amount" 
+              (input)="onAmountChange()"
+              name="gross_amount" 
+              required 
+              min="0.01"
+              step="0.01"
+              class="form-input"
+              placeholder="0.00"
+            >
+          </div>
+        </div>
+
+        <div class="form-row three-cols">
+          <div class="form-group">
+            <label>IVA (%)</label>
+            <input 
+              type="number" 
+              [(ngModel)]="formData.vat_rate" 
+              (input)="onAmountChange()"
+              name="vat_rate" 
+              min="0" 
+              max="100"
+              step="0.01"
+              class="form-input"
+            >
+          </div>
+
+          <div class="form-group">
+            <label>Retenção na Fonte (%)</label>
+            <input 
+              type="number" 
+              [(ngModel)]="formData.withholding_tax_rate" 
+              (input)="onAmountChange()"
+              name="withholding_tax_rate" 
+              min="0" 
+              max="100"
+              step="0.01"
+              class="form-input"
+            >
+          </div>
+
+          <div class="form-group">
+            <label>Imposto de Selo (%)</label>
+            <input 
+              type="number" 
+              [(ngModel)]="formData.stamp_duty_rate" 
+              (input)="onAmountChange()"
+              name="stamp_duty_rate" 
+              min="0" 
+              max="100"
+              step="0.01"
+              class="form-input"
+            >
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Retenção de Garantia</label>
+            <input 
+              type="number" 
+              [(ngModel)]="formData.retention_amount" 
+              (input)="onAmountChange()"
+              name="retention_amount" 
+              min="0"
+              step="0.01"
+              class="form-input"
+              placeholder="0.00"
+            >
+          </div>
+        </div>
+
+        <!-- Resumo Financeiro -->
+        <div class="financial-summary">
+          <div class="financial-row">
+            <span>Valor Bruto</span>
+            <span class="financial-amount">{{ formData.gross_amount | number:'1.2-2' }} AOA</span>
+          </div>
+          <div class="financial-row" *ngIf="formData.vat_rate > 0">
+            <span>IVA ({{ formData.vat_rate }}%)</span>
+            <span class="financial-amount financial-amount--positive">+ {{ getVatAmount() | number:'1.2-2' }} AOA</span>
+          </div>
+          <div class="financial-row" *ngIf="formData.withholding_tax_rate > 0">
+            <span>Retenção na Fonte ({{ formData.withholding_tax_rate }}%)</span>
+            <span class="financial-amount financial-amount--negative">- {{ getWithholdingAmount() | number:'1.2-2' }} AOA</span>
+          </div>
+          <div class="financial-row" *ngIf="formData.stamp_duty_rate > 0">
+            <span>Imposto de Selo ({{ formData.stamp_duty_rate }}%)</span>
+            <span class="financial-amount financial-amount--negative">- {{ getStampDutyAmount() | number:'1.2-2' }} AOA</span>
+          </div>
+          <div class="financial-row" *ngIf="formData.retention_amount > 0">
+            <span>Retenção de Garantia</span>
+            <span class="financial-amount financial-amount--negative">- {{ formData.retention_amount | number:'1.2-2' }} AOA</span>
+          </div>
+          <div class="financial-row financial-row--total">
+            <span>Valor Líquido</span>
+            <span class="financial-amount">{{ getNetAmount() | number:'1.2-2' }} AOA</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secção 3: Datas e Fatura -->
+      <div class="form-section">
+        <h3 class="section-title">Datas e Fatura</h3>
+
+        <div class="form-row three-cols">
+          <div class="form-group">
+            <label>Data de Vencimento</label>
+            <input 
+              type="date" 
+              [(ngModel)]="formData.due_date" 
+              name="due_date" 
+              class="form-input"
+            >
+          </div>
+
+          <div class="form-group">
+            <label>Data da Fatura</label>
+            <input 
+              type="date" 
+              [(ngModel)]="formData.invoice_date" 
+              name="invoice_date" 
+              class="form-input"
+            >
+          </div>
+
+          <div class="form-group">
+            <label>Número da Fatura</label>
+            <input 
+              type="text" 
+              [(ngModel)]="formData.invoice_number" 
+              name="invoice_number" 
+              class="form-input"
+              placeholder="Ex: FT/2026/001"
+            >
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group form-group--full">
+            <label>Notas Internas</label>
+            <textarea 
+              [(ngModel)]="formData.notes" 
+              name="notes" 
+              class="form-textarea" 
+              rows="3" 
+              placeholder="Notas adicionais sobre este pagamento..."
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scroll to Top Button -->
+      <button type="button" *ngIf="showScrollTop" (click)="scrollToTop()" class="scroll-top-btn" title="Voltar ao topo">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="form-footer">
+    <button type="button" (click)="close.emit()" class="btn-secondary">Cancelar</button>
+    
+    <button type="submit" (click)="onSubmit()" [disabled]="isSaving || !isFormValid()" class="btn-primary">
+      <span *ngIf="!isSaving">Criar Pagamento</span>
+      <span *ngIf="isSaving">A criar...</span>
+    </button>
+  </div>
+</div>

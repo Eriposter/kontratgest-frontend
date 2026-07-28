@@ -40,24 +40,22 @@
       "sourceRoot": "src",
       "prefix": "app",
       "architect": {
-                "build": {
+        "build": {
           "builder": "@angular/build:application",
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              "src/assets",
+              "src/web.config",
               {
                 "glob": "**/*",
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.scss"
-            ],
-            "polyfills": [
-              "zone.js"
-            ]
+            "styles": ["src/styles.scss"],
+            "polyfills": ["zone.js"]
           },
           "configurations": {
             "production": {

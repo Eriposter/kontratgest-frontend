@@ -17,7 +17,6 @@
   <!-- Métricas -->
   <div class="metrics-grid">
     <div class="metric-card metric-card--blue">
-      <div class="metric-icon">📄</div>
       <div class="metric-content">
         <p class="metric-label">Contratos Ativos</p>
         <p class="metric-value">{{ metrics.active }}</p>
@@ -25,7 +24,6 @@
     </div>
 
     <div class="metric-card metric-card--green">
-      <div class="metric-icon">💰</div>
       <div class="metric-content">
         <p class="metric-label">Valor Total</p>
         <p class="metric-value">{{ formatCurrency(metrics.totalValue) }}</p>
@@ -33,7 +31,6 @@
     </div>
 
     <div class="metric-card metric-card--amber">
-      <div class="metric-icon">⏳</div>
       <div class="metric-content">
         <p class="metric-label">Pendentes</p>
         <p class="metric-value">{{ metrics.pending }}</p>
@@ -41,7 +38,6 @@
     </div>
 
     <div class="metric-card metric-card--red">
-      <div class="metric-icon">⏰</div>
       <div class="metric-content">
         <p class="metric-label">A Expirar</p>
         <p class="metric-value">{{ metrics.expiring }}</p>
@@ -227,6 +223,23 @@
   [contract]="selectedContract"
   (close)="closeDetailModal()"
   (refresh)="loadContracts()">
+        <!-- 🆕 DOCUMENTOS -->
+      <div class="detail-section">
+        <h3>📎 Documentos do Contrato</h3>
+        <app-document-uploader 
+          entityType="contract"
+          [entityId]="selectedContract.id"
+          [documentTypes]="[
+            { value: 'contract_draft', label: 'Minuta do Contrato' },
+            { value: 'signed_contract', label: 'Contrato Assinado' },
+            { value: 'annex', label: 'Anexo' },
+            { value: 'technical_spec', label: 'Especificações Técnicas' },
+            { value: 'amendment', label: 'Adenda / Alteração' },
+            { value: 'termination', label: 'Documento de Rescisão' },
+            { value: 'other', label: 'Outro' }
+          ]">
+        </app-document-uploader>
+      </div>
 </app-contract-detail>
 
 <!-- Modal de Formulário -->

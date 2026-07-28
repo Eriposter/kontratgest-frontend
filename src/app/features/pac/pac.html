@@ -1,0 +1,215 @@
+<div class="pac-page animate-fade-in">
+  
+  <!-- Cabeçalho -->
+  <div class="pac-header">
+    <div>
+      <h1 class="pac-title">Planos Anuais de Contratação</h1>
+      <p class="pac-subtitle">Planeamento e execução de contratações anuais</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Novo Plano
+    </button>
+  </div>
+
+  <!-- Métricas -->
+  <div class="metrics-grid">
+    <div class="metric-card metric-card--blue">
+      <div class="metric-content">
+        <p class="metric-label">Total de Planos</p>
+        <p class="metric-value">{{ metrics.total }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--green">
+      <div class="metric-content">
+        <p class="metric-label">Aprovados</p>
+        <p class="metric-value">{{ metrics.approved }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--purple">
+      <div class="metric-content">
+        <p class="metric-label">Total Planeado</p>
+        <p class="metric-value">{{ formatCurrency(metrics.totalPlanned) }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--amber">
+      <div class="metric-content">
+        <p class="metric-label">Total Executado</p>
+        <p class="metric-value">{{ formatCurrency(metrics.totalExecuted) }}</p>
+        <p class="metric-subvalue" *ngIf="metrics.totalPlanned > 0">
+          {{ ((metrics.totalExecuted / metrics.totalPlanned) * 100) | number:'1.1-1' }}% do planeado
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="pac-filters">
+    <div class="filter-search">
+      <svg class="filter-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery" 
+        (keyup.enter)="onSearch()"
+        placeholder="Pesquisar por título ou descrição..." 
+        class="filter-search-input"
+      >
+    </div>
+
+    <select [(ngModel)]="selectedYear" (change)="onFilterChange()" class="filter-select">
+      <option [ngValue]="null">Todos os anos</option>
+      <option *ngFor="let year of getAvailableYears()" [ngValue]="year">{{ year }}</option>
+    </select>
+
+    <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="filter-select">
+      <option value="">Todos os estados</option>
+      <option value="draft">Rascunho</option>
+      <option value="submitted">Submetido</option>
+      <option value="approved">Aprovado</option>
+      <option value="in_progress">Em Execução</option>
+      <option value="completed">Concluído</option>
+      <option value="cancelled">Cancelado</option>
+    </select>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>A carregar planos...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p>{{ error }}</p>
+    <button (click)="loadPlans()" class="btn-secondary">Tentar novamente</button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && plans.length === 0" class="empty-state">
+    <div class="empty-icon">📋</div>
+    <h3>Nenhum plano encontrado</h3>
+    <p>Crie o primeiro Plano Anual de Contratação</p>
+    <button (click)="openCreateModal()" class="btn-primary">Criar Plano</button>
+  </div>
+
+  <!-- Cards dos Planos -->
+  <div *ngIf="!loading && !error && plans.length > 0" class="plans-grid">
+    <div *ngFor="let plan of plans" class="plan-card" (click)="viewDetails(plan)">
+      
+      <!-- Header do Card -->
+      <div class="plan-card-header">
+        <div class="plan-year-badge">{{ plan.year }}</div>
+        <span class="status-badge" [ngClass]="getStatusInfo(plan.status).class">
+          {{ getStatusInfo(plan.status).icon }} {{ getStatusInfo(plan.status).label }}
+        </span>
+      </div>
+
+      <!-- Título -->
+      <h3 class="plan-title">{{ plan.title }}</h3>
+      <p class="plan-description" *ngIf="plan.description">{{ plan.description }}</p>
+
+      <!-- Progresso de Execução -->
+      <div class="execution-section">
+        <div class="execution-header">
+          <span class="execution-label">Execução</span>
+          <span class="execution-value" [ngClass]="getExecutionClass(plan)">
+            {{ plan.financial.execution_percentage | number:'1.1-1' }}%
+          </span>
+        </div>
+        <div class="execution-bar">
+          <div 
+            class="execution-fill" 
+            [style.width.%]="plan.financial.execution_percentage"
+            [ngClass]="getExecutionClass(plan)"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Valores -->
+      <div class="plan-financial">
+        <div class="financial-item">
+          <span class="financial-label">Planeado</span>
+          <span class="financial-value">{{ formatCurrency(plan.financial.total_planned) }}</span>
+        </div>
+        <div class="financial-item">
+          <span class="financial-label">Executado</span>
+          <span class="financial-value executed">{{ formatCurrency(plan.financial.total_executed) }}</span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="plan-footer">
+        <span class="needs-count">
+          📋 {{ plan.needs_count }} necessidade{{ plan.needs_count !== 1 ? 's' : '' }}
+        </span>
+        <span class="created-date">
+          {{ plan.created_at | date:'dd/MM/yyyy' }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginação -->
+  <div *ngIf="!loading && plans.length > 0" class="pagination">
+    <div class="pagination-info">
+      Mostrando {{ plans.length }} de {{ totalPlans }} planos
+    </div>
+    <div class="pagination-controls">
+      <button 
+        (click)="goToPage(currentPage - 1)" 
+        [disabled]="currentPage === 1"
+        class="pagination-btn"
+      >
+        ← Anterior
+      </button>
+      
+      <div class="pagination-pages">
+        <button 
+          *ngFor="let page of [].constructor(totalPages); let i = index" 
+          (click)="goToPage(i + 1)"
+          [class.active]="currentPage === i + 1"
+          class="pagination-page"
+        >
+          {{ i + 1 }}
+        </button>
+      </div>
+
+      <button 
+        (click)="goToPage(currentPage + 1)" 
+        [disabled]="currentPage === totalPages"
+        class="pagination-btn"
+      >
+        Próxima →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalhes -->
+<app-pac-detail
+  *ngIf="showDetailModal && selectedPlan"
+  [plan]="selectedPlan"
+  (close)="closeDetailModal()"
+  (refresh)="loadPlans()">
+</app-pac-detail>
+
+<!-- Modal de Formulário -->
+<div *ngIf="showFormModal" class="modal-overlay" (click)="closeFormModal()">
+  <div class="modal-content modal-content--medium" (click)="$event.stopPropagation()">
+    <app-pac-form 
+      [plan]="editingPlan"
+      (close)="closeFormModal()"
+      (saved)="onPlanSaved()">
+    </app-pac-form>
+  </div>
+</div>

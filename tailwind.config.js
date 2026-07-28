@@ -12,7 +12,7 @@ module.exports = {
           200: '#c7d2fe',
           300: '#a5b4fc',
           400: '#818cf8',
-          500: '#6366f1', // Indigo moderno
+          500: '#f06421', // Indigo moderno
           600: '#4f46e5',
           700: '#4338ca',
           800: '#3730a3',

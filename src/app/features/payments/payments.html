@@ -1,0 +1,279 @@
+<!-- payments.html - Ações completas -->
+<div class="payments-page animate-fade-in">
+  
+  <!-- Cabeçalho (mantido igual) -->
+  <div class="payments-header">
+    <div>
+      <h1 class="payments-title">Pagamentos</h1>
+      <p class="payments-subtitle">Gestão financeira de pagamentos a contrapartes</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Novo Pagamento
+    </button>
+  </div>
+
+  <!-- Métricas (mantido igual) -->
+  <div class="metrics-grid">
+    <div class="metric-card metric-card--amber">
+      <div class="metric-content">
+        <p class="metric-label">Pendentes</p>
+        <p class="metric-value">{{ metrics.pending }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--green">
+      <div class="metric-content">
+        <p class="metric-label">Aprovados</p>
+        <p class="metric-value">{{ metrics.approved }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--blue">
+      <div class="metric-content">
+        <p class="metric-label">Valor Total</p>
+        <p class="metric-value">{{ formatCurrency(metrics.totalAmount) }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--red">
+      <div class="metric-content">
+        <p class="metric-label">Em Atraso</p>
+        <p class="metric-value">{{ metrics.overdue }}</p>
+        <p class="metric-subvalue">{{ formatCurrency(metrics.overdueAmount) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros (mantido igual) -->
+  <div class="payments-filters">
+    <div class="filter-search">
+      <svg class="filter-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery" 
+        (keyup.enter)="onSearch()"
+        placeholder="Pesquisar por número, contrato ou contraparte..." 
+        class="filter-search-input"
+      >
+    </div>
+
+    <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="filter-select">
+      <option value="">Todos os estados</option>
+      <option value="pending">Pendente</option>
+      <option value="approved">Aprovado</option>
+      <option value="paid">Pago</option>
+      <option value="rejected">Rejeitado</option>
+      <option value="cancelled">Cancelado</option>
+    </select>
+
+    <select [(ngModel)]="selectedType" (change)="onFilterChange()" class="filter-select">
+      <option value="">Todos os tipos</option>
+      <option value="measurement">Auto de Medição</option>
+      <option value="advance">Adiantamento</option>
+      <option value="installment">Prestação</option>
+      <option value="final">Pagamento Final</option>
+    </select>
+  </div>
+
+  <!-- Loading, Error, Empty States (mantido igual) -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>A carregar pagamentos...</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="error-state">
+    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p>{{ error }}</p>
+    <button (click)="loadPayments()" class="btn-secondary">Tentar novamente</button>
+  </div>
+
+  <div *ngIf="!loading && !error && payments.length === 0" class="empty-state">
+    <div class="empty-icon">💸</div>
+    <h3>Nenhum pagamento encontrado</h3>
+    <p>Crie o primeiro pagamento para começar</p>
+    <button (click)="openCreateModal()" class="btn-primary">Criar Pagamento</button>
+  </div>
+
+  <!-- Tabela com ações completas -->
+  <div *ngIf="!loading && !error && payments.length > 0" class="payments-table-wrapper">
+    <table class="payments-table">
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Contrato / Contraparte</th>
+          <th>Tipo</th>
+          <th>Valor Líquido</th>
+          <th>Vencimento</th>
+          <th>Estado</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let payment of payments" class="payment-row" [class.overdue-row]="payment.dates?.is_overdue">
+          <td>
+            <div class="payment-info">
+              <p class="payment-number">{{ payment.payment_number }}</p>
+              <p class="payment-date">{{ payment.created_at | date:'dd/MM/yy' }}</p>
+            </div>
+          </td>
+          <td>
+            <div class="contract-info">
+              <p class="contract-number">{{ payment.contract?.contract_number }}</p>
+              <p class="counterparty-name">{{ payment.contract?.counterparty?.name }}</p>
+            </div>
+          </td>
+          <td>
+            <span class="type-badge">{{ payment.payment_type_label || payment.payment_type }}</span>
+          </td>
+          <td>
+            <div class="financial-info">
+              <p class="financial-amount">
+                {{ payment.financial?.currency_symbol || 'AOA' }} {{ formatCurrency(payment.financial?.net_amount || 0, payment.financial?.currency || 'AOA') }}
+              </p>
+              <p class="financial-gross">Bruto: {{ formatCurrency(payment.financial?.gross_amount || 0) }}</p>
+            </div>
+          </td>
+          <td>
+            <div class="due-info">
+              <p class="due-date" *ngIf="payment.dates?.due">
+                {{ payment.dates.due | date:'dd/MM/yyyy' }}
+              </p>
+              <p class="due-date" *ngIf="!payment.dates?.due">—</p>
+              <span 
+                *ngIf="getDueDateInfo(payment) as dueInfo" 
+                class="due-badge" 
+                [ngClass]="dueInfo.class"
+              >
+                {{ dueInfo.text }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusInfo(payment.status).class">
+              {{ getStatusInfo(payment.status).icon }} {{ getStatusInfo(payment.status).label }}
+            </span>
+          </td>
+          <td class="text-right">
+            <div class="payment-actions">
+              <!-- Ver detalhes -->
+              <button class="action-btn" (click)="viewDetails(payment)" title="Ver detalhes">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              </button>
+
+              <!-- Aprovar -->
+              <button 
+                *ngIf="payment.can_be_approved"
+                class="action-btn action-btn--success" 
+                (click)="approvePayment(payment)"
+                title="Aprovar"
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              </button>
+
+              <!-- Rejeitar -->
+              <button 
+                *ngIf="payment.can_be_approved"
+                class="action-btn action-btn--danger" 
+                (click)="rejectPayment(payment)"
+                title="Rejeitar"
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+
+              <!-- Marcar como Pago -->
+              <!-- <button 
+                *ngIf="payment.can_be_paid"
+                class="action-btn action-btn--paid" 
+                (click)="markAsPaid(payment)"
+                title="Marcar como Pago"
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v1m0 4v1m0-1c-1.11 0-2.08-.402-2.599-1M12 12v1m0-1c1.11 0 2.08-.402 2.599-1"/>
+                </svg>
+              </button> -->
+
+              <!-- Cancelar -->
+              <button 
+                *ngIf="payment.can_be_cancelled"
+                class="action-btn action-btn--cancel" 
+                (click)="cancelPayment(payment)"
+                title="Cancelar"
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginação (mantido igual) -->
+  <div *ngIf="!loading && payments.length > 0" class="pagination">
+    <div class="pagination-info">
+      Mostrando {{ payments.length }} de {{ totalPayments }} pagamentos
+    </div>
+    <div class="pagination-controls">
+      <button 
+        (click)="goToPage(currentPage - 1)" 
+        [disabled]="currentPage === 1"
+        class="pagination-btn"
+      >
+        ← Anterior
+      </button>
+      
+      <div class="pagination-pages">
+        <button 
+          *ngFor="let page of [].constructor(totalPages); let i = index" 
+          (click)="goToPage(i + 1)"
+          [class.active]="currentPage === i + 1"
+          class="pagination-page"
+        >
+          {{ i + 1 }}
+        </button>
+      </div>
+
+      <button 
+        (click)="goToPage(currentPage + 1)" 
+        [disabled]="currentPage === totalPages"
+        class="pagination-btn"
+      >
+        Próxima →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalhes -->
+<app-payment-detail
+  *ngIf="showDetailModal && selectedPayment"
+  [payment]="selectedPayment"
+  (close)="closeDetailModal()"
+  (refresh)="loadPayments()">
+</app-payment-detail>
+
+<!-- Modal de Formulário -->
+<div *ngIf="showFormModal" class="modal-overlay" (click)="closeFormModal()">
+  <div class="modal-content modal-content--large" (click)="$event.stopPropagation()">
+    <app-payment-form 
+      (close)="closeFormModal()"
+      (saved)="onPaymentSaved()">
+    </app-payment-form>
+  </div>
+</div>

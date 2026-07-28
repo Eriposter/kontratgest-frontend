@@ -76,6 +76,13 @@
       >
         Pagamentos
       </button>
+      <button 
+        (click)="activeTab = 'documents'" 
+        [class.active]="activeTab === 'documents'"
+        class="tab-btn"
+      >
+        📎 Documentos
+      </button>
     </div>
 
     <!-- Tab Content -->
@@ -242,6 +249,25 @@
           <p>Nenhum plano de pagamento definido</p>
         </div>
       </div>
+            <!-- 🆕 TAB DOCUMENTOS -->
+      <div *ngIf="activeTab === 'documents'" class="tab-content">
+        <app-document-uploader 
+          entityType="contract"
+          [entityId]="contract.id"
+          [documentTypes]="[
+            { value: 'contract_draft', label: 'Minuta do Contrato' },
+            { value: 'signed_contract', label: 'Contrato Assinado' },
+            { value: 'annex', label: 'Anexo' },
+            { value: 'technical_spec', label: 'Especificações Técnicas' },
+            { value: 'measurement', label: 'Auto de Medição' },
+            { value: 'delivery_note', label: 'Guia de Remessa' },
+            { value: 'amendment', label: 'Adenda / Alteração' },
+            { value: 'termination', label: 'Documento de Rescisão' },
+            { value: 'other', label: 'Outro' }
+          ]">
+        </app-document-uploader>
+      </div>
+      
     </div>
 
     <!-- Footer com Ações -->

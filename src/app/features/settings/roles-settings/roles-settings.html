@@ -1,0 +1,123 @@
+<div class="roles-section">
+  
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>A carregar roles e permissões...</p>
+  </div>
+
+  <div *ngIf="!loading" class="roles-content">
+    
+    <!-- Messages -->
+    <div *ngIf="successMessage" class="message message--success">{{ successMessage }}</div>
+    <div *ngIf="errorMessage" class="message message--error">{{ errorMessage }}</div>
+
+    <!-- Header -->
+    <div class="roles-header-card">
+      <div class="header-info">
+        <h2>Roles e Permissões</h2>
+        <p>Define os perfis de acesso e as permissões associadas a cada um.</p>
+      </div>
+      <button class="btn-primary" (click)="openCreateModal()">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nova Role
+      </button>
+    </div>
+
+    <!-- Lista de Roles -->
+    <div class="roles-list">
+      <div *ngFor="let role of roles" class="role-card">
+        <div class="role-info">
+          <div class="role-icon">🛡️</div>
+          <div class="role-details">
+            <h3>{{ role.name }}</h3>
+            <p class="role-meta">
+              <span>{{ role.permissions.length }} permissões</span>
+              <span class="separator">•</span>
+              <span>{{ role.users_count }} utilizador{{ role.users_count !== 1 ? 'es' : '' }}</span>
+            </p>
+          </div>
+        </div>
+        
+        <div class="role-actions">
+          <button class="action-btn" (click)="openEditModal(role)" title="Editar">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+          </button>
+          <button 
+            class="action-btn action-btn--danger" 
+            (click)="deleteRole(role)" 
+            title="Eliminar"
+            [disabled]="role.name === 'super-admin' || role.users_count > 0"
+          >
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Criação/Edição -->
+<div *ngIf="showFormModal" class="modal-overlay" (click)="closeFormModal()">
+  <div class="modal-content modal-content--large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2>{{ editingRole ? 'Editar Role' : 'Nova Role' }}</h2>
+        <p>Atribui permissões específicas a este perfil de acesso.</p>
+      </div>
+      <button class="close-btn" (click)="closeFormModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nome da Role *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="formData.name" 
+          class="form-input"
+          placeholder="Ex: gestor-financeiro"
+          [readonly]="editingRole?.name === 'super-admin'"
+        >
+      </div>
+
+      <div class="permissions-container">
+        <h3 class="permissions-title">Permissões</h3>
+        
+        <div *ngFor="let group of permissionGroups" class="permission-group">
+          <div class="group-header">
+            <h4>{{ group.label }}</h4>
+            <button type="button" class="select-all-btn" (click)="selectAllInGroup(group.name)">
+              Selecionar Todos
+            </button>
+          </div>
+          
+          <div class="permissions-grid">
+            <label 
+              *ngFor="let perm of group.permissions" 
+              class="permission-item"
+              [class.selected]="isPermissionSelected(perm.name)"
+            >
+              <input 
+                type="checkbox" 
+                [checked]="isPermissionSelected(perm.name)"
+                (change)="togglePermission(perm.name)"
+              >
+              <span class="permission-name">{{ perm.name }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeFormModal()">Cancelar</button>
+      <button class="btn-primary" (click)="saveRole()">Guardar Role</button>
+    </div>
+  </div>
+</div>

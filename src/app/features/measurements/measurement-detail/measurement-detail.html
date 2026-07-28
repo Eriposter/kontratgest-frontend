@@ -1,0 +1,318 @@
+<div class="detail-overlay" (click)="close.emit()">
+  <div class="detail-container" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="detail-header">
+      <div class="detail-header-top">
+        <div class="detail-title-section">
+          <span class="detail-number">{{ measurement.measurement_number }}</span>
+          <h2 class="detail-title">Auto de Medição #{{ measurement.sequence_number }}</h2>
+          <span class="status-badge" [ngClass]="getStatusInfo(measurement.status).class">
+            {{ getStatusInfo(measurement.status).icon }} {{ getStatusInfo(measurement.status).label }}
+          </span>
+        </div>
+        <button class="close-btn" (click)="close.emit()">×</button>
+      </div>
+
+      <!-- Action Messages -->
+      <div *ngIf="actionMessage" class="action-message action-message--success">
+        {{ actionMessage }}
+      </div>
+      <div *ngIf="actionError" class="action-message action-message--error">
+        {{ actionError }}
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="detail-tabs">
+      <button 
+        (click)="activeTab = 'overview'" 
+        [class.active]="activeTab === 'overview'"
+        class="tab-btn"
+      >
+        Visão Geral
+      </button>
+      <button 
+        (click)="activeTab = 'items'" 
+        [class.active]="activeTab === 'items'"
+        class="tab-btn"
+      >
+        Itens ({{ getTotalItems() }})
+      </button>
+      <button 
+        (click)="activeTab = 'financial'" 
+        [class.active]="activeTab === 'financial'"
+        class="tab-btn"
+      >
+        Financeiro
+      </button>
+      <button 
+        (click)="activeTab = 'approval'" 
+        [class.active]="activeTab === 'approval'"
+        class="tab-btn"
+      >
+        Aprovação
+      </button>
+            <button (click)="activeTab = 'documents'" [class.active]="activeTab === 'documents'" class="tab-btn">
+        📎 Documentos
+      </button>
+
+    </div>
+
+    <!-- Tab Content -->
+    <div class="detail-body">
+      
+      <!-- Overview Tab -->
+      <div *ngIf="activeTab === 'overview'" class="tab-content">
+        <div class="info-grid">
+          <div class="info-section">
+            <h3>Contrato</h3>
+            <div class="info-row">
+              <span class="info-label">Número</span>
+              <span class="info-value mono">{{ measurement.contract.contract_number }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Contraparte</span>
+              <span class="info-value">{{ measurement.contract.counterparty.name }}</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Período de Medição</h3>
+            <div class="info-row">
+              <span class="info-label">Data Início</span>
+              <span class="info-value">{{ measurement.period.start | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Data Fim</span>
+              <span class="info-value">{{ measurement.period.end | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Valores</h3>
+            <div class="info-row">
+              <span class="info-label">Total</span>
+              <span class="info-value highlight">{{ formatCurrency(measurement.financial.total_amount) }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Acumulado</span>
+              <span class="info-value">{{ formatCurrency(measurement.financial.cumulative_amount) }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Retenção ({{ measurement.financial.retention_percentage }}%)</span>
+              <span class="info-value retention">{{ formatCurrency(measurement.financial.retention_amount) }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Líquido</span>
+              <span class="info-value highlight">{{ formatCurrency(measurement.financial.net_amount) }}</span>
+            </div>
+          </div>
+
+          <div class="info-section" *ngIf="measurement.observations">
+            <h3>Observações</h3>
+            <p class="info-text">{{ measurement.observations }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Items Tab -->
+      <div *ngIf="activeTab === 'items'" class="tab-content">
+        <div *ngIf="measurement.items && measurement.items.length > 0" class="items-list">
+          <div class="items-header">
+            <span class="item-col-code">Código</span>
+            <span class="item-col-desc">Descrição</span>
+            <span class="item-col-unit">Unidade</span>
+            <span class="item-col-qty">Quantidade</span>
+            <span class="item-col-price">Preço Unit.</span>
+            <span class="item-col-total">Total</span>
+          </div>
+
+          <div *ngFor="let item of measurement.items" class="item-row">
+            <span class="item-col-code mono">{{ item.item_code || '—' }}</span>
+            <span class="item-col-desc">{{ item.description }}</span>
+            <span class="item-col-unit">{{ item.unit }}</span>
+            <span class="item-col-qty">{{ item.quantity | number:'1.2-2' }}</span>
+            <span class="item-col-price">{{ item.unit_price | number:'1.2-2' }}</span>
+            <span class="item-col-total mono">{{ calculateItemTotal(item) | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="items-total">
+            <span class="item-col-total-label">TOTAL</span>
+            <span class="item-col-total-value mono">{{ measurement.financial.total_amount | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="!measurement.items || measurement.items.length === 0" class="empty-tab">
+          <p>Nenhum item registado neste auto</p>
+        </div>
+      </div>
+
+      <!-- Financial Tab -->
+      <div *ngIf="activeTab === 'financial'" class="tab-content">
+        <div class="financial-summary">
+          <div class="financial-row">
+            <span>Valor Bruto</span>
+            <span class="financial-amount">{{ formatCurrency(measurement.financial.total_amount) }}</span>
+          </div>
+          <div class="financial-row">
+            <span>Retenção ({{ measurement.financial.retention_percentage }}%)</span>
+            <span class="financial-amount financial-amount--negative">- {{ formatCurrency(measurement.financial.retention_amount) }}</span>
+          </div>
+          <div class="financial-row financial-row--total">
+            <span>Valor Líquido a Pagar</span>
+            <span class="financial-amount">{{ formatCurrency(measurement.financial.net_amount) }}</span>
+          </div>
+        </div>
+
+        <div class="cumulative-section">
+          <h3>Progressão Acumulada</h3>
+          <div class="cumulative-info">
+            <div class="cumulative-item">
+              <span class="cumulative-label">Total Acumulado</span>
+              <span class="cumulative-value">{{ formatCurrency(measurement.financial.cumulative_amount) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approval Tab -->
+      <div *ngIf="activeTab === 'approval'" class="tab-content">
+        <div class="approval-timeline">
+          <div *ngIf="measurement.approval.submitted_at" class="timeline-item">
+            <div class="timeline-icon timeline-icon--submitted">📤</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Submetido para Aprovação</p>
+              <p class="timeline-date">{{ measurement.approval.submitted_at | date:'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="measurement.approval.approved_at" class="timeline-item">
+            <div class="timeline-icon timeline-icon--approved">✅</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Aprovado</p>
+              <p class="timeline-date">{{ measurement.approval.approved_at | date:'dd/MM/yyyy HH:mm' }}</p>
+              <p *ngIf="measurement.approval.notes" class="timeline-notes">{{ measurement.approval.notes }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="measurement.payment.paid_at" class="timeline-item">
+            <div class="timeline-icon timeline-icon--paid">💰</div>
+            <div class="timeline-content">
+              <p class="timeline-title">Pagamento Efetuado</p>
+              <p class="timeline-date">{{ measurement.payment.paid_at | date:'dd/MM/yyyy' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+            <!-- 🆕 TAB DOCUMENTOS -->
+      <div *ngIf="activeTab === 'documents'" class="tab-content">
+        <app-document-uploader 
+          entityType="contract"
+          [entityId]="measurement.contract.id"
+          [documentTypes]="[
+            { value: 'measurement', label: 'Relatório de Medição' },
+            { value: 'delivery_note', label: 'Guia de Remessa' },
+            { value: 'photos', label: 'Fotografias da Obra' },
+            { value: 'technical_report', label: 'Relatório Técnico' },
+            { value: 'other', label: 'Outro' }
+          ]">
+        </app-document-uploader>
+      </div>
+    </div>
+
+    <!-- Footer com Ações -->
+    <div class="detail-footer">
+      <button class="btn-secondary" (click)="close.emit()">Fechar</button>
+      
+      <div class="footer-actions">
+        <button 
+          *ngIf="measurement.can_be_submitted" 
+          (click)="submitForApproval()" 
+          [disabled]="isLoading" 
+          class="btn-primary"
+        >
+          Submeter para Aprovação
+        </button>
+        <button 
+          *ngIf="measurement.can_be_approved" 
+          (click)="openApproveModal()" 
+          [disabled]="isLoading" 
+          class="btn-success"
+        >
+          Aprovar
+        </button>
+        <button 
+          *ngIf="measurement.can_be_approved" 
+          (click)="openRejectModal()" 
+          [disabled]="isLoading" 
+          class="btn-danger"
+        >
+          Rejeitar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Aprovação -->
+<div *ngIf="showApproveModal" class="modal-overlay" (click)="showApproveModal = false">
+  <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Aprovar Auto de Medição</h2>
+      <button class="close-btn" (click)="showApproveModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Notas de Aprovação (opcional)</label>
+        <textarea 
+          [(ngModel)]="approvalNotes" 
+          rows="4" 
+          placeholder="Adicione notas ou observações..."
+          class="form-textarea"
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showApproveModal = false">Cancelar</button>
+      <button class="btn-success" (click)="approveMeasurement()" [disabled]="isLoading">
+        {{ isLoading ? 'A aprovar...' : 'Confirmar Aprovação' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Rejeição -->
+<div *ngIf="showRejectModal" class="modal-overlay" (click)="showRejectModal = false">
+  <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Rejeitar Auto de Medição</h2>
+      <button class="close-btn" (click)="showRejectModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert--warning">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <p>Esta ação não pode ser desfeita. O auto voltará ao estado de rascunho.</p>
+      </div>
+      <div class="form-group">
+        <label>Motivo da Rejeição *</label>
+        <textarea 
+          [(ngModel)]="rejectionNotes" 
+          rows="4" 
+          placeholder="Indique o motivo da rejeição..."
+          class="form-textarea"
+          required
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showRejectModal = false">Cancelar</button>
+      <button class="btn-danger" (click)="rejectMeasurement()" [disabled]="isLoading">
+        {{ isLoading ? 'A rejeitar...' : 'Confirmar Rejeição' }}
+      </button>
+    </div>
+  </div>
+</div>

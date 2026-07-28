@@ -184,114 +184,16 @@
   </div>
 </div>
 
-<!-- Modal de Detalhes -->
-<div *ngIf="showDetailModal && selectedEntity" class="modal-overlay" (click)="closeDetailModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2>Detalhes da Entidade</h2>
-      <button class="modal-close" (click)="closeDetailModal()">×</button>
-    </div>
-    
-    <div class="modal-body">
-      <!-- Conteúdo do modal de detalhes (mantido igual) -->
-      <div class="detail-section">
-        <h3>Identificação</h3>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <label>Nome</label>
-            <p>{{ selectedEntity.identification.name }}</p>
-          </div>
-          <div class="detail-item">
-            <label>Razão Social</label>
-            <p>{{ selectedEntity.identification.legal_name || '—' }}</p>
-          </div>
-          <div class="detail-item">
-            <label>NIF</label>
-            <p>{{ selectedEntity.identification.nif }}</p>
-          </div>
-          <div class="detail-item">
-            <label>Tipo</label>
-            <p>{{ getTypeLabel(selectedEntity.type) }}</p>
-          </div>
-        </div>
-      </div>
+<!-- Modal de Detalhes (NOVO) -->
+<app-entity-detail
+  *ngIf="showDetailModal && selectedEntity"
+  [entity]="selectedEntity"
+  (close)="closeDetailModal()"
+  (refresh)="loadEntities()"
+  (edit)="onEntityEdited($event)">
+</app-entity-detail>
 
-      <div class="detail-section">
-        <h3>Contacto</h3>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <label>Email</label>
-            <p>{{ selectedEntity.contact.email || '—' }}</p>
-          </div>
-          <div class="detail-item">
-            <label>Telefone</label>
-            <p>{{ selectedEntity.contact.phone || '—' }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="detail-section">
-        <h3>Endereço</h3>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <label>Morada</label>
-            <p>{{ selectedEntity.address.street || '—' }}</p>
-          </div>
-          <div class="detail-item">
-            <label>Cidade</label>
-            <p>{{ selectedEntity.address.city || '—' }}</p>
-          </div>
-          <div class="detail-item">
-            <label>Província</label>
-            <p>{{ selectedEntity.address.province_label || '—' }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="detail-section">
-        <h3>Compliance</h3>
-        <div class="compliance-details">
-          <div class="compliance-item">
-            <div class="compliance-header">
-              <span class="compliance-label">Certidão AGT</span>
-              <span class="compliance-badge" [ngClass]="selectedEntity.compliance.certificates.agt.is_valid ? 'compliance--ok' : 'compliance--expired'">
-                {{ selectedEntity.compliance.certificates.agt.is_valid ? 'Válida' : 'Expirada' }}
-              </span>
-            </div>
-            <p class="compliance-date">
-              Expira em: {{ selectedEntity.compliance.certificates.agt.expiry | date:'dd/MM/yyyy' }}
-              <span *ngIf="selectedEntity.compliance.certificates.agt.days_until_expiry !== null" class="compliance-days">
-                ({{ selectedEntity.compliance.certificates.agt.days_until_expiry }} dias)
-              </span>
-            </p>
-          </div>
-
-          <div class="compliance-item">
-            <div class="compliance-header">
-              <span class="compliance-label">Certidão INSS</span>
-              <span class="compliance-badge" [ngClass]="selectedEntity.compliance.certificates.inss.is_valid ? 'compliance--ok' : 'compliance--expired'">
-                {{ selectedEntity.compliance.certificates.inss.is_valid ? 'Válida' : 'Expirada' }}
-              </span>
-            </div>
-            <p class="compliance-date">
-              Expira em: {{ selectedEntity.compliance.certificates.inss.expiry | date:'dd/MM/yyyy' }}
-              <span *ngIf="selectedEntity.compliance.certificates.inss.days_until_expiry !== null" class="compliance-days">
-                ({{ selectedEntity.compliance.certificates.inss.days_until_expiry }} dias)
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeDetailModal()">Fechar</button>
-      <button class="btn-primary" (click)="editEntity(selectedEntity)">Editar Entidade</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Único para Criação/Edição -->
+<!-- Modal de Formulário -->
 <div *ngIf="showFormModal" class="modal-overlay" (click)="closeFormModal()">
   <div class="modal-content modal-content--large" (click)="$event.stopPropagation()">
     <app-entity-form 

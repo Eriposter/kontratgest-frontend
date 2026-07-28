@@ -1,0 +1,264 @@
+<div class="guarantees-page animate-fade-in">
+  
+  <!-- Cabeçalho -->
+  <div class="guarantees-header">
+    <div>
+      <h1 class="guarantees-title">Cauções</h1>
+      <p class="guarantees-subtitle">Gestão de garantias bancárias e seguros</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Nova Caução
+    </button>
+  </div>
+
+  <!-- Métricas -->
+  <div class="metrics-grid">
+    <div class="metric-card metric-card--blue">
+      <div class="metric-content">
+        <p class="metric-label">Cauções Ativas</p>
+        <p class="metric-value">{{ metrics.active }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--amber">
+      <div class="metric-content">
+        <p class="metric-label">A Expirar</p>
+        <p class="metric-value">{{ metrics.expiring }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--red">
+      <div class="metric-content">
+        <p class="metric-label">Expiradas</p>
+        <p class="metric-value">{{ metrics.expired }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--green">
+      <div class="metric-content">
+        <p class="metric-label">Valor Total</p>
+        <p class="metric-value">{{ formatCurrency(metrics.totalValue) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="guarantees-filters">
+    <div class="filter-search">
+      <svg class="filter-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery" 
+        (keyup.enter)="onSearch()"
+        placeholder="Pesquisar por número, emissora ou contrato..." 
+        class="filter-search-input"
+      >
+    </div>
+
+    <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="filter-select">
+      <option value="">Todos os estados</option>
+      <option value="active">Ativa</option>
+      <option value="released">Libertada</option>
+      <option value="executed">Executada</option>
+      <option value="expired">Expirada</option>
+    </select>
+
+    <select [(ngModel)]="selectedType" (change)="onFilterChange()" class="filter-select">
+      <option value="">Todos os tipos</option>
+      <option value="bank_guarantee">Garantia Bancária</option>
+      <option value="insurance">Seguro</option>
+      <option value="cash_deposit">Depósito em Numerário</option>
+    </select>
+
+    <select [(ngModel)]="selectedPurpose" (change)="onFilterChange()" class="filter-select">
+      <option value="">Todos os propósitos</option>
+      <option value="performance">Boa Execução</option>
+      <option value="advance_payment">Adiantamento</option>
+      <option value="bid">Proposta</option>
+      <option value="retention">Retenção</option>
+      <option value="warranty">Garantia</option>
+    </select>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>A carregar cauções...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p>{{ error }}</p>
+    <button (click)="loadGuarantees()" class="btn-secondary">Tentar novamente</button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && guarantees.length === 0" class="empty-state">
+    <div class="empty-icon">🛡️</div>
+    <h3>Nenhuma caução encontrada</h3>
+    <p>Crie a primeira caução para começar</p>
+    <button (click)="openCreateModal()" class="btn-primary">Criar Caução</button>
+  </div>
+
+  <!-- Tabela -->
+  <div *ngIf="!loading && !error && guarantees.length > 0" class="guarantees-table-wrapper">
+    <table class="guarantees-table">
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Contrato / Contraparte</th>
+          <th>Tipo / Propósito</th>
+          <th>Emissora</th>
+          <th>Valor</th>
+          <th>Validade</th>
+          <th>Estado</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let guarantee of guarantees" class="guarantee-row" [class.expired-row]="guarantee.dates.is_expired" [class.expiring-row]="guarantee.dates.is_expiring_soon && !guarantee.dates.is_expired">
+          <td>
+            <div class="guarantee-info">
+              <p class="guarantee-number">{{ guarantee.guarantee_number }}</p>
+              <p class="guarantee-date">{{ guarantee.dates.issue | date:'dd/MM/yy' }}</p>
+            </div>
+          </td>
+          <td>
+            <div class="contract-info">
+              <p class="contract-number">{{ guarantee.contract.contract_number }}</p>
+              <p class="counterparty-name">{{ guarantee.contract.counterparty.name }}</p>
+            </div>
+          </td>
+          <td>
+            <div class="type-info">
+              <p class="type-label">{{ guarantee.type.label }}</p>
+              <p class="purpose-label">{{ guarantee.purpose.label }}</p>
+            </div>
+          </td>
+          <td>
+            <div class="issuer-info">
+              <p class="issuer-name">{{ guarantee.issuer.name }}</p>
+              <p class="issuer-nif">NIF: {{ guarantee.issuer.nif }}</p>
+            </div>
+          </td>
+          <td>
+            <div class="financial-info">
+              <p class="financial-amount">
+                {{ guarantee.financial.currency_symbol }} {{ formatCurrency(guarantee.financial.amount, guarantee.financial.currency) }}
+              </p>
+              <p class="financial-aoa" *ngIf="guarantee.financial.currency !== 'AOA'">
+                ≈ {{ formatCurrency(guarantee.financial.amount_in_aoa) }}
+              </p>
+            </div>
+          </td>
+          <td>
+            <div class="expiry-info">
+              <p class="expiry-date">{{ guarantee.dates.expiry | date:'dd/MM/yyyy' }}</p>
+              <span 
+                *ngIf="getExpiryInfo(guarantee) as expiryInfo" 
+                class="expiry-badge" 
+                [ngClass]="expiryInfo.class"
+              >
+                {{ expiryInfo.text }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusInfo(guarantee.status).class">
+              {{ getStatusInfo(guarantee.status).icon }} {{ getStatusInfo(guarantee.status).label }}
+            </span>
+          </td>
+          <td class="text-right">
+            <div class="guarantee-actions">
+              <button class="action-btn" (click)="viewDetails(guarantee)" title="Ver detalhes">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              </button>
+              <button 
+                *ngIf="guarantee.can_release"
+                class="action-btn action-btn--success" 
+                title="Libertar"
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              </button>
+              <button 
+                *ngIf="guarantee.can_execute"
+                class="action-btn action-btn--warning" 
+                title="Executar"
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginação -->
+  <div *ngIf="!loading && guarantees.length > 0" class="pagination">
+    <div class="pagination-info">
+      Mostrando {{ guarantees.length }} de {{ totalGuarantees }} cauções
+    </div>
+    <div class="pagination-controls">
+      <button 
+        (click)="goToPage(currentPage - 1)" 
+        [disabled]="currentPage === 1"
+        class="pagination-btn"
+      >
+        ← Anterior
+      </button>
+      
+      <div class="pagination-pages">
+        <button 
+          *ngFor="let page of [].constructor(totalPages); let i = index" 
+          (click)="goToPage(i + 1)"
+          [class.active]="currentPage === i + 1"
+          class="pagination-page"
+        >
+          {{ i + 1 }}
+        </button>
+      </div>
+
+      <button 
+        (click)="goToPage(currentPage + 1)" 
+        [disabled]="currentPage === totalPages"
+        class="pagination-btn"
+      >
+        Próxima →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalhes -->
+<app-guarantee-detail
+  *ngIf="showDetailModal && selectedGuarantee"
+  [guarantee]="selectedGuarantee"
+  (close)="closeDetailModal()"
+  (refresh)="loadGuarantees()">
+</app-guarantee-detail>
+
+<!-- Modal de Formulário -->
+<div *ngIf="showFormModal" class="modal-overlay" (click)="closeFormModal()">
+  <div class="modal-content modal-content--large" (click)="$event.stopPropagation()">
+    <app-guarantee-form 
+      (close)="closeFormModal()"
+      (saved)="onGuaranteeSaved()">
+    </app-guarantee-form>
+  </div>
+</div>

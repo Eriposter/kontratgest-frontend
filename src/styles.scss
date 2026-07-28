@@ -58,3 +58,14 @@
            transition-all duration-200;
   }
 }
+
+button{
+  display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-primary{
+  background-color: #f06421!important;
+  border-color: #f06421;
+}

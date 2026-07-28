@@ -1,0 +1,108 @@
+<div class="document-uploader">
+  
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="message message--success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="message message--error">{{ errorMessage }}</div>
+
+  <!-- Upload Area -->
+  <div 
+    class="upload-area" 
+    [class.drag-over]="isDragOver"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <div class="upload-icon">📤</div>
+    <p class="upload-title">Arraste um ficheiro ou clique para selecionar</p>
+    <p class="upload-hint">PDF, JPG, PNG ou DOC/DOCX (máx. 10MB)</p>
+    
+    <input 
+      type="file" 
+      #fileInput 
+      (change)="onFileSelected($event)" 
+      class="file-input"
+      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+    >
+    
+    <button type="button" (click)="fileInput.click()" class="btn-secondary">
+      Selecionar Ficheiro
+    </button>
+
+    <!-- Selected File Preview -->
+    <div *ngIf="selectedFile" class="selected-file">
+      <div class="file-info">
+        <span class="file-icon">{{ getFileIcon(selectedFile.type) }}</span>
+        <div class="file-details">
+          <p class="file-name">{{ selectedFile.name }}</p>
+          <p class="file-size">{{ formatFileSize(selectedFile.size) }}</p>
+        </div>
+      </div>
+      <button type="button" (click)="selectedFile = null" class="remove-file">×</button>
+    </div>
+
+    <!-- Document Type Selection -->
+    <div *ngIf="selectedFile" class="type-selection">
+      <label>Tipo de Documento *</label>
+      <select [(ngModel)]="selectedType" class="form-select">
+        <option value="">Selecionar tipo...</option>
+        <option *ngFor="let type of documentTypes" [value]="type.value">{{ type.label }}</option>
+      </select>
+    </div>
+
+    <!-- Upload Button -->
+    <button 
+      *ngIf="selectedFile && selectedType"
+      (click)="upload()" 
+      [disabled]="uploading"
+      class="btn-primary"
+    >
+      {{ uploading ? 'A carregar...' : 'Carregar Documento' }}
+    </button>
+  </div>
+
+  <!-- Documents List -->
+  <div *ngIf="!loading && documents.length > 0" class="documents-list">
+    <h3 class="list-title">Documentos Anexados ({{ documents.length }})</h3>
+    
+    <div *ngFor="let doc of documents" class="document-item">
+      <div class="doc-icon">{{ getFileIcon(doc.mime_type) }}</div>
+      
+      <div class="doc-info">
+        <p class="doc-title">{{ doc.title }}</p>
+        <p class="doc-meta">
+          <span>{{ formatFileSize(doc.file_size) }}</span>
+          <span class="separator">•</span>
+          <span>{{ doc.uploaded_at | date:'dd/MM/yyyy' }}</span>
+          <span *ngIf="doc.expires_at" class="separator">•</span>
+          <span *ngIf="doc.expires_at" [class.expired]="doc.is_expired">
+            Expira: {{ doc.expires_at | date:'dd/MM/yyyy' }}
+          </span>
+        </p>
+      </div>
+
+      <div class="doc-actions">
+        <button (click)="downloadDocument(doc)" class="action-btn" title="Descarregar">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+        </button>
+        <button (click)="deleteDocument(doc)" class="action-btn action-btn--danger" title="Eliminar">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && documents.length === 0" class="empty-state">
+    <p>Nenhum documento anexado</p>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>A carregar documentos...</p>
+  </div>
+</div>

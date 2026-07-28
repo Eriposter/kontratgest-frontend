@@ -9,7 +9,7 @@ export class ApiService {
   private http = inject(HttpClient);
   protected apiUrl = 'http://127.0.0.1:8000/api/v1';
 
-  protected get<T>(endpoint: string, params?: any): Observable<T> {
+  protected get<T>(endpoint: string, params?: any, p0?: { responseType: string; }): Observable<T> {
     let httpParams = new HttpParams();
     if (params) {
       Object.keys(params).forEach(key => {

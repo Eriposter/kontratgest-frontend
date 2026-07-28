@@ -24,8 +24,10 @@ export class MainLayoutComponent {
 
   menuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: 'home' },
+    { label: 'PAC', route: '/pac', icon: 'calendar', badge: 0 },
     { label: 'Entidades', route: '/entities', icon: 'building' },
     { label: 'Contratos', route: '/contracts', icon: 'document', badge: 5 },
+    { label: 'Autos de Medição', route: '/measurements', icon: 'measurement' },  // ← ADICIONAR
     { label: 'Cauções', route: '/guarantees', icon: 'shield' },
     { label: 'Pagamentos', route: '/payments', icon: 'money', badge: 2 },
     { label: 'Relatórios', route: '/reports', icon: 'chart' },

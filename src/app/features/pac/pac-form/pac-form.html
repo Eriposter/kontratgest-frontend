@@ -1,0 +1,69 @@
+<div class="pac-form">
+  <!-- Header -->
+  <div class="form-header">
+    <div>
+      <h2>{{ isEdit ? 'Editar Plano' : 'Novo Plano Anual de Contratação' }}</h2>
+      <p>{{ isEdit ? 'Atualize os dados do plano' : 'Crie um novo plano de contratações' }}</p>
+    </div>
+    <button class="close-btn" (click)="close.emit()">×</button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Form -->
+  <form (ngSubmit)="onSubmit()" class="form-content">
+    
+    <div class="form-group">
+      <label>Ano Fiscal *</label>
+      <select 
+        [(ngModel)]="formData.year" 
+        name="year" 
+        required 
+        class="form-select"
+        [disabled]="isEdit"
+      >
+        <option *ngFor="let year of getAvailableYears()" [ngValue]="year">{{ year }}</option>
+      </select>
+      <p class="form-hint" *ngIf="!isEdit">O ano fiscal não pode ser alterado após a criação</p>
+    </div>
+
+    <div class="form-group">
+      <label>Título *</label>
+      <input 
+        type="text" 
+        [(ngModel)]="formData.title" 
+        name="title" 
+        required 
+        class="form-input"
+        placeholder="Ex: Plano Anual de Contratação 2026"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Descrição</label>
+      <textarea 
+        [(ngModel)]="formData.description" 
+        name="description" 
+        class="form-textarea" 
+        rows="4"
+        placeholder="Descrição do plano de contratações..."
+      ></textarea>
+    </div>
+
+    <!-- Footer -->
+    <div class="form-footer">
+      <button type="button" (click)="close.emit()" class="btn-secondary">Cancelar</button>
+      
+      <button type="submit" [disabled]="isSaving" class="btn-primary">
+        <span *ngIf="!isSaving">{{ isEdit ? 'Atualizar Plano' : 'Criar Plano' }}</span>
+        <span *ngIf="isSaving">A guardar...</span>
+      </button>
+    </div>
+  </form>
+</div>

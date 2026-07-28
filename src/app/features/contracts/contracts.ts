@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ContractService, Contract } from '../../core/services/contract.service';
 import { ContractDetailComponent } from './contract-detail/contract-detail';
 import { ContractFormComponent } from './contract-form/contract-form';
+import { DocumentUploaderComponent } from '../../shared/components/document-uploader/document-uploader';
 
 @Component({
   selector: 'app-contracts',
   standalone: true,
-  imports: [CommonModule, FormsModule, ContractDetailComponent, ContractFormComponent],
+  imports: [CommonModule, FormsModule, ContractDetailComponent, ContractFormComponent, DocumentUploaderComponent],
   templateUrl: './contracts.html',
   styleUrls: ['./contracts.scss']
 })

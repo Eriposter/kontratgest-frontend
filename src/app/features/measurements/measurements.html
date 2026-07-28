@@ -1,0 +1,229 @@
+<div class="measurements-page animate-fade-in">
+  
+  <!-- Cabeçalho -->
+  <div class="measurements-header">
+    <div>
+      <h1 class="measurements-title">Autos de Medição</h1>
+      <p class="measurements-subtitle">Gestão de medições e execução de obras</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Novo Auto de Medição
+    </button>
+  </div>
+
+  <!-- Métricas -->
+  <div class="metrics-grid">
+    <div class="metric-card metric-card--blue">
+      <div class="metric-content">
+        <p class="metric-label">Total de Autos</p>
+        <p class="metric-value">{{ metrics.total }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--amber">
+      <div class="metric-content">
+        <p class="metric-label">Submetidos</p>
+        <p class="metric-value">{{ metrics.submitted }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--green">
+      <div class="metric-content">
+        <p class="metric-label">Aprovados</p>
+        <p class="metric-value">{{ metrics.approved }}</p>
+      </div>
+    </div>
+
+    <div class="metric-card metric-card--purple">
+      <div class="metric-content">
+        <p class="metric-label">Valor Total</p>
+        <p class="metric-value">{{ formatCurrency(metrics.totalAmount) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="measurements-filters">
+    <div class="filter-search">
+      <svg class="filter-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery" 
+        (keyup.enter)="onSearch()"
+        placeholder="Pesquisar por número ou contrato..." 
+        class="filter-search-input"
+      >
+    </div>
+
+    <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="filter-select">
+      <option value="">Todos os estados</option>
+      <option value="draft">Rascunho</option>
+      <option value="submitted">Submetido</option>
+      <option value="approved">Aprovado</option>
+      <option value="rejected">Rejeitado</option>
+      <option value="paid">Pago</option>
+    </select>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>A carregar autos de medição...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p>{{ error }}</p>
+    <button (click)="loadMeasurements()" class="btn-secondary">Tentar novamente</button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && measurements.length === 0" class="empty-state">
+    <div class="empty-icon">📏</div>
+    <h3>Nenhum auto de medição encontrado</h3>
+    <p>Crie o primeiro auto de medição para começar</p>
+    <button (click)="openCreateModal()" class="btn-primary">Criar Auto de Medição</button>
+  </div>
+
+  <!-- Tabela -->
+  <div *ngIf="!loading && !error && measurements.length > 0" class="measurements-table-wrapper">
+    <table class="measurements-table">
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Contrato</th>
+          <th>Período</th>
+          <th>Valor</th>
+          <th>Retenção</th>
+          <th>Estado</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let measurement of measurements" class="measurement-row">
+          <td>
+            <div class="measurement-info">
+              <p class="measurement-number">{{ measurement.measurement_number }}</p>
+              <p class="measurement-sequence">Auto #{{ measurement.sequence_number }}</p>
+            </div>
+          </td>
+          <td>
+            <div class="contract-info">
+              <p class="contract-number">{{ measurement.contract.contract_number }}</p>
+              <p class="contract-counterparty">{{ measurement.contract.counterparty.name }}</p>
+            </div>
+          </td>
+          <td>
+            <div class="period-info">
+              <p class="period-range">
+                {{ measurement.period.start | date:'dd/MM/yy' }}
+              </p>
+              <p class="period-range">
+                {{ measurement.period.end | date:'dd/MM/yy' }}
+              </p>
+            </div>
+          </td>
+          <td>
+            <div class="financial-info">
+              <p class="financial-amount">{{ formatCurrency(measurement.financial.total_amount) }}</p>
+              <p class="financial-cumulative">Acumulado: {{ formatCurrency(measurement.financial.cumulative_amount) }}</p>
+            </div>
+          </td>
+          <td>
+            <div class="retention-info">
+              <p class="retention-percentage">{{ measurement.financial.retention_percentage }}%</p>
+              <p class="retention-amount">{{ formatCurrency(measurement.financial.retention_amount) }}</p>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusInfo(measurement.status).class">
+              {{ getStatusInfo(measurement.status).icon }} {{ getStatusInfo(measurement.status).label }}
+            </span>
+          </td>
+          <td class="text-right">
+            <div class="measurement-actions">
+              <button class="action-btn" (click)="viewDetails(measurement)" title="Ver detalhes">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              </button>
+              <button 
+                *ngIf="measurement.status === 'draft'"
+                class="action-btn" 
+                (click)="editMeasurement(measurement)" 
+                title="Editar"
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginação -->
+  <div *ngIf="!loading && measurements.length > 0" class="pagination">
+    <div class="pagination-info">
+      Mostrando {{ measurements.length }} de {{ totalMeasurements }} autos
+    </div>
+    <div class="pagination-controls">
+      <button 
+        (click)="goToPage(currentPage - 1)" 
+        [disabled]="currentPage === 1"
+        class="pagination-btn"
+      >
+        ← Anterior
+      </button>
+      
+      <div class="pagination-pages">
+        <button 
+          *ngFor="let page of [].constructor(totalPages); let i = index" 
+          (click)="goToPage(i + 1)"
+          [class.active]="currentPage === i + 1"
+          class="pagination-page"
+        >
+          {{ i + 1 }}
+        </button>
+      </div>
+
+      <button 
+        (click)="goToPage(currentPage + 1)" 
+        [disabled]="currentPage === totalPages"
+        class="pagination-btn"
+      >
+        Próxima →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalhes -->
+<app-measurement-detail
+  *ngIf="showDetailModal && selectedMeasurement"
+  [measurement]="selectedMeasurement"
+  (close)="closeDetailModal()"
+  (refresh)="loadMeasurements()">
+</app-measurement-detail>
+
+<!-- Modal de Formulário -->
+<div *ngIf="showFormModal" class="modal-overlay" (click)="closeFormModal()">
+  <div class="modal-content modal-content--xlarge" (click)="$event.stopPropagation()">
+    <app-measurement-form 
+      [measurement]="editingMeasurement"
+      (close)="closeFormModal()"
+      (saved)="onMeasurementSaved()">
+    </app-measurement-form>
+  </div>
+</div>

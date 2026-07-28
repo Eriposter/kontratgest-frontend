@@ -2,12 +2,13 @@ import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContractService, Contract } from '../../../core/services/contract.service';
 import { ContractProgressComponent } from '../contract-progress/contract-progress';
+import { DocumentUploaderComponent } from '../../../shared/components/document-uploader/document-uploader';
 
 
 @Component({
   selector: 'app-contract-detail',
   standalone: true,
-  imports: [CommonModule, ContractProgressComponent],
+  imports: [CommonModule, ContractProgressComponent, DocumentUploaderComponent],
   templateUrl: './contract-detail.html',
   styleUrls: ['./contract-detail.scss']
 })

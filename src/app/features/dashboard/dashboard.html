@@ -28,7 +28,7 @@
   <ng-container *ngIf="overview && !loading">
     
     <!-- Hero Section -->
-    <div class="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-purple-800 rounded-2xl p-8 text-white shadow-xl">
+    <div class="relative overflow-hidden bg-gradient-to-br from-[#000] via-[#000] to-[#000] rounded-2xl p-8 text-white shadow-xl">
       <div class="absolute inset-0 opacity-10">
         <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -46,7 +46,7 @@
             <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
             Sistema Operacional
           </div>
-          <h1 class="text-3xl font-bold tracking-tight">{{ getGreeting() }}, {{ user?.name?.split(' ')[0] }} 👋</h1>
+          <h1 class="text-3xl font-bold tracking-tight">{{ getGreeting() }}, {{ user?.name?.split(' ')[0] }}</h1>
           <p class="text-primary-100 mt-2 text-base">Aqui está o resumo atualizado do teu sistema.</p>
         </div>
         

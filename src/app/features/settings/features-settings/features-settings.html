@@ -1,0 +1,105 @@
+<div class="features-section">
+  
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>A carregar funcionalidades...</p>
+  </div>
+
+  <div *ngIf="!loading && company" class="features-content">
+    
+    <!-- Messages -->
+    <div *ngIf="successMessage" class="message message--success">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="message message--error">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Header com estatísticas -->
+    <div class="features-header-card">
+      <div class="header-stats">
+        <div class="stat">
+          <p class="stat-value">{{ getActiveCount() }}</p>
+          <p class="stat-label">Funcionalidades Ativas</p>
+        </div>
+        <div class="stat">
+          <p class="stat-value">{{ allFeatures.length - getActiveCount() }}</p>
+          <p class="stat-label">Disponíveis</p>
+        </div>
+      </div>
+      <div class="header-info">
+        <h2>Funcionalidades do Sistema</h2>
+        <p>Ative ou desative módulos conforme as necessidades da sua organização. As alterações têm efeito imediato.</p>
+      </div>
+    </div>
+
+    <!-- Funcionalidades para Empresas Públicas -->
+    <div class="features-category">
+      <div class="category-header">
+        <div class="category-icon">🏛️</div>
+        <div>
+          <h3>Setor Público</h3>
+          <p>Funcionalidades específicas para empresas públicas angolanas</p>
+        </div>
+      </div>
+
+      <div class="features-grid">
+        <div 
+          *ngFor="let feature of getFeaturesByCategory('public')"
+          class="feature-card"
+          [class.enabled]="isFeatureEnabled(feature.code)"
+        >
+          <div class="feature-icon">{{ feature.icon }}</div>
+          <div class="feature-content">
+            <h4>{{ feature.name }}</h4>
+            <p>{{ feature.description }}</p>
+          </div>
+          <label class="toggle-switch">
+            <input 
+              type="checkbox" 
+              [checked]="isFeatureEnabled(feature.code)"
+              (change)="toggleFeature(feature.code)"
+              [disabled]="saving"
+            >
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Funcionalidades para Empresas Privadas -->
+    <div class="features-category">
+      <div class="category-header">
+        <div class="category-icon">🏢</div>
+        <div>
+          <h3>Setor Privado</h3>
+          <p>Funcionalidades para empresas privadas</p>
+        </div>
+      </div>
+
+      <div class="features-grid">
+        <div 
+          *ngFor="let feature of getFeaturesByCategory('private')"
+          class="feature-card"
+          [class.enabled]="isFeatureEnabled(feature.code)"
+        >
+          <div class="feature-icon">{{ feature.icon }}</div>
+          <div class="feature-content">
+            <h4>{{ feature.name }}</h4>
+            <p>{{ feature.description }}</p>
+          </div>
+          <label class="toggle-switch">
+            <input 
+              type="checkbox" 
+              [checked]="isFeatureEnabled(feature.code)"
+              (change)="toggleFeature(feature.code)"
+              [disabled]="saving"
+            >
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
