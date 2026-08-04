@@ -8,7 +8,7 @@
           <span class="detail-number">{{ guarantee.guarantee_number }}</span>
           <h2 class="detail-title">{{ guarantee.type.label }} - {{ guarantee.purpose.label }}</h2>
           <span class="status-badge" [ngClass]="getStatusInfo(guarantee.status).class">
-            {{ getStatusInfo(guarantee.status).icon }} {{ getStatusInfo(guarantee.status).label }}
+            {{ getStatusInfo(guarantee.status).label }}
           </span>
         </div>
         <button class="close-btn" (click)="close.emit()">×</button>
@@ -72,7 +72,7 @@
       </button>
 
       <button (click)="activeTab = 'documents'" [class.active]="activeTab === 'documents'" class="tab-btn">
-        📎 Documentos
+        Documentos
       </button>
     </div>
 
@@ -229,7 +229,6 @@
       <div *ngIf="activeTab === 'timeline'" class="tab-content">
         <div class="timeline">
           <div class="timeline-item">
-            <div class="timeline-icon timeline-icon--created">📝</div>
             <div class="timeline-content">
               <p class="timeline-title">Caução Criada</p>
               <p class="timeline-date">{{ guarantee.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
@@ -237,7 +236,6 @@
           </div>
 
           <div *ngIf="guarantee.status === 'released'" class="timeline-item">
-            <div class="timeline-icon timeline-icon--released">✅</div>
             <div class="timeline-content">
               <p class="timeline-title">Caução Libertada</p>
               <p class="timeline-date">{{ guarantee.release_date | date:'dd/MM/yyyy' }}</p>
@@ -248,7 +246,6 @@
           </div>
 
           <div *ngIf="guarantee.status === 'executed'" class="timeline-item">
-            <div class="timeline-icon timeline-icon--executed">⚡</div>
             <div class="timeline-content">
               <p class="timeline-title">Caução Executada</p>
               <p class="timeline-date">{{ guarantee.execution_date | date:'dd/MM/yyyy' }}</p>
@@ -262,7 +259,6 @@
           </div>
 
           <div *ngIf="guarantee.dates.is_expired && guarantee.status === 'active'" class="timeline-item">
-            <div class="timeline-icon timeline-icon--expired">⏰</div>
             <div class="timeline-content">
               <p class="timeline-title">Caução Expirada</p>
               <p class="timeline-date">{{ guarantee.dates.expiry | date:'dd/MM/yyyy' }}</p>

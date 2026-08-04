@@ -845,3 +845,451 @@
     grid-template-columns: 1fr;
   }
 }
+
+// ─── Modal Grande ──────────────────────────────────────────
+.modal-content--large {
+  max-width: 800px;
+}
+
+// ─── Preview da Necessidade ────────────────────────────────
+.need-preview {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1.5px solid #86efac;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.need-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.need-plan-badge {
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  color: white;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.need-priority {
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.priority--high { background: #fee2e2; color: #991b1b; }
+  &.priority--medium { background: #fef3c7; color: #92400e; }
+  &.priority--low { background: #f1f5f9; color: #475569; }
+}
+
+.need-preview-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 0.5rem;
+}
+
+.need-preview-description {
+  font-size: 0.85rem;
+  color: #047857;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.need-preview-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #bbf7d0;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.meta-label {
+  font-size: 0.7rem;
+  color: #047857;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.meta-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #065f46;
+
+  &.amount {
+    font-family: 'Courier New', monospace;
+    color: #059669;
+  }
+}
+
+// ─── Formulário de Contrato ────────────────────────────────
+.contract-form-section {
+  margin-top: 1rem;
+}
+
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1.5px solid #e2e8f0;
+}
+
+.form-row {
+  margin-bottom: 1rem;
+
+  &.two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  &.three-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+.form-group {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.form-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #0f172a;
+  transition: all 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  }
+
+  &:disabled {
+    background: #f8fafc;
+    color: #64748b;
+    cursor: not-allowed;
+  }
+}
+
+.form-textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+// ─── Resumo Financeiro ─────────────────────────────────────
+.financial-summary {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 1.5rem 0;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+
+  &:last-child { border-bottom: none; }
+
+  &--total {
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    font-weight: 700;
+    font-size: 1rem;
+  }
+}
+
+.summary-value {
+  font-weight: 700;
+  color: #0f172a;
+  font-family: 'Courier New', monospace;
+
+  &.positive { color: #059669; }
+  &.negative { color: #dc2626; }
+}
+
+// ─── Alerta Informativo ────────────────────────────────────
+.info-alert {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  margin-top: 1rem;
+}
+
+.info-icon {
+  width: 20px;
+  height: 20px;
+  color: #1e40af;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.alert-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin-bottom: 0.5rem;
+}
+
+.alert-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.8rem;
+  color: #1e40af;
+  line-height: 1.6;
+
+  li {
+    margin-bottom: 0.25rem;
+  }
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-row.two-cols,
+  .form-row.three-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Secção de Valor ───────────────────────────────────────
+.amount-section {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: #fef3c7;
+  border: 1.5px solid #fde68a;
+  border-radius: 12px;
+}
+
+.amount-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.toggle-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #f59e0b;
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+  }
+
+  input[type="radio"] {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    accent-color: #f59e0b;
+    cursor: pointer;
+  }
+}
+
+.toggle-label-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+
+  small {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #64748b;
+    font-family: 'Courier New', monospace;
+  }
+}
+
+.custom-amount-input {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #fde68a;
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.amount-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.2s;
+
+  &:focus-within {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+  }
+}
+
+.currency-prefix {
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-right: 1.5px solid #e2e8f0;
+}
+
+.amount-input {
+  flex: 1;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 1.1rem;
+
+  &:focus {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
+// ─── Comparação de Valores ─────────────────────────────────
+.amount-comparison {
+  margin-top: 1rem;
+}
+
+.comparison-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 10px;
+  animation: slideDown 0.3s ease-out;
+
+  &.comparison--lower {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border: 1px solid #6ee7b7;
+  }
+
+  &.comparison--higher {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 1px solid #fca5a5;
+  }
+}
+
+.comparison-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.comparison-text {
+  flex: 1;
+}
+
+.comparison-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #065f46;
+  margin-bottom: 0.25rem;
+
+  .comparison--higher & {
+    color: #991b1b;
+  }
+}
+
+.comparison-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-family: 'Courier New', monospace;
+  color: #065f46;
+
+  .comparison--higher & {
+    color: #991b1b;
+  }
+}
+
+.comparison-percentage {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  opacity: 0.8;
+}

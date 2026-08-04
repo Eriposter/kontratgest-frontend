@@ -8,7 +8,7 @@
           <span class="detail-number">{{ contract.contract_number }}</span>
           <h2 class="detail-title">{{ contract.title }}</h2>
           <span class="status-badge" [ngClass]="getStatusInfo(contract.status).class">
-            {{ getStatusInfo(contract.status).icon }} {{ getStatusInfo(contract.status).label }}
+            {{ getStatusInfo(contract.status).label }}
           </span>
         </div>
         <div class="header-actions">
@@ -81,7 +81,7 @@
         [class.active]="activeTab === 'documents'"
         class="tab-btn"
       >
-        📎 Documentos
+        Documentos
       </button>
     </div>
 

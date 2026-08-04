@@ -158,7 +158,7 @@
           </td>
           <td>
             <span class="status-badge" [ngClass]="getStatusInfo(contract.status).class">
-              {{ getStatusInfo(contract.status).icon }} {{ getStatusInfo(contract.status).label }}
+              {{ getStatusInfo(contract.status).label }}
             </span>
           </td>
           <td class="text-right">
@@ -225,7 +225,7 @@
   (refresh)="loadContracts()">
         <!-- 🆕 DOCUMENTOS -->
       <div class="detail-section">
-        <h3>📎 Documentos do Contrato</h3>
+        <h3>Documentos do Contrato</h3>
         <app-document-uploader 
           entityType="contract"
           [entityId]="selectedContract.id"

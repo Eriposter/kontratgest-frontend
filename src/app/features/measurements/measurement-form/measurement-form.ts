@@ -232,56 +232,76 @@ export class MeasurementFormComponent implements OnInit, AfterViewInit {
 
   // Submit
   onSubmit(): void {
-    if (!this.isFormValid()) {
-      this.errorMessage = 'Por favor, preencha todos os campos obrigatórios corretamente';
-      
-      // Find first invalid step and go to it
-      if (this.formData.items.length === 0 || this.getInvalidItemsCount() > 0) {
-        this.currentStep = 2;
-      } else if (!this.isValidPeriod()) {
-        this.currentStep = 1;
-      }
-      
-      this.scrollToTop();
-      return;
-    }
-
-    this.isSaving = true;
-    this.errorMessage = '';
-
-    const payload = {
+  console.log('🔵 onSubmit chamado!');  // ← DEBUG
+  
+  if (!this.isFormValid()) {
+    console.log('❌ Formulário inválido:', {
       contract_id: this.formData.contract_id,
       period_start: this.formData.period_start,
       period_end: this.formData.period_end,
-      observations: this.formData.observations || '',
-      retention_percentage: this.formData.retention_percentage,
-      items: this.formData.items
-        .filter(item => this.isItemValid(item))
-        .map(item => ({
-          item_code: item.item_code || '',
-          description: item.description,
-          unit: item.unit || 'un',
-          quantity: item.quantity,
-          unit_price: item.unit_price
-        }))
-    };
-
-    const operation = this.isEdit && this.measurement
-      ? this.measurementService.update(this.measurement.id, payload)
-      : this.measurementService.create(payload);
-
-    operation.subscribe({
-      next: (response) => {
-        this.isSaving = false;
-        this.saved.emit(response.data);
-      },
-      error: (err) => {
-        this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Erro ao guardar auto de medição';
-        this.scrollToTop();
-      }
+      items: this.formData.items.length,
+      invalidItems: this.getInvalidItemsCount()
     });
+    
+    this.errorMessage = 'Por favor, preencha todos os campos obrigatórios corretamente.';
+    
+    if (this.formData.items.length === 0 || this.getInvalidItemsCount() > 0) {
+      this.currentStep = 2;
+    } else if (!this.isValidPeriod() || !this.formData.contract_id) {
+      this.currentStep = 1;
+    }
+    
+    this.scrollToTop();
+    
+    setTimeout(() => {
+      this.errorMessage = '';
+    }, 5000);
+    
+    return;
   }
+
+  console.log('✅ Formulário válido, a enviar...');
+  this.isSaving = true;
+  this.errorMessage = '';
+
+  const payload = {
+    contract_id: this.formData.contract_id,
+    period_start: this.formData.period_start,
+    period_end: this.formData.period_end,
+    observations: this.formData.observations || '',
+    retention_percentage: this.formData.retention_percentage,
+    total_amount: this.getTotalAmount(),
+    items: this.formData.items
+      .filter(item => this.isItemValid(item))
+      .map(item => ({
+        item_code: item.item_code || '',
+        description: item.description,
+        unit: item.unit || 'un',
+        quantity: Number(item.quantity),
+        unit_price: Number(item.unit_price)
+      }))
+  };
+
+  console.log('📦 Payload:', payload);  // ← DEBUG
+
+  const operation = this.isEdit && this.measurement
+    ? this.measurementService.update(this.measurement.id, payload)
+    : this.measurementService.create(payload);
+
+  operation.subscribe({
+    next: (response) => {
+      console.log('✅ Resposta do servidor:', response);  // ← DEBUG
+      this.isSaving = false;
+      this.saved.emit(response.data || response);
+    },
+    error: (err) => {
+      console.error('❌ Erro:', err);  // ← DEBUG
+      this.isSaving = false;
+      this.errorMessage = err.error?.message || 'Erro ao guardar auto de medição. Verifique os dados.';
+      this.scrollToTop();
+    }
+  });
+}
 
   // Utility methods
   formatCurrency(value: number): string {

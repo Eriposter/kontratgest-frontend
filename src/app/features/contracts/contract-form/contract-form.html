@@ -39,6 +39,58 @@
 
   <!-- Form Content -->
   <form (ngSubmit)="onSubmit()" class="form-content">
+
+    <!-- Adicionar no início do formulário, antes dos dados básicos -->
+<div class="pac-selection-section">
+  <div class="pac-toggle">
+    <label class="toggle-label">
+      <input 
+        type="checkbox" 
+        [checked]="fromPAC"
+        (change)="toggleFromPAC()"
+      >
+      <span>Este contrato vem de uma necessidade do PAC?</span>
+    </label>
+  </div>
+
+  <div *ngIf="fromPAC" class="pac-needs-selector">
+    <div *ngIf="loadingNeeds" class="loading-needs">
+      <div class="spinner-small"></div>
+      <p>A carregar necessidades disponíveis...</p>
+    </div>
+
+    <div *ngIf="!loadingNeeds && availableNeeds.length === 0" class="no-needs">
+      <p>Nenhuma necessidade disponível do PAC</p>
+      <p class="hint">Cria primeiro uma necessidade no módulo PAC</p>
+    </div>
+
+    <div *ngIf="!loadingNeeds && availableNeeds.length > 0" class="needs-list">
+      <label>Selecionar Necessidade do PAC *</label>
+      <div 
+        *ngFor="let need of availableNeeds"
+        class="need-option"
+        [class.selected]="selectedNeed?.id === need.id"
+        (click)="selectNeed(need)"
+      >
+        <div class="need-header">
+          <span class="need-plan-badge">{{ need.plan_year }}</span>
+          <span class="need-priority" [ngClass]="'priority--' + need.priority">
+            {{ need.priority_label }}
+          </span>
+        </div>
+        <h4 class="need-title">{{ need.title }}</h4>
+        <p class="need-description" *ngIf="need.description">{{ need.description }}</p>
+        <div class="need-meta">
+          <span class="need-type">{{ need.contract_type_label }}</span>
+          <span class="need-procedure">{{ need.procedure_type_label }}</span>
+          <span class="need-amount">{{ need.estimated_amount | number:'1.0-0' }} AOA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Resto do formulário existente... -->
     
     <!-- Step 1: Identificação -->
     <div *ngIf="currentStep === 1" class="form-step">
@@ -63,7 +115,7 @@
           <label>Tipo de Contrato *</label>
           <select [(ngModel)]="formData.contract_type_id" name="contract_type_id" required class="form-select">
             <option value="">Selecionar tipo...</option>
-            <option *ngFor="let type of contractTypes" [value]="type.code">{{ type.name }}</option>
+            <option *ngFor="let type of contractTypes" [value]="type.id">{{ type.name }}</option>
           </select>
         </div>
 

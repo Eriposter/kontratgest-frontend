@@ -348,10 +348,15 @@
         Próximo →
       </button>
       
-      <button type="submit" *ngIf="currentStep === totalSteps" [disabled]="isSaving || !isFormValid()" class="btn-primary">
-        <span *ngIf="!isSaving">{{ isEdit ? 'Atualizar' : 'Criar' }} Auto de Medição</span>
-        <span *ngIf="isSaving">A guardar...</span>
-      </button>
+      <button 
+  type="submit" 
+  *ngIf="currentStep === totalSteps" 
+  [disabled]="isSaving" 
+  class="btn-primary"
+  (click)="onSubmit()">  <!-- ← ADICIONAR ESTE -->
+  <span *ngIf="!isSaving">{{ isEdit ? 'Atualizar' : 'Criar' }} Auto de Medição</span>
+  <span *ngIf="isSaving">A guardar...</span>
+</button>
     </div>
   </div>
 </div>

@@ -8,7 +8,7 @@
           <span class="detail-number">{{ payment.payment_number }}</span>
           <h2 class="detail-title">{{ payment.payment_type_label }}</h2>
           <span class="status-badge" [ngClass]="getStatusInfo(payment.status).class">
-            {{ getStatusInfo(payment.status).icon }} {{ getStatusInfo(payment.status).label }}
+            {{ getStatusInfo(payment.status).label }}
           </span>
         </div>
         <button class="close-btn" (click)="close.emit()">×</button>
@@ -190,7 +190,6 @@
       <div *ngIf="activeTab === 'timeline'" class="tab-content">
         <div class="timeline">
           <div class="timeline-item">
-            <div class="timeline-icon timeline-icon--created">📝</div>
             <div class="timeline-content">
               <p class="timeline-title">Pagamento Criado</p>
               <p class="timeline-date">{{ payment.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
@@ -198,15 +197,6 @@
           </div>
 
           <div *ngIf="payment.status !== 'pending'" class="timeline-item">
-            <div class="timeline-icon" [ngClass]="{
-              'timeline-icon--approved': payment.status === 'approved' || payment.status === 'paid',
-              'timeline-icon--rejected': payment.status === 'rejected',
-              'timeline-icon--cancelled': payment.status === 'cancelled'
-            }">
-              <span *ngIf="payment.status === 'approved' || payment.status === 'paid'">✅</span>
-              <span *ngIf="payment.status === 'rejected'">❌</span>
-              <span *ngIf="payment.status === 'cancelled'">🚫</span>
-            </div>
             <div class="timeline-content">
               <p class="timeline-title">
                 {{ payment.status === 'approved' || payment.status === 'paid' ? 'Aprovado' : 
@@ -217,7 +207,6 @@
           </div>
 
           <div *ngIf="payment.status === 'paid'" class="timeline-item">
-            <div class="timeline-icon timeline-icon--paid">💰</div>
             <div class="timeline-content">
               <p class="timeline-title">Pagamento Efetuado</p>
               <p class="timeline-date">{{ payment.dates.payment | date:'dd/MM/yyyy' }}</p>

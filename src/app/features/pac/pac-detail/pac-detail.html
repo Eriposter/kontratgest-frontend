@@ -1,6 +1,6 @@
 <div class="detail-overlay" (click)="close.emit()">
   <div class="detail-container" (click)="$event.stopPropagation()">
-    
+
     <!-- Header -->
     <div class="detail-header">
       <div class="detail-header-top">
@@ -23,11 +23,8 @@
           </span>
         </div>
         <div class="execution-bar">
-          <div 
-            class="execution-fill" 
-            [style.width.%]="plan.financial.execution_percentage"
-            [ngClass]="getExecutionClass()"
-          ></div>
+          <div class="execution-fill" [style.width.%]="plan.financial.execution_percentage"
+            [ngClass]="getExecutionClass()"></div>
         </div>
         <div class="execution-values">
           <span>Planeado: {{ formatCurrency(plan.financial.total_planned) }}</span>
@@ -62,7 +59,7 @@
 
     <!-- Tab Content -->
     <div class="detail-body">
-      
+
       <!-- Overview Tab -->
       <div *ngIf="activeTab === 'overview'" class="tab-content">
         <div class="info-grid">
@@ -125,11 +122,8 @@
       <div *ngIf="activeTab === 'needs'" class="tab-content">
         <div class="needs-header">
           <h3>Necessidades de Contratação</h3>
-          <button 
-            *ngIf="plan.status === 'draft' || plan.status === 'approved'"
-            (click)="openAddNeedModal()" 
-            class="btn-primary btn-small"
-          >
+          <button *ngIf="plan.status === 'draft' || plan.status === 'approved'" (click)="openAddNeedModal()"
+            class="btn-primary btn-small">
             + Adicionar Necessidade
           </button>
         </div>
@@ -184,12 +178,8 @@
               <button (click)="editNeed(need)" class="action-btn" title="Editar">
                 ✏️
               </button>
-              <button 
-                *ngIf="need.status === 'planned' && !need.contract"
-                (click)="openGenerateContractModal(need)" 
-                class="action-btn action-btn--success" 
-                title="Gerar Contrato"
-              >
+              <button *ngIf="need.status === 'planned' && !need.contract" (click)="openGenerateContractModal(need)"
+                class="action-btn action-btn--success" title="Gerar Contrato">
                 📄
               </button>
               <button (click)="deleteNeed(need)" class="action-btn action-btn--danger" title="Eliminar">
@@ -201,11 +191,8 @@
 
         <div *ngIf="!plan.needs || plan.needs.length === 0" class="empty-tab">
           <p>Nenhuma necessidade adicionada</p>
-          <button 
-            *ngIf="plan.status === 'draft' || plan.status === 'approved'"
-            (click)="openAddNeedModal()" 
-            class="btn-primary"
-          >
+          <button *ngIf="plan.status === 'draft' || plan.status === 'approved'" (click)="openAddNeedModal()"
+            class="btn-primary">
             Adicionar Primeira Necessidade
           </button>
         </div>
@@ -267,30 +254,16 @@
     <!-- Footer com Ações -->
     <div class="detail-footer">
       <button class="btn-secondary" (click)="close.emit()">Fechar</button>
-      
+
       <div class="footer-actions">
-        <button 
-          *ngIf="plan.status === 'draft'" 
-          (click)="submitPlan()" 
-          [disabled]="isLoading" 
-          class="btn-primary"
-        >
+        <button *ngIf="plan.status === 'draft'" (click)="submitPlan()" [disabled]="isLoading" class="btn-primary">
           Submeter para Aprovação
         </button>
-        <button 
-          *ngIf="plan.status === 'submitted'" 
-          (click)="approvePlan()" 
-          [disabled]="isLoading" 
-          class="btn-success"
-        >
+        <button *ngIf="plan.status === 'submitted'" (click)="approvePlan()" [disabled]="isLoading" class="btn-success">
           Aprovar Plano
         </button>
-        <button 
-          *ngIf="plan.status === 'draft' || plan.status === 'submitted'" 
-          (click)="cancelPlan()" 
-          [disabled]="isLoading" 
-          class="btn-danger"
-        >
+        <button *ngIf="plan.status === 'draft' || plan.status === 'submitted'" (click)="cancelPlan()"
+          [disabled]="isLoading" class="btn-danger">
           Cancelar
         </button>
       </div>
@@ -309,12 +282,8 @@
     <div class="modal-body">
       <div class="form-group">
         <label>Título *</label>
-        <input 
-          type="text" 
-          [(ngModel)]="needFormData.title" 
-          class="form-input"
-          placeholder="Ex: Reabilitação da Rede de Distribuição"
-        >
+        <input type="text" [(ngModel)]="needFormData.title" class="form-input"
+          placeholder="Ex: Reabilitação da Rede de Distribuição">
       </div>
 
       <div class="form-row two-cols">
@@ -335,35 +304,21 @@
 
       <div class="form-group">
         <label>Descrição</label>
-        <textarea 
-          [(ngModel)]="needFormData.description" 
-          rows="3" 
-          class="form-textarea"
-          placeholder="Descrição detalhada da necessidade..."
-        ></textarea>
+        <textarea [(ngModel)]="needFormData.description" rows="3" class="form-textarea"
+          placeholder="Descrição detalhada da necessidade..."></textarea>
       </div>
 
       <div class="form-group">
         <label>Justificação</label>
-        <textarea 
-          [(ngModel)]="needFormData.justification" 
-          rows="2" 
-          class="form-textarea"
-          placeholder="Porque é necessária esta contratação?"
-        ></textarea>
+        <textarea [(ngModel)]="needFormData.justification" rows="2" class="form-textarea"
+          placeholder="Porque é necessária esta contratação?"></textarea>
       </div>
 
       <div class="form-row three-cols">
         <div class="form-group">
           <label>Valor Estimado (AOA) *</label>
-          <input 
-            type="number" 
-            [(ngModel)]="needFormData.estimated_amount" 
-            min="0"
-            step="0.01"
-            class="form-input"
-            placeholder="0.00"
-          >
+          <input type="number" [(ngModel)]="needFormData.estimated_amount" min="0" step="0.01" class="form-input"
+            placeholder="0.00">
         </div>
 
         <div class="form-group">
@@ -397,25 +352,298 @@
 
 <!-- Modal de Gerar Contrato -->
 <div *ngIf="showGenerateContractModal && selectedNeed" class="modal-overlay" (click)="closeGenerateContractModal()">
-  <div class="modal-content modal-content--medium" (click)="$event.stopPropagation()">
+  <div class="modal-content modal-content--large" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
     <div class="modal-header">
-      <h2>Gerar Contrato</h2>
+      <div>
+        <h2>Gerar Contrato a partir do PAC</h2>
+        <p>Criar contrato baseado nesta necessidade do Plano Anual de Contratação</p>
+      </div>
       <button class="close-btn" (click)="closeGenerateContractModal()">×</button>
     </div>
 
-    <div class="modal-body">
-      <div class="alert alert--info">
-        <p>Vai criar um contrato baseado nesta necessidade do PAC:</p>
-        <p class="alert-title">{{ selectedNeed.title }}</p>
-        <p>Valor estimado: {{ formatCurrency(selectedNeed.estimated_amount) }}</p>
-      </div>
-      <p>Esta funcionalidade será implementada na próxima fase, permitindo pré-preencher o formulário de contrato com os dados da necessidade.</p>
+    <!-- Error Message -->
+    <div *ngIf="actionError" class="action-message action-message--error">
+      {{ actionError }}
     </div>
 
+    <!-- Body -->
+    <div class="modal-body">
+
+      <!-- Info da Necessidade (pré-preenchido) -->
+      <div class="need-preview">
+        <div class="need-preview-header">
+          <span class="need-plan-badge">{{ plan.year }}</span>
+          <span class="need-priority" [ngClass]="'priority--' + selectedNeed.priority">
+            {{ selectedNeed.priority_label }}
+          </span>
+        </div>
+        <h3 class="need-preview-title">{{ selectedNeed.title }}</h3>
+        <p class="need-preview-description" *ngIf="selectedNeed.description">
+          {{ selectedNeed.description }}
+        </p>
+        <div class="need-preview-meta">
+          <div class="meta-item">
+            <span class="meta-label">Tipo de Contrato</span>
+            <span class="meta-value">{{ selectedNeed.contract_type_label }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Procedimento</span>
+            <span class="meta-value">{{ selectedNeed.procedure_type_label }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Valor Estimado</span>
+            <span class="meta-value amount">{{ formatCurrency(selectedNeed.estimated_amount) }}</span>
+          </div>
+          <div class="meta-item" *ngIf="selectedNeed.planned_quarter">
+            <span class="meta-label">Trimestre Previsto</span>
+            <span class="meta-value">Q{{ selectedNeed.planned_quarter }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulário de Contrato -->
+      <div class="contract-form-section">
+        <h3 class="section-title">Dados do Contrato</h3>
+
+        <!-- Contraparte -->
+        <div class="form-group">
+          <label>Contraparte (Fornecedor/Empreiteiro) *</label>
+          <select 
+            [(ngModel)]="contractFormData.counterparty_id" 
+            class="form-select"
+            [disabled]="loadingEntities"
+          >
+            <option value="">Selecionar contraparte...</option>
+            <option *ngFor="let entity of entities" [value]="entity.id">
+              {{ entity.identification.name }} (NIF: {{ entity.identification.nif }})
+            </option>
+          </select>
+        </div>
+
+                <!-- Tipo de Contrato -->
+        <div class="form-group">
+  <label>Tipo de Contrato *</label>
+    <select [(ngModel)]="contractFormData.contract_type_id" 
+      (change)="onContractTypeChange($any($event.target).value)"
+          class="form-select">
+    <option value="">Selecionar...</option>
+    <option *ngFor="let type of contractTypes" [value]="type.id">
+      {{ type.name }}
+    </option>
+  </select>
+</div>
+
+<div class="form-group" *ngIf="showSpecificationField">
+  <label>Especificar Tipo de Contrato *</label>
+  <input type="text" 
+         [(ngModel)]="contractFormData.contract_type_specification"
+         class="form-input"
+         placeholder="Descreva o tipo de contrato...">
+</div>
+
+        <!-- 🆕 VALOR DO CONTRATO (EDITÁVEL) -->
+        <div class="amount-section">
+          <h3 class="section-title">Valor do Contrato</h3>
+
+          <div class="amount-toggle">
+            <label class="toggle-option" [class.active]="contractFormData.use_estimated_amount">
+              <input type="radio" name="amountSource" [checked]="contractFormData.use_estimated_amount"
+                (change)="toggleEstimatedAmount()">
+              <span class="toggle-label-text">
+                Usar valor estimado do PAC
+                <small>({{ formatCurrency(selectedNeed.estimated_amount) }})</small>
+              </span>
+            </label>
+
+            <label class="toggle-option" [class.active]="!contractFormData.use_estimated_amount">
+              <input type="radio" name="amountSource" [checked]="!contractFormData.use_estimated_amount"
+                (change)="toggleEstimatedAmount()">
+              <span class="toggle-label-text">
+                Inserir valor real da adjudicação
+                <small>(ex: valor da proposta vencedora)</small>
+              </span>
+            </label>
+          </div>
+
+          <div *ngIf="!contractFormData.use_estimated_amount" class="custom-amount-input">
+            <label>Valor Real do Contrato (AOA) *</label>
+            <div class="amount-input-wrapper">
+              <span class="currency-prefix">Kz</span>
+              <input type="number" [(ngModel)]="contractFormData.total_amount" min="0" step="0.01"
+                class="form-input amount-input" placeholder="0.00">
+            </div>
+
+            <!-- Comparação com o estimado -->
+            <div class="amount-comparison" *ngIf="contractFormData.total_amount !== selectedNeed.estimated_amount">
+              <div class="comparison-info" [ngClass]="{
+              'comparison--lower': contractFormData.total_amount < selectedNeed.estimated_amount,
+              'comparison--higher': contractFormData.total_amount > selectedNeed.estimated_amount
+            }">
+                <span class="comparison-icon">
+                  {{ contractFormData.total_amount < selectedNeed.estimated_amount ? '📉' : '📈' }} </span>
+                    <div class="comparison-text">
+                      <p class="comparison-title">
+                        {{ contractFormData.total_amount < selectedNeed.estimated_amount ? 'Economia de'
+                          : 'Acima do estimado' }}: </p>
+                          <p class="comparison-value">
+                            {{ formatCurrency(Math.abs(contractFormData.total_amount - selectedNeed.estimated_amount))
+                            }}
+                            <span class="comparison-percentage">
+                              ({{ ((contractFormData.total_amount - selectedNeed.estimated_amount) /
+                              selectedNeed.estimated_amount * 100) | number:'1.1-1' }}%)
+                            </span>
+                          </p>
+                    </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumo Financeiro (atualizado para usar o valor editado) -->
+        <div class="financial-summary">
+          <div class="summary-row">
+            <span>Valor do Contrato</span>
+            <span class="summary-value">
+              {{ formatCurrency(contractFormData.total_amount) }}
+            </span>
+          </div>
+          <div class="summary-row">
+            <span>IVA ({{ contractFormData.vat_rate }}%)</span>
+            <span class="summary-value positive">
+              + {{ formatCurrency(contractFormData.total_amount * (contractFormData.vat_rate / 100)) }}
+            </span>
+          </div>
+          <div class="summary-row">
+            <span>Retenção na Fonte ({{ contractFormData.withholding_tax_rate }}%)</span>
+            <span class="summary-value negative">
+              - {{ formatCurrency(contractFormData.total_amount * (contractFormData.withholding_tax_rate / 100)) }}
+            </span>
+          </div>
+          <div class="summary-row summary-row--total">
+            <span>Valor Líquido Estimado</span>
+            <span class="summary-value">
+              {{ formatCurrency(
+              contractFormData.total_amount +
+              (contractFormData.total_amount * (contractFormData.vat_rate / 100)) -
+              (contractFormData.total_amount * (contractFormData.withholding_tax_rate / 100))
+              ) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Datas -->
+        <div class="form-row three-cols">
+          <div class="form-group">
+            <label>Data de Início *</label>
+            <input type="date" [(ngModel)]="contractFormData.start_date" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label>Data de Fim *</label>
+            <input type="date" [(ngModel)]="contractFormData.end_date" class="form-input"
+              [min]="contractFormData.start_date">
+          </div>
+
+          <div class="form-group">
+            <label>Data de Assinatura</label>
+            <input type="date" [(ngModel)]="contractFormData.signature_date" class="form-input">
+          </div>
+        </div>
+
+        <!-- Impostos -->
+        <div class="form-row two-cols">
+          <div class="form-group">
+            <label>Taxa de IVA (%)</label>
+            <input type="number" [(ngModel)]="contractFormData.vat_rate" min="0" max="100" step="0.01"
+              class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label>Retenção na Fonte (%)</label>
+            <input type="number" [(ngModel)]="contractFormData.withholding_tax_rate" min="0" max="100" step="0.01"
+              class="form-input">
+          </div>
+        </div>
+
+        <!-- Modelo de Pagamento -->
+        <div class="form-group" [class.has-error]="!contractFormData.payment_model">
+  <label>Modelo de Pagamento *</label>
+  <select [(ngModel)]="contractFormData.payment_model" class="form-select" required>
+    <option value="">Selecionar...</option>
+    <option *ngFor="let model of paymentModels" [value]="model.value">
+      {{ model.label }}
+    </option>
+  </select>
+  <small class="error-text" *ngIf="!contractFormData.payment_model">Campo obrigatório</small>
+</div>
+
+        <!-- Notas -->
+        <div class="form-group">
+          <label>Notas Adicionais</label>
+          <textarea [(ngModel)]="contractFormData.notes" rows="3" class="form-textarea"
+            placeholder="Observações sobre o contrato..."></textarea>
+        </div>
+
+        <!-- Resumo Financeiro -->
+        <div class="financial-summary">
+          <div class="summary-row">
+            <span>Valor do Contrato (estimado)</span>
+            <span class="summary-value">
+              {{ formatCurrency(selectedNeed.estimated_amount) }}
+            </span>
+          </div>
+          <div class="summary-row">
+            <span>IVA ({{ contractFormData.vat_rate }}%)</span>
+            <span class="summary-value positive">
+              + {{ formatCurrency(selectedNeed.estimated_amount * (contractFormData.vat_rate / 100)) }}
+            </span>
+          </div>
+          <div class="summary-row">
+            <span>Retenção na Fonte ({{ contractFormData.withholding_tax_rate }}%)</span>
+            <span class="summary-value negative">
+              - {{ formatCurrency(selectedNeed.estimated_amount * (contractFormData.withholding_tax_rate / 100)) }}
+            </span>
+          </div>
+          <div class="summary-row summary-row--total">
+            <span>Valor Líquido Estimado</span>
+            <span class="summary-value">
+              {{ formatCurrency(
+              selectedNeed.estimated_amount +
+              (selectedNeed.estimated_amount * (contractFormData.vat_rate / 100)) -
+              (selectedNeed.estimated_amount * (contractFormData.withholding_tax_rate / 100))
+              ) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Alerta Informativo -->
+        <div class="info-alert">
+          <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <p class="alert-title">O que acontece ao gerar o contrato?</p>
+            <ul class="alert-list">
+              <li>Um novo contrato será criado em estado "Rascunho"</li>
+              <li>O contrato será automaticamente ligado a esta necessidade do PAC</li>
+              <li>A necessidade passará ao estado "Contratada"</li>
+              <li>O valor executado do PAC será atualizado automaticamente</li>
+              <li>Poderá editar o contrato posteriormente antes de o submeter para aprovação</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
     <div class="modal-footer">
       <button class="btn-secondary" (click)="closeGenerateContractModal()">Cancelar</button>
-      <button class="btn-primary" (click)="generateContract()">
-        Gerar Contrato
+      <button class="btn-success" (click)="generateContract()" [disabled]="isGeneratingContract">
+        <span *ngIf="!isGeneratingContract">📄 Gerar Contrato</span>
+        <span *ngIf="isGeneratingContract">A gerar...</span>
       </button>
     </div>
   </div>

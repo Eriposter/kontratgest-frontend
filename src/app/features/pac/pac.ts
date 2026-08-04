@@ -134,14 +134,14 @@ export class PACComponent implements OnInit {
 
   getStatusInfo(status: string): { label: string; class: string; icon: string } {
     const statuses: { [key: string]: { label: string; class: string; icon: string } } = {
-      'draft': { label: 'Rascunho', class: 'status--draft', icon: '📝' },
-      'submitted': { label: 'Submetido', class: 'status--submitted', icon: '📤' },
-      'approved': { label: 'Aprovado', class: 'status--approved', icon: '✅' },
-      'in_progress': { label: 'Em Execução', class: 'status--in-progress', icon: '⚙️' },
-      'completed': { label: 'Concluído', class: 'status--completed', icon: '🏁' },
-      'cancelled': { label: 'Cancelado', class: 'status--cancelled', icon: '🚫' }
+      'draft': { label: 'Rascunho', class: 'status--draft', icon: '' },
+      'submitted': { label: 'Submetido', class: 'status--submitted', icon: '' },
+      'approved': { label: 'Aprovado', class: 'status--approved', icon: '' },
+      'in_progress': { label: 'Em Execução', class: 'status--in-progress', icon: '' },
+      'completed': { label: 'Concluído', class: 'status--completed', icon: '' },
+      'cancelled': { label: 'Cancelado', class: 'status--cancelled', icon: '' }
     };
-    return statuses[status] || { label: status, class: '', icon: '❓' };
+    return statuses[status] || { label: status, class: '', icon: '' };
   }
 
   getExecutionClass(plan: AnnualContractPlan): string {

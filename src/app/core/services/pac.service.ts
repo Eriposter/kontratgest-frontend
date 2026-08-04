@@ -108,4 +108,8 @@ export class PACService extends ApiService {
   getAvailableNeeds(): Observable<{ data: any[] }> {
   return this.get<{ data: any[] }>('pacs/available-needs');
 }
+
+generateContract(needId: string, data: any): Observable<{ data: any }> {
+  return this.post<{ data: any }>(`pacs/needs/${needId}/generate-contract`, data);
+}
 }

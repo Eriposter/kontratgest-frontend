@@ -158,4 +158,9 @@ calculateProgress(contractId: string): Observable<any> {
 createFromPAC(needId: string, data: any): Observable<{ data: Contract }> {
   return this.post<{ data: Contract }>(`pacs/needs/${needId}/generate-contract`, data);
 }
+
+// Em src/app/core/services/contract.service.ts
+getContractTypes(): Observable<any> {
+  return this.get<any>('contract-types'); // Ajusta o endpoint se for diferente no teu sistema
+}
 }

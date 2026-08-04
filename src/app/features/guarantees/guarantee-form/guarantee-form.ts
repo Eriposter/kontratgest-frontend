@@ -115,36 +115,103 @@ export class GuaranteeFormComponent implements OnInit {
     }
   }
 
-  onSubmit(): void {
-    this.isSaving = true;
-    this.errorMessage = '';
+  // guarantee-form.ts
 
-    const payload = {
-      contract_id: this.formData.contract_id,
-      guarantee_type: this.formData.guarantee_type,
-      purpose: this.formData.purpose,
-      issuer_name: this.formData.issuer_name,
-      issuer_nif: this.formData.issuer_nif,
-      issuer_contact: this.formData.issuer_contact,
-      currency: this.formData.currency,
-      amount: this.formData.amount,
-      exchange_rate: this.formData.exchange_rate,
-      issue_date: this.formData.issue_date,
-      expiry_date: this.formData.expiry_date,
-      release_conditions: this.formData.release_conditions
-    };
-
-    this.guaranteeService.create(payload).subscribe({
-      next: () => {
-        this.isSaving = false;
-        this.saved.emit();
-      },
-      error: (err) => {
-        this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Erro ao criar caução';
-      }
-    });
+onSubmit(): void {
+  console.log('🔵 onSubmit chamado!');
+  
+  if (!this.isFormValid()) {
+    setTimeout(() => this.errorMessage = '', 5000);
+    return;
   }
+
+  this.isSaving = true;
+  this.errorMessage = '';
+
+  // 🔥 PAYLOAD CORRETO - issuing_entity como STRING
+  const payload = {
+    contract_id: this.formData.contract_id,
+    guarantee_type: this.formData.guarantee_type,
+    purpose: this.formData.purpose,
+    issuing_entity: this.formData.issuer_name.trim(), // ← STRING (nome da emissora)
+    issuer_nif: this.formData.issuer_nif?.trim() || '',
+    issuer_contact: this.formData.issuer_contact?.trim() || '',
+    currency: this.formData.currency,
+    amount: Number(this.formData.amount),
+    exchange_rate: this.formData.exchange_rate || null,
+    issue_date: this.formData.issue_date,
+    expiry_date: this.formData.expiry_date,
+    release_conditions: this.formData.release_conditions?.trim() || ''
+  };
+
+  console.log('📦 Payload a enviar:', payload);
+
+  this.guaranteeService.create(payload).subscribe({
+    next: (response) => {
+      console.log('✅ Caução criada:', response);
+      this.isSaving = false;
+      this.saved.emit();
+    },
+    error: (err) => {
+      console.error('❌ Erro:', err);
+      this.isSaving = false;
+      
+      // Mostrar erros detalhados
+      if (err.error?.errors) {
+        const errorMessages = Object.entries(err.error.errors)
+          .map(([field, messages]) => `${field}: ${(messages as string[]).join(', ')}`)
+          .join('\n');
+        this.errorMessage = `Erros:\n${errorMessages}`;
+      } else {
+        this.errorMessage = err.error?.message || 'Erro ao criar caução. Verifique os dados.';
+      }
+      
+    }
+  });
+}
+
+isFormValid(): boolean {
+  // Validar contrato
+  if (!this.formData.contract_id) {
+    this.errorMessage = 'Selecione um contrato';
+    return false;
+  }
+  
+  // Validar emissora
+  if (!this.formData.issuer_name || this.formData.issuer_name.trim().length < 3) {
+    this.errorMessage = 'Nome da emissora inválido (mínimo 3 caracteres)';
+    return false;
+  }
+  
+  // Validar NIF (se for obrigatório)
+  if (!this.formData.issuer_nif || this.formData.issuer_nif.trim().length < 9) {
+    this.errorMessage = 'NIF da emissora inválido (mínimo 9 dígitos)';
+    return false;
+  }
+  
+  // Validar valor
+  if (!this.formData.amount || this.formData.amount <= 0) {
+    this.errorMessage = 'Valor da caução deve ser maior que zero';
+    return false;
+  }
+  
+  // Validar datas
+  if (!this.formData.issue_date || !this.formData.expiry_date) {
+    this.errorMessage = 'Preencha todas as datas';
+    return false;
+  }
+  
+  const issue = new Date(this.formData.issue_date);
+  const expiry = new Date(this.formData.expiry_date);
+  
+  if (expiry <= issue) {
+    this.errorMessage = 'A data de expiração deve ser posterior à data de emissão';
+    return false;
+  }
+  
+  this.errorMessage = '';
+  return true;
+}
 
   formatCurrency(value: number): string {
     return value.toFixed(2);

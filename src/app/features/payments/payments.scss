@@ -1,4 +1,5 @@
-// payments.scss - Adicionar estilos do modal
+// payments.scss - Correção do modal
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -20,20 +21,35 @@
   border-radius: 16px;
   width: 100%;
   max-width: 600px;
-  max-height: 90vh;
+  height: 85vh; // ← ADICIONAR ALTURA
+  max-height: 85vh; // ← ADICIONAR ALTURA MÁXIMA
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: hidden; // ← IMPEDIR SCROLL DO MODAL
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   animation: slideUp 0.3s ease-out;
 
   &--large {
     max-width: 800px;
+    height: 90vh; // ← ALTURA PARA FORMULÁRIOS GRANDES
+    max-height: 90vh;
   }
 
   &--xlarge {
     max-width: 1000px;
+    height: 92vh;
+    max-height: 92vh;
   }
+}
+
+// 🔥 GARANTIR QUE O COMPONENTE FILHO OCUPA TODO O ESPAÇO
+.modal-content app-payment-form,
+.modal-content app-payment-detail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 @keyframes fadeIn {

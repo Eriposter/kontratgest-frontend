@@ -181,41 +181,41 @@ export class PaymentFormComponent implements OnInit, AfterViewInit {
   }
 
   onSubmit(): void {
-    if (!this.isFormValid()) {
-      this.errorMessage = 'Por favor, preencha todos os campos obrigatórios';
-      return;
-    }
-
-    this.isSaving = true;
-    this.errorMessage = '';
-
-    const payload = {
-      contract_id: this.formData.contract_id,
-      measurement_id: this.formData.measurement_id || null,
-      payment_type: this.formData.payment_type,
-      gross_amount: this.formData.gross_amount,
-      vat_rate: this.formData.vat_rate,
-      withholding_tax_rate: this.formData.withholding_tax_rate,
-      stamp_duty_rate: this.formData.stamp_duty_rate,
-      retention_amount: this.formData.retention_amount,
-      due_date: this.formData.due_date || null,
-      invoice_date: this.formData.invoice_date || null,
-      invoice_number: this.formData.invoice_number || null,
-      notes: this.formData.notes
-    };
-
-    this.paymentService.create(payload).subscribe({
-      next: () => {
-        this.isSaving = false;
-        this.saved.emit();
-      },
-      error: (err) => {
-        this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Erro ao criar pagamento';
-        this.scrollToTop();
-      }
-    });
+  if (!this.isFormValid()) {
+    this.errorMessage = 'Por favor, preencha todos os campos obrigatórios';
+    return;
   }
+
+  this.isSaving = true;
+  this.errorMessage = '';
+
+  const payload = {
+    contract_id: this.formData.contract_id,
+    measurement_id: this.formData.measurement_id || null,
+    payment_type: this.formData.payment_type,
+    gross_amount: this.formData.gross_amount,
+    vat_rate: this.formData.vat_rate,
+    withholding_tax_rate: this.formData.withholding_tax_rate,
+    stamp_duty_rate: this.formData.stamp_duty_rate,
+    retention_amount: this.formData.retention_amount,
+    due_date: this.formData.due_date || null,
+    invoice_date: this.formData.invoice_date || null,
+    invoice_number: this.formData.invoice_number || null,
+    payment_notes: this.formData.notes // ← ALTERADO de 'notes' para 'payment_notes'
+  };
+
+  this.paymentService.create(payload).subscribe({
+    next: () => {
+      this.isSaving = false;
+      this.saved.emit();
+    },
+    error: (err) => {
+      this.isSaving = false;
+      this.errorMessage = err.error?.message || 'Erro ao criar pagamento';
+      this.scrollToTop();
+    }
+  });
+}
 
   formatCurrency(value: number): string {
     if (!value) return '0,00';

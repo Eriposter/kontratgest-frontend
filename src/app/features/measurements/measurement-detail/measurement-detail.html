@@ -8,7 +8,7 @@
           <span class="detail-number">{{ measurement.measurement_number }}</span>
           <h2 class="detail-title">Auto de Medição #{{ measurement.sequence_number }}</h2>
           <span class="status-badge" [ngClass]="getStatusInfo(measurement.status).class">
-            {{ getStatusInfo(measurement.status).icon }} {{ getStatusInfo(measurement.status).label }}
+            {{ getStatusInfo(measurement.status).label }}
           </span>
         </div>
         <button class="close-btn" (click)="close.emit()">×</button>
@@ -54,7 +54,7 @@
         Aprovação
       </button>
             <button (click)="activeTab = 'documents'" [class.active]="activeTab === 'documents'" class="tab-btn">
-        📎 Documentos
+        Documentos
       </button>
 
     </div>
@@ -180,7 +180,6 @@
       <div *ngIf="activeTab === 'approval'" class="tab-content">
         <div class="approval-timeline">
           <div *ngIf="measurement.approval.submitted_at" class="timeline-item">
-            <div class="timeline-icon timeline-icon--submitted">📤</div>
             <div class="timeline-content">
               <p class="timeline-title">Submetido para Aprovação</p>
               <p class="timeline-date">{{ measurement.approval.submitted_at | date:'dd/MM/yyyy HH:mm' }}</p>
@@ -188,7 +187,6 @@
           </div>
 
           <div *ngIf="measurement.approval.approved_at" class="timeline-item">
-            <div class="timeline-icon timeline-icon--approved">✅</div>
             <div class="timeline-content">
               <p class="timeline-title">Aprovado</p>
               <p class="timeline-date">{{ measurement.approval.approved_at | date:'dd/MM/yyyy HH:mm' }}</p>
@@ -197,7 +195,6 @@
           </div>
 
           <div *ngIf="measurement.payment.paid_at" class="timeline-item">
-            <div class="timeline-icon timeline-icon--paid">💰</div>
             <div class="timeline-content">
               <p class="timeline-title">Pagamento Efetuado</p>
               <p class="timeline-date">{{ measurement.payment.paid_at | date:'dd/MM/yyyy' }}</p>
