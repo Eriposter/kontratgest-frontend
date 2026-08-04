@@ -63,53 +63,67 @@ export interface PACListResponse {
 })
 export class PACService extends ApiService {
   
-
   list(params?: { year?: number; status?: string; search?: string; per_page?: number }): Observable<PACListResponse> {
-      return super.get<PACListResponse>('pacs', params);
-    }
+    return super.get<PACListResponse>('pacs', params);
+  }
   
-  getById(id: string): Observable<{ data: AnnualContractPlan }> {
-      return super.get<{ data: AnnualContractPlan }>(`pacs/${id}`);
+  // Usando override para sobrescrever o método da classe base
+  override get<T = any>(endpoint: string, params?: any): Observable<T> {
+    // Se o endpoint for para buscar um PAC específico, adiciona include
+    if (endpoint.startsWith('pacs/') && !endpoint.includes('available-needs')) {
+      const id = endpoint.split('/')[1];
+      if (id && !isNaN(Number(id)) && !params) {
+        params = { include: 'needs.contract' };
+      } else if (id && !isNaN(Number(id)) && params) {
+        params = { ...params, include: 'needs.contract' };
+      }
     }
+    return super.get<T>(endpoint, params);
+  }
+
+  // Método específico para buscar PAC com necessidades
+  getPACWithNeeds(id: string): Observable<{ data: AnnualContractPlan }> {
+    return super.get<{ data: AnnualContractPlan }>(`pacs/${id}`, { include: 'needs.contract' });
+  }
 
   create(data: { year: number; title: string; description?: string }): Observable<{ data: AnnualContractPlan }> {
-    return this.post<{ data: AnnualContractPlan }>('pacs', data);
+    return super.post<{ data: AnnualContractPlan }>('pacs', data);
   }
 
   update(id: string, data: { title?: string; description?: string }): Observable<{ data: AnnualContractPlan }> {
-    return this.put<{ data: AnnualContractPlan }>(`pacs/${id}`, data);
+    return super.put<{ data: AnnualContractPlan }>(`pacs/${id}`, data);
   }
 
   submit(id: string): Observable<{ data: AnnualContractPlan }> {
-    return this.post<{ data: AnnualContractPlan }>(`pacs/${id}/submit`, {});
+    return super.post<{ data: AnnualContractPlan }>(`pacs/${id}/submit`, {});
   }
 
   approve(id: string): Observable<{ data: AnnualContractPlan }> {
-    return this.post<{ data: AnnualContractPlan }>(`pacs/${id}/approve`, {});
+    return super.post<{ data: AnnualContractPlan }>(`pacs/${id}/approve`, {});
   }
 
   cancel(id: string): Observable<{ data: AnnualContractPlan }> {
-    return this.post<{ data: AnnualContractPlan }>(`pacs/${id}/cancel`, {});
+    return super.post<{ data: AnnualContractPlan }>(`pacs/${id}/cancel`, {});
   }
 
   // ─── Necessidades ──────────────────────────────────────
   addNeed(planId: string, data: any): Observable<{ data: PlanNeed }> {
-    return this.post<{ data: PlanNeed }>(`pacs/${planId}/needs`, data);
+    return super.post<{ data: PlanNeed }>(`pacs/${planId}/needs`, data);
   }
 
   updateNeed(needId: string, data: any): Observable<{ data: PlanNeed }> {
-    return this.put<{ data: PlanNeed }>(`pacs/needs/${needId}`, data);
+    return super.put<{ data: PlanNeed }>(`pacs/needs/${needId}`, data);
   }
 
   deleteNeed(needId: string): Observable<void> {
-    return this.delete<void>(`pacs/needs/${needId}`);
+    return super.delete<void>(`pacs/needs/${needId}`);
   }
 
   getAvailableNeeds(): Observable<{ data: any[] }> {
-  return this.get<{ data: any[] }>('pacs/available-needs');
-}
+    return super.get<{ data: any[] }>('pacs/available-needs');
+  }
 
-generateContract(needId: string, data: any): Observable<{ data: any }> {
-  return this.post<{ data: any }>(`pacs/needs/${needId}/generate-contract`, data);
-}
+  generateContract(needId: string, data: any): Observable<{ data: any }> {
+    return super.post<{ data: any }>(`pacs/needs/${needId}/generate-contract`, data);
+  }
 }

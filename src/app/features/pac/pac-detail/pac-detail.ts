@@ -463,6 +463,11 @@ toggleEstimatedAmount(): void {
 }
 
   private refreshPlan(): void {
-    this.refresh.emit();
-  }
+  this.pacService.get(this.plan.id).subscribe({
+    next: (response) => {
+      this.plan = response.data;
+      this.refresh.emit();
+    }
+  });
+}
 }
