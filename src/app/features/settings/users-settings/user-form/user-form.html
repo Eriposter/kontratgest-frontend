@@ -260,14 +260,21 @@
   </div>
 
   <!-- Footer -->
-  <div class="form-footer">
-    <button type="button" (click)="close.emit()" class="btn-secondary">Cancelar</button>
-    
-    <div class="form-actions">
-      <button type="submit" [disabled]="isSaving || !isFormValid()" class="btn-primary">
-        <span *ngIf="!isSaving">{{ isEdit ? 'Atualizar Utilizador' : 'Criar Utilizador' }}</span>
-        <span *ngIf="isSaving">A guardar...</span>
-      </button>
-    </div>
+  <!-- user-form.html - Substitua temporariamente -->
+<div class="form-footer">
+  <button type="button" (click)="close.emit()" class="btn-secondary">Cancelar</button>
+  
+  <div class="form-actions">
+    <!-- TESTE: mudar para (click) ao invés de submit -->
+    <button 
+      type="button"
+      [disabled]="isSaving || !isFormValid()" 
+      class="btn-primary"
+      (click)="onSubmit()" 
+    >
+      <span *ngIf="!isSaving">{{ isEdit ? 'Atualizar Utilizador' : 'Criar Utilizador' }}</span>
+      <span *ngIf="isSaving">A guardar...</span>
+    </button>
   </div>
+</div>
 </div>

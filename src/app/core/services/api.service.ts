@@ -1,14 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
   private http = inject(HttpClient);
-  
+
   protected apiUrl =  `${environment.apiUrl}/api/v1`;
 
   protected get<T>(endpoint: string, params?: any, p0?: { responseType: string; }): Observable<T> {

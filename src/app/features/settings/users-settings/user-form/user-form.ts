@@ -190,42 +190,66 @@ export class UserFormComponent implements OnInit, AfterViewInit {
     return 'Muito Forte';
   }
 
-  isFormValid(): boolean {
-    // Name validation
-    if (!this.formData.name || this.formData.name.trim().length < 3) return false;
-
-    // Email validation
-    if (!this.formData.email || !this.isValidEmail(this.formData.email)) return false;
-
-    // Password validation for new users
-    if (!this.isEdit) {
-      if (!this.formData.password || this.formData.password.length < 8) return false;
-      if (this.formData.password !== this.formData.password_confirmation) return false;
-    }
-
-    return true;
+  // user-form.ts - Corrigir isFormValid
+isFormValid(): boolean {
+  // Name validation
+  if (!this.formData.name || this.formData.name.trim().length < 3) {
+    console.log('❌ Nome inválido');
+    return false;
   }
 
-  onSubmit(): void {
-    if (!this.isFormValid()) {
-      this.errorMessage = 'Por favor, corrija os campos com erro antes de continuar';
-      this.scrollToTop();
-      return;
+  // Email validation
+  if (!this.formData.email || !this.isValidEmail(this.formData.email)) {
+    console.log('❌ Email inválido');
+    return false;
+  }
+
+  // Password validation for new users
+  if (!this.isEdit) {
+    if (!this.formData.password || this.formData.password.length < 8) {
+      console.log('❌ Password muito curta');
+      return false;
     }
+    if (this.formData.password !== this.formData.password_confirmation) {
+      console.log('❌ Passwords não coincidem');
+      return false;
+    }
+  }
 
-    this.isSaving = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+  console.log('✅ Formulário válido');
+  return true;
+}
 
-    const payload: any = {
-      name: this.formData.name.trim(),
-      email: this.formData.email.trim(),
-      phone: this.formData.phone || null,
-      department: this.formData.department || null,
-      position: this.formData.position || null,
-      roles: this.selectedRoles,
-      is_active: this.formData.is_active
-    };
+  onSubmit(): void {
+  console.log('🚀🚀🚀 SUBMIT CHAMADO! 🚀🚀🚀');
+  console.log('📝 isEdit:', this.isEdit);
+  console.log('📝 user:', this.user);
+  console.log('📝 formData:', this.formData);
+  
+  if (!this.isFormValid()) {
+    console.log('❌ Formulário inválido');
+    this.errorMessage = 'Por favor, corrija os campos com erro antes de continuar';
+    this.scrollToTop();
+    return;
+  }
+
+  console.log('✅ Formulário válido - continuando...');
+
+  this.isSaving = true;
+  this.errorMessage = '';
+  this.successMessage = '';
+
+  const payload: any = {
+    name: this.formData.name.trim(),
+    email: this.formData.email.trim(),
+    phone: this.formData.phone || null,
+    department: this.formData.department || null,
+    position: this.formData.position || null,
+    roles: this.selectedRoles,
+    is_active: this.formData.is_active
+  };
+
+  console.log('📦 Payload a ser enviado:', payload);
 
     if (!this.isEdit) {
       payload.password = this.formData.password;
