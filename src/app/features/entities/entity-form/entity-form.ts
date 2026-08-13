@@ -8,7 +8,8 @@ import { EntityService, Entity, EntityFormData } from '../../../core/services/en
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './entity-form.html',
-  styleUrls: ['./entity-form.scss']
+  styleUrls: ['./entity-form.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntityFormComponent implements OnInit {
   private entityService = inject(EntityService);

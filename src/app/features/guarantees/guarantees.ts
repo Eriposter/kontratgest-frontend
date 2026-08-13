@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GuaranteeService, Guarantee } from '../../core/services/guarantee.service';
@@ -10,7 +10,8 @@ import { GuaranteeFormComponent } from './guarantee-form/guarantee-form';
   standalone: true,
   imports: [CommonModule, FormsModule, GuaranteeDetailComponent, GuaranteeFormComponent],
   templateUrl: './guarantees.html',
-  styleUrls: ['./guarantees.scss']
+  styleUrls: ['./guarantees.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GuaranteesComponent implements OnInit {
   private guaranteeService = inject(GuaranteeService);

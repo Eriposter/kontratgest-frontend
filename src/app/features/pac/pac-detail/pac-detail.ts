@@ -10,7 +10,8 @@ import { EntityService, Entity } from '../../../core/services/entity.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './pac-detail.html',
-  styleUrls: ['./pac-detail.scss']
+  styleUrls: ['./pac-detail.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PACDetailComponent {
   private pacService = inject(PACService);

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ContractService, Contract } from '../../core/services/contract.service';
@@ -11,7 +11,8 @@ import { DocumentUploaderComponent } from '../../shared/components/document-uplo
   standalone: true,
   imports: [CommonModule, FormsModule, ContractDetailComponent, ContractFormComponent, DocumentUploaderComponent],
   templateUrl: './contracts.html',
-  styleUrls: ['./contracts.scss']
+  styleUrls: ['./contracts.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContractsComponent implements OnInit {
   private contractService = inject(ContractService);

@@ -8,7 +8,8 @@ import { SettingsService, TaxConfiguration } from '../../../core/services/settin
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './fiscal-settings.html',
-  styleUrls: ['./fiscal-settings.scss']
+  styleUrls: ['./fiscal-settings.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FiscalSettingsComponent implements OnInit {
   private settingsService = inject(SettingsService);
