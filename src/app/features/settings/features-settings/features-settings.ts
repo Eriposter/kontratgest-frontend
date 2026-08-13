@@ -15,7 +15,8 @@ interface Feature {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './features-settings.html',
-  styleUrls: ['./features-settings.scss']
+  styleUrls: ['./features-settings.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FeaturesSettingsComponent implements OnInit {
   private settingsService = inject(SettingsService);

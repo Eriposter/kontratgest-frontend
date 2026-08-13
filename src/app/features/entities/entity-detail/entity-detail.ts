@@ -8,7 +8,8 @@ import { DocumentUploaderComponent } from '../../../shared/components/document-u
   standalone: true,
   imports: [CommonModule, DocumentUploaderComponent],
   templateUrl: './entity-detail.html',
-  styleUrls: ['./entity-detail.scss']
+  styleUrls: ['./entity-detail.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntityDetailComponent {
   private entityService = inject(EntityService);

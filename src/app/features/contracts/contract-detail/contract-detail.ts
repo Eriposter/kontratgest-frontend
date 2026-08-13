@@ -10,7 +10,8 @@ import { DocumentUploaderComponent } from '../../../shared/components/document-u
   standalone: true,
   imports: [CommonModule, ContractProgressComponent, DocumentUploaderComponent],
   templateUrl: './contract-detail.html',
-  styleUrls: ['./contract-detail.scss']
+  styleUrls: ['./contract-detail.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContractDetailComponent {
   private contractService = inject(ContractService);

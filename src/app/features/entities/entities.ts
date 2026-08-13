@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EntityService, Entity } from '../../core/services/entity.service';
@@ -11,7 +11,8 @@ import { EntityDetailComponent } from './entity-detail/entity-detail';
   standalone: true,
   imports: [CommonModule, FormsModule, EntityFormComponent, EntityDetailComponent],
   templateUrl: './entities.html',
-  styleUrls: ['./entities.scss']
+  styleUrls: ['./entities.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntitiesComponent implements OnInit {
   private entityService = inject(EntityService);

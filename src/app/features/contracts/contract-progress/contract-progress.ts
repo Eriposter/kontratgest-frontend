@@ -8,7 +8,8 @@ import { ContractService, Contract, ContractProgress, ProgressUpdate } from '../
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './contract-progress.html',
-  styleUrls: ['./contract-progress.scss']
+  styleUrls: ['./contract-progress.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContractProgressComponent implements OnInit {
   private contractService = inject(ContractService);

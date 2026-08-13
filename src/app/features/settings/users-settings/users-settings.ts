@@ -9,7 +9,8 @@ import { UserFormComponent } from './user-form/user-form';
   standalone: true,
   imports: [CommonModule, FormsModule, UserFormComponent],
   templateUrl: './users-settings.html',
-  styleUrls: ['./users-settings.scss']
+  styleUrls: ['./users-settings.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UsersSettingsComponent implements OnInit {
   private settingsService = inject(SettingsService);

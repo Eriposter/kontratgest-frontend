@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MeasurementService, Measurement } from '../../core/services/measurement.service';
@@ -10,7 +10,8 @@ import { MeasurementFormComponent } from './measurement-form/measurement-form';
   standalone: true,
   imports: [CommonModule, FormsModule, MeasurementDetailComponent, MeasurementFormComponent],
   templateUrl: './measurements.html',
-  styleUrls: ['./measurements.scss']
+  styleUrls: ['./measurements.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MeasurementsComponent implements OnInit {
   private measurementService = inject(MeasurementService);

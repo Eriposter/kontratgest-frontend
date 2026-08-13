@@ -14,7 +14,8 @@ interface PermissionGroup {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './roles-settings.html',
-  styleUrls: ['./roles-settings.scss']
+  styleUrls: ['./roles-settings.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RolesSettingsComponent implements OnInit {
   private settingsService = inject(SettingsService);

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PACService, AnnualContractPlan } from '../../core/services/pac.service';
@@ -10,7 +10,8 @@ import { PACFormComponent } from './pac-form/pac-form';
   standalone: true,
   imports: [CommonModule, FormsModule, PACDetailComponent, PACFormComponent],
   templateUrl: './pac.html',
-  styleUrls: ['./pac.scss']
+  styleUrls: ['./pac.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PACComponent implements OnInit {
   private pacService = inject(PACService);

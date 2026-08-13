@@ -8,7 +8,8 @@ import { SettingsService, Company } from '../../../core/services/settings.servic
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './company-profile.html',
-  styleUrls: ['./company-profile.scss']
+  styleUrls: ['./company-profile.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CompanyProfileComponent implements OnInit {
   private settingsService = inject(SettingsService);
