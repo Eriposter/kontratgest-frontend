@@ -43,6 +43,9 @@ export class GuaranteeFormComponent implements OnInit {
     { value: 'warranty', label: 'Garantia' }
   ];
 
+  // Percentagens dinâmicas baseadas no tipo de contrato
+  guaranteePercentages: { value: number; label: string }[] = [];
+
   currencies = [
     { value: 'AOA', label: 'Kwanza (AOA)', symbol: 'Kz' },
     { value: 'USD', label: 'Dólar (USD)', symbol: '$' },
@@ -57,6 +60,7 @@ export class GuaranteeFormComponent implements OnInit {
     issuer_nif: '',
     issuer_contact: '',
     currency: 'AOA',
+    percentage: null as number | null,
     amount: 0,
     exchange_rate: null as number | null,
     issue_date: '',
@@ -83,6 +87,66 @@ export class GuaranteeFormComponent implements OnInit {
 
   onContractChange(): void {
     this.selectedContract = this.contracts.find(c => c.id === this.formData.contract_id) || null;
+    
+    // Atualizar percentagens disponíveis baseado no tipo de contrato
+    if (this.selectedContract) {
+      this.updateGuaranteePercentages(this.selectedContract.type.code);
+      
+      // Se o contrato tiver um valor total, já definir a percentagem padrão e calcular o valor
+      if (this.guaranteePercentages.length > 0) {
+        const defaultPercentage = this.guaranteePercentages[0].value;
+        this.formData.percentage = defaultPercentage;
+        this.calculateAmountFromPercentage(defaultPercentage);
+      }
+    }
+  }
+
+  updateGuaranteePercentages(contractTypeCode: string): void {
+    // Verificar se é contrato de concessão
+    const concessionTypes = ['public_works_concession', 'public_services_concession', 'concessao'];
+    const isConcession = concessionTypes.some(type => 
+      contractTypeCode.toLowerCase().includes(type)
+    );
+
+    if (isConcession) {
+      // Contrato de concessão: 1% a 5%
+      this.guaranteePercentages = [
+        { value: 1, label: '1%' },
+        { value: 2, label: '2%' },
+        { value: 3, label: '3%' },
+        { value: 4, label: '4%' },
+        { value: 5, label: '5%' }
+      ];
+    } else {
+      // Outros contratos: 5% a 15%
+      this.guaranteePercentages = [
+        { value: 5, label: '5%' },
+        { value: 6, label: '6%' },
+        { value: 7, label: '7%' },
+        { value: 8, label: '8%' },
+        { value: 9, label: '9%' },
+        { value: 10, label: '10%' },
+        { value: 11, label: '11%' },
+        { value: 12, label: '12%' },
+        { value: 13, label: '13%' },
+        { value: 14, label: '14%' },
+        { value: 15, label: '15%' }
+      ];
+    }
+  }
+
+  onPercentageChange(): void {
+    if (this.formData.percentage && this.selectedContract) {
+      this.calculateAmountFromPercentage(this.formData.percentage);
+    }
+  }
+
+  calculateAmountFromPercentage(percentage: number): void {
+    if (!this.selectedContract?.financial?.total_amount) return;
+
+    const totalAmount = this.selectedContract.financial.total_amount;
+    const calculatedAmount = (totalAmount * percentage) / 100;
+    this.formData.amount = calculatedAmount;
   }
 
   onCurrencyChange(): void {
@@ -118,7 +182,7 @@ export class GuaranteeFormComponent implements OnInit {
 
   // guarantee-form.ts
 
-onSubmit(): void {
+  onSubmit(): void {
   console.log('🔵 onSubmit chamado!');
   
   if (!this.isFormValid()) {
@@ -129,7 +193,7 @@ onSubmit(): void {
   this.isSaving = true;
   this.errorMessage = '';
 
-  // 🔥 PAYLOAD CORRETO - issuing_entity como STRING
+  // 🔥 PAYLOAD CORRETO - issuing_entity como STRING + percentage
   const payload = {
     contract_id: this.formData.contract_id,
     guarantee_type: this.formData.guarantee_type,
@@ -138,6 +202,7 @@ onSubmit(): void {
     issuer_nif: this.formData.issuer_nif?.trim() || '',
     issuer_contact: this.formData.issuer_contact?.trim() || '',
     currency: this.formData.currency,
+    percentage: this.formData.percentage, // ← Percentagem selecionada
     amount: Number(this.formData.amount),
     exchange_rate: this.formData.exchange_rate || null,
     issue_date: this.formData.issue_date,
@@ -216,5 +281,19 @@ isFormValid(): boolean {
 
   formatCurrency(value: number): string {
     return value.toFixed(2);
+  }
+
+  getCurrencySymbol(): string {
+    const currency = this.currencies.find(c => c.value === this.formData.currency);
+    return currency ? currency.symbol : 'Kz';
+  }
+
+  isConcessionContract(): boolean {
+    if (!this.selectedContract?.type?.code) return false;
+    
+    const concessionTypes = ['public_works_concession', 'public_services_concession', 'concessao'];
+    const contractTypeCode = this.selectedContract.type.code.toLowerCase();
+    
+    return concessionTypes.some(type => contractTypeCode.includes(type));
   }
 }

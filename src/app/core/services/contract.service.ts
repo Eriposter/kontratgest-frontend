@@ -6,8 +6,8 @@ export interface Contract {
   internal_notes: string;
   tribunal_de_contas_visto: boolean;
   bna_registration_number: string;
-object: any;
-compliance: any;
+  object: any;
+  compliance: any;
   id: string;
   contract_number: string;
   type: { id: string; code: string; name: string };
@@ -42,6 +42,18 @@ compliance: any;
   };
   status: string;
   status_label: string;
+  // Caução vinculada
+  guarantee_required: boolean;
+  guarantee_attached: boolean;
+  guarantee?: {
+    id: string;
+    guarantee_number: string;
+    type: { code: string; label: string };
+    purpose: { code: string; label: string };
+    amount: number;
+    percentage: number;
+    status: string;
+  } | null;
   created_at: string;
 }
 
@@ -162,5 +174,26 @@ createFromPAC(needId: string, data: any): Observable<{ data: Contract }> {
 // Em src/app/core/services/contract.service.ts
 getContractTypes(): Observable<any> {
   return this.get<any>('contract-types'); // Ajusta o endpoint se for diferente no teu sistema
+}
+
+// Verificar se contrato requer caução (valor > 182M Kz)
+requiresGuarantee(amount: number): boolean {
+  return amount > 182_000_000;
+}
+
+// Obter percentagem de caução baseada no tipo de contrato
+getGuaranteePercentage(contractType: string): number {
+  const concessionTypes = ['public_works_concession', 'public_services_concession'];
+  if (concessionTypes.includes(contractType)) {
+    // Concessão: 1-5%
+    return 3; // valor médio sugerido
+  }
+  // Outros contratos: 5-15%
+  return 10; // valor médio sugerido
+}
+
+// Validar se contrato tem caução vinculada antes de submeter para aprovação
+validateGuaranteeBeforeSubmit(contractId: string): Observable<{ valid: boolean; message?: string }> {
+  return this.get<{ valid: boolean; message?: string }>(`contracts/${contractId}/validate-guarantee`);
 }
 }

@@ -138,7 +138,18 @@
     <div *ngIf="currentStep === 3" class="form-step">
       <h3 class="step-title">Valores e Datas</h3>
 
-      <div class="form-row three-cols">
+      <!-- Informação do contrato selecionado -->
+      <div *ngIf="selectedContract" class="contract-value-info">
+        <p class="info-label">Valor Total do Contrato:</p>
+        <p class="info-value">{{ selectedContract.financial.currency_symbol }} {{ selectedContract.financial.total_amount | number:'1.2-2' }}</p>
+        <p class="info-hint" *ngIf="selectedContract.type">
+          Tipo: <strong>{{ selectedContract.type.name }}</strong>
+          <span *ngIf="isConcessionContract()" class="badge-concession">Concessão</span>
+          <span *ngIf="!isConcessionContract()" class="badge-standard">Outro</span>
+        </p>
+      </div>
+
+      <div class="form-row two-cols">
         <div class="form-group">
           <label>Moeda *</label>
           <select [(ngModel)]="formData.currency" (change)="onCurrencyChange()" name="currency" required class="form-select">
@@ -147,29 +158,36 @@
         </div>
 
         <div class="form-group">
-          <label>Valor *</label>
+          <label>Percentagem *</label>
+          <select 
+            [(ngModel)]="formData.percentage" 
+            (change)="onPercentageChange()" 
+            name="percentage" 
+            required 
+            class="form-select"
+            [disabled]="guaranteePercentages.length === 0"
+          >
+            <option value="">Selecionar percentagem...</option>
+            <option *ngFor="let pct of guaranteePercentages" [value]="pct.value">{{ pct.label }}</option>
+          </select>
+          <p class="form-hint" *ngIf="!selectedContract">Selecione um contrato primeiro</p>
+          <p class="form-hint" *ngIf="isConcessionContract()">Contrato de concessão: 1% - 5%</p>
+          <p class="form-hint" *ngIf="selectedContract && !isConcessionContract()">Outros contratos: 5% - 15%</p>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group form-group--full">
+          <label>Valor da Caução (calculado automaticamente)</label>
+          <div class="calculated-amount-display">
+            <span class="currency-symbol">{{ getCurrencySymbol() }}</span>
+            <span class="amount-value">{{ formData.amount | number:'1.2-2' }}</span>
+          </div>
           <input 
-            type="number" 
+            type="hidden" 
             [(ngModel)]="formData.amount" 
             name="amount" 
             required 
-            min="0.01"
-            step="0.01"
-            class="form-input"
-            placeholder="0.00"
-          >
-        </div>
-
-        <div class="form-group" *ngIf="formData.currency !== 'AOA'">
-          <label>Taxa de Câmbio</label>
-          <input 
-            type="number" 
-            [(ngModel)]="formData.exchange_rate" 
-            name="exchange_rate" 
-            min="0"
-            step="0.000001"
-            class="form-input"
-            placeholder="Taxa BNA"
           >
         </div>
       </div>
@@ -198,6 +216,22 @@
             name="expiry_date" 
             required 
             class="form-input"
+          >
+        </div>
+      </div>
+
+      <!-- Taxa de câmbio (apenas para moedas estrangeiras) -->
+      <div class="form-row" *ngIf="formData.currency !== 'AOA'">
+        <div class="form-group form-group--full">
+          <label>Taxa de Câmbio</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formData.exchange_rate" 
+            name="exchange_rate" 
+            min="0"
+            step="0.000001"
+            class="form-input"
+            placeholder="Taxa BNA"
           >
         </div>
       </div>

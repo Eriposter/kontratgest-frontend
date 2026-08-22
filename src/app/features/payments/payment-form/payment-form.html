@@ -211,13 +211,16 @@
 
         <div class="form-row three-cols">
           <div class="form-group">
-            <label>Data de Vencimento</label>
+            <label>Data de Vencimento *</label>
             <input 
               type="date" 
               [(ngModel)]="formData.due_date" 
               name="due_date" 
+              required
               class="form-input"
+              [class.has-error]="!formData.due_date && isSaving"
             >
+            <small class="error-text" *ngIf="!formData.due_date && isSaving">Campo obrigatório</small>
           </div>
 
           <div class="form-group">
@@ -239,6 +242,27 @@
               class="form-input"
               placeholder="Ex: FT/2026/001"
             >
+          </div>
+        </div>
+
+        <!-- Comprovativo de Pagamento -->
+        <div class="form-row">
+          <div class="form-group form-group--full">
+            <label>Comprovativo de Pagamento</label>
+            <div class="file-upload-wrapper">
+              <input 
+                type="file" 
+                (change)="onFileSelected($event)"
+                accept=".pdf,.jpg,.jpeg,.png"
+                class="file-input"
+                #fileInput
+              >
+              <button type="button" (click)="fileInput.click()" class="btn-secondary btn-small">
+                📎 Selecionar Documento
+              </button>
+              <span class="file-name" *ngIf="formData.proof_document">{{ formData.proof_document.name }}</span>
+            </div>
+            <p class="form-hint">Formatos aceites: PDF, JPG, PNG</p>
           </div>
         </div>
 

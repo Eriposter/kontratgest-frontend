@@ -55,7 +55,8 @@ export class PaymentFormComponent implements OnInit, AfterViewInit {
     due_date: '',
     invoice_date: '',
     invoice_number: '',
-    notes: ''
+    notes: '',
+    proof_document: null as File | null
   };
 
   ngOnInit(): void {
@@ -178,7 +179,15 @@ export class PaymentFormComponent implements OnInit, AfterViewInit {
     if (!this.formData.contract_id) return false;
     if (this.formData.gross_amount <= 0) return false;
     if (this.formData.payment_type === 'measurement' && !this.formData.measurement_id) return false;
+    if (!this.formData.due_date) return false; // Vencimento obrigatório
     return true;
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.formData.proof_document = input.files[0];
+    }
   }
 
   onSubmit(): void {
@@ -202,7 +211,8 @@ export class PaymentFormComponent implements OnInit, AfterViewInit {
     due_date: this.formData.due_date || null,
     invoice_date: this.formData.invoice_date || null,
     invoice_number: this.formData.invoice_number || null,
-    payment_notes: this.formData.notes // ← ALTERADO de 'notes' para 'payment_notes'
+    payment_notes: this.formData.notes,
+    has_proof_document: !!this.formData.proof_document
   };
 
   this.paymentService.create(payload).subscribe({
