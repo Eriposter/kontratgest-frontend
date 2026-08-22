@@ -1,16 +1,16 @@
 ```
-# Angular cache and build artifacts
+# Build artifacts
+dist/
 .angular/cache/
-*.tsbuildinfo
-angular-compiler.db-lock
 
-# Dependencies
-node_modules/
+# Compiled files
+*.js
+*.css
+*.map
 
 # Logs and temp files
 *.log
 *.tmp
-*.swp
 
 # Environment
 .env
@@ -20,13 +20,4 @@ node_modules/
 # Editors
 .vscode/
 .idea/
-
-# Coverage and test reports
-coverage/
-htmlcov/
-*.coverage
-
-# OS generated files
-.DS_Store
-Thumbs.db
 ```
