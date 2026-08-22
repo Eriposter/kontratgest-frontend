@@ -28,7 +28,7 @@ export class MainLayoutComponent {
   menuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: 'home' },
     { label: 'PAC', route: '/pac', icon: 'calendar', badge: 0 },
-    { label: 'Entidades', route: '/entities', icon: 'building' },
+    { label: 'Operadores Económicos', route: '/entities', icon: 'building' },
     { label: 'Contratos', route: '/contracts', icon: 'document', badge: 5 },
     { label: 'Medições', route: '/measurements', icon: 'measurement' },
     { label: 'Cauções', route: '/guarantees', icon: 'shield' },

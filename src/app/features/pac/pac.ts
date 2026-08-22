@@ -11,7 +11,7 @@ import { PACFormComponent } from './pac-form/pac-form';
   imports: [CommonModule, FormsModule, PACDetailComponent, PACFormComponent],
   templateUrl: './pac.html',
   styleUrls: ['./pac.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class PACComponent implements OnInit {
   private pacService = inject(PACService);

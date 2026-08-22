@@ -10,7 +10,7 @@ import { Role, SettingsService, User } from '../../../../core/services/settings.
   imports: [CommonModule, FormsModule],
   templateUrl: './user-form.html',
   styleUrls: ['./user-form.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  
 })
 export class UserFormComponent implements OnInit, AfterViewInit {
   private settingsService = inject(SettingsService);

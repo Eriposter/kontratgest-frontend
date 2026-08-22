@@ -11,7 +11,7 @@ import { GuaranteeFormComponent } from './guarantee-form/guarantee-form';
   imports: [CommonModule, FormsModule, GuaranteeDetailComponent, GuaranteeFormComponent],
   templateUrl: './guarantees.html',
   styleUrls: ['./guarantees.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class GuaranteesComponent implements OnInit {
   private guaranteeService = inject(GuaranteeService);

@@ -11,7 +11,7 @@ import { PACService } from '../../../core/services/pac.service';
   imports: [CommonModule, FormsModule],
   templateUrl: './contract-form.html',
   styleUrls: ['./contract-form.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class ContractFormComponent implements OnInit {
   private contractService = inject(ContractService);

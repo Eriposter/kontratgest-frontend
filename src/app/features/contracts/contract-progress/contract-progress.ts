@@ -9,7 +9,7 @@ import { ContractService, Contract, ContractProgress, ProgressUpdate } from '../
   imports: [CommonModule, FormsModule],
   templateUrl: './contract-progress.html',
   styleUrls: ['./contract-progress.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class ContractProgressComponent implements OnInit {
   private contractService = inject(ContractService);

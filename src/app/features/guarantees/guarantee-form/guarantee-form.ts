@@ -10,7 +10,7 @@ import { ContractService, Contract } from '../../../core/services/contract.servi
   imports: [CommonModule, FormsModule],
   templateUrl: './guarantee-form.html',
   styleUrls: ['./guarantee-form.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class GuaranteeFormComponent implements OnInit {
   private guaranteeService = inject(GuaranteeService);

@@ -12,7 +12,7 @@ import { PaymentFormComponent } from './payment-form/payment-form';
   imports: [CommonModule, FormsModule, PaymentDetailComponent, PaymentFormComponent],
   templateUrl: './payments.html',
   styleUrls: ['./payments.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class PaymentsComponent implements OnInit {
   private paymentService = inject(PaymentService);

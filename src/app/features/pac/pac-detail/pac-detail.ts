@@ -10,8 +10,7 @@ import { EntityService, Entity } from '../../../core/services/entity.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './pac-detail.html',
-  styleUrls: ['./pac-detail.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./pac-detail.scss']
 })
 export class PACDetailComponent {
   private pacService = inject(PACService);
@@ -28,7 +27,6 @@ export class PACDetailComponent {
   actionError = '';
 
   Math = Math;
-
   showSpecificationField: boolean | undefined;
 
   // Modais
@@ -44,8 +42,8 @@ export class PACDetailComponent {
 
   // Formulário de necessidade
   needFormData = {
-    contract_type: 'works',
-    procedure_type: 'dynamic_electronic',
+    contract_type: 'public_works',
+    procedure_type: 'cp',
     title: '',
     description: '',
     justification: '',
@@ -54,35 +52,49 @@ export class PACDetailComponent {
     planned_quarter: null as number | null
   };
 
-contractFormData = {
-  counterparty_id: '',
-  contract_type_id: '', // ← ADICIONAR
-  contract_type_specification: '',
-  start_date: '',
-  end_date: '',
-  signature_date: '',
-  vat_rate: 14,
-  withholding_tax_rate: 2,
-  payment_model: 'fixed',
-  notes: '',
-  total_amount: 0,
-  use_estimated_amount: true,
-};
+  contractFormData = {
+    counterparty_id: '',
+    contract_type_id: '',
+    contract_type_specification: '',
+    start_date: '',
+    end_date: '',
+    signature_date: '',
+    vat_rate: 14,
+    withholding_tax_rate: 2,
+    payment_model: 'single',
+    notes: '',
+    total_amount: 0,
+    use_estimated_amount: true,
+  };
 
+  // ✅ TIPOS DE PROCEDIMENTO ATUALIZADOS
+  procedureTypes = [
+    { value: 'cp', label: 'Concurso Público', code: 'CP' },
+    { value: 'clpq', label: 'Concurso Limitado por Prévia Qualificação', code: 'CLPQ' },
+    { value: 'clc', label: 'Concurso Limitado por Convite', code: 'CLC' },
+    { value: 'cs', label: 'Contratação Simplificada', code: 'CS' },
+    { value: 'cde', label: 'Procedimento Dinâmico Electrónico', code: 'CDE' },
+    { value: 'pce', label: 'Procedimento de Contratação Emergencial', code: 'PCE' }
+  ];
+
+  // ✅ TIPOS DE CONTRATO
+  contractTypesList = [
+    { value: 'public_works', label: 'Empreitada de obras públicas' },
+    { value: 'goods_acquisition', label: 'Aquisição de bens móveis' },
+    { value: 'services_acquisition', label: 'Aquisição de serviços' },
+    { value: 'consultancy', label: 'Serviços de consultoria' },
+    { value: 'goods_rental', label: 'Locação de bens móveis' },
+    { value: 'public_works_concession', label: 'Concessão de obras públicas' },
+    { value: 'public_services_concession', label: 'Concessão de serviços públicos' },
+    { value: 'other', label: 'Outro' }
+  ];
 
   paymentModels = [
-  { value: 'single', label: 'Pagamento Único' },
-  { value: 'installment', label: 'Pagamento Parcelar' },
-  { value: 'measurement', label: 'Por Auto de Medição' },
-  { value: 'consignment', label: 'À Consignação' },
-  { value: 'milestone', label: 'Por Marcos' }
-];
-
-  procedureTypes = [
-    { value: 'dynamic_electronic', label: 'Dinâmico Eletrónico' },
-    { value: 'invitation', label: 'Convite' },
-    { value: 'limited_tender', label: 'Concurso Limitado' },
-    { value: 'direct_award', label: 'Ajuste Direto' }
+    { value: 'single', label: 'Pagamento Único' },
+    { value: 'installment', label: 'Pagamento Parcelar' },
+    { value: 'measurement', label: 'Por Auto de Medição' },
+    { value: 'consignment', label: 'À Consignação' },
+    { value: 'milestone', label: 'Por Marcos' }
   ];
 
   priorities = [
@@ -90,7 +102,6 @@ contractFormData = {
     { value: 'medium', label: 'Média' },
     { value: 'low', label: 'Baixa' }
   ];
-  
 
   formatCurrency(value: number): string {
     if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(2)}B AOA`;
@@ -101,14 +112,14 @@ contractFormData = {
 
   getStatusInfo(status: string): { label: string; class: string; icon: string } {
     const statuses: { [key: string]: { label: string; class: string; icon: string } } = {
-      'draft': { label: 'Rascunho', class: 'status--draft', icon: '' },
-      'submitted': { label: 'Submetido', class: 'status--submitted', icon: '' },
-      'approved': { label: 'Aprovado', class: 'status--approved', icon: '' },
-      'in_progress': { label: 'Em Execução', class: 'status--in-progress', icon: '' },
-      'completed': { label: 'Concluído', class: 'status--completed', icon: '' },
-      'cancelled': { label: 'Cancelado', class: 'status--cancelled', icon: '' }
+      'draft': { label: 'Rascunho', class: 'status--draft', icon: '📝' },
+      'submitted': { label: 'Submetido', class: 'status--submitted', icon: '📤' },
+      'approved': { label: 'Aprovado', class: 'status--approved', icon: '✅' },
+      'in_progress': { label: 'Em Execução', class: 'status--in-progress', icon: '⚙️' },
+      'completed': { label: 'Concluído', class: 'status--completed', icon: '🏁' },
+      'cancelled': { label: 'Cancelado', class: 'status--cancelled', icon: '🚫' }
     };
-    return statuses[status] || { label: status, class: '', icon: '' };
+    return statuses[status] || { label: status, class: '', icon: '❓' };
   }
 
   getNeedStatusInfo(status: string): { label: string; class: string } {
@@ -139,25 +150,24 @@ contractFormData = {
   }
 
   // ─── Ações do Plano ──────────────────────────────────────
-
   submitPlan(): void {
-    this.performAction(() => 
+    this.performAction(() =>
       this.pacService.submit(this.plan.id)
-    , 'Plano submetido para aprovação!');
+      , 'Plano submetido para aprovação!');
   }
 
   approvePlan(): void {
     if (!confirm('Tem a certeza que deseja aprovar este plano?')) return;
-    this.performAction(() => 
+    this.performAction(() =>
       this.pacService.approve(this.plan.id)
-    , 'Plano aprovado com sucesso!');
+      , 'Plano aprovado com sucesso!');
   }
 
   cancelPlan(): void {
     if (!confirm('Tem a certeza que deseja cancelar este plano? Esta ação é irreversível.')) return;
-    this.performAction(() => 
+    this.performAction(() =>
       this.pacService.cancel(this.plan.id)
-    , 'Plano cancelado.');
+      , 'Plano cancelado.');
   }
 
   private performAction(action: () => any, successMessage: string): void {
@@ -181,13 +191,13 @@ contractFormData = {
     });
   }
 
-  // ─── Gestão de Necessidades ──────────────────────────────
+  // ── Gestão de Necessidades ──────────────────────────────
 
   openAddNeedModal(): void {
     this.editingNeed = null;
     this.needFormData = {
-      contract_type: 'works',
-      procedure_type: 'dynamic_electronic',
+      contract_type: 'public_works',
+      procedure_type: 'cp',
       title: '',
       description: '',
       justification: '',
@@ -219,25 +229,25 @@ contractFormData = {
   }
 
   saveNeed(): void {
-    if (!this.needFormData.title.trim()) {
-      this.actionError = 'O título é obrigatório';
-      return;
-    }
-
-    const operation = this.editingNeed
-      ? this.pacService.updateNeed(this.editingNeed.id, this.needFormData)
-      : this.pacService.addNeed(this.plan.id, this.needFormData);
-
-    operation.subscribe({
-      next: () => {
-        this.closeNeedFormModal();
-        this.refreshPlan();
-      },
-      error: (err) => {
-        this.actionError = err.error?.message || 'Erro ao guardar necessidade';
-      }
-    });
+  if (!this.needFormData.title.trim()) {
+    this.actionError = 'O título é obrigatório';
+    return;
   }
+
+  const operation = this.editingNeed
+    ? this.pacService.updateNeed(this.editingNeed.id, this.needFormData)
+    : this.pacService.addNeed(this.plan.id, this.needFormData);
+
+  operation.subscribe({
+    next: () => {
+      this.closeNeedFormModal();
+      this.refreshPlan(); // ✅ Já está a recarregar
+    },
+    error: (err) => {
+      this.actionError = err.error?.message || 'Erro ao guardar necessidade';
+    }
+  });
+}
 
   deleteNeed(need: PlanNeed): void {
     if (!confirm(`Tem a certeza que deseja eliminar a necessidade "${need.title}"?`)) return;
@@ -253,52 +263,46 @@ contractFormData = {
   }
 
   openGenerateContractModal(need: PlanNeed): void {
-  this.selectedNeed = need;
-  this.showGenerateContractModal = true;
-  
-  // Carregar os tipos de contrato
-  this.loadContractTypes();
-  
-  this.contractFormData = {
-    counterparty_id: '',
-    contract_type_id: '',
-    contract_type_specification: '',
-    start_date: '',
-    end_date: '',
-    signature_date: new Date().toISOString().split('T')[0],
-    vat_rate: 14,
-    withholding_tax_rate: 2,
-    payment_model: 'single', // 🔥 VALOR PADRÃO EXPLÍCITO
-    notes: '',
-    total_amount: need.estimated_amount,
-    use_estimated_amount: true,
-  };
-  
-  this.loadEntities();
-}
-
-// Método auxiliar para mapear os tipos
-private mapContractType(type: string): string {
-  const mapping: { [key: string]: string } = {
-    'works': 'public_works',
-    'services': 'services_acquisition',
-    'supply': 'goods_acquisition',
-    'consultancy': 'consultancy',
-    'lease': 'goods_rental',
-    'concession': 'public_works_concession',
-    'public_services_concession': 'public_services_concession',
-    'other': 'other'
-  };
-  return mapping[type] || type;
-}
-
-// 🆕 NOVO: Método para alternar entre valor estimado e personalizado
-toggleEstimatedAmount(): void {
-  this.contractFormData.use_estimated_amount = !this.contractFormData.use_estimated_amount;
-  if (this.contractFormData.use_estimated_amount && this.selectedNeed) {
-    this.contractFormData.total_amount = this.selectedNeed.estimated_amount;
+    this.selectedNeed = need;
+    this.showGenerateContractModal = true;
+    this.contractFormData = {
+      counterparty_id: '',
+      contract_type_id: '',
+      contract_type_specification: '',
+      start_date: '',
+      end_date: '',
+      signature_date: new Date().toISOString().split('T')[0],
+      vat_rate: 14,
+      withholding_tax_rate: 2,
+      payment_model: 'single',
+      notes: '',
+      total_amount: need.estimated_amount,
+      use_estimated_amount: true,
+    };
+    this.loadEntities();
+    this.loadContractTypes();
   }
-}
+
+  private mapContractType(type: string): string {
+    const mapping: { [key: string]: string } = {
+      'works': 'public_works',
+      'services': 'services_acquisition',
+      'supply': 'goods_acquisition',
+      'consultancy': 'consultancy',
+      'lease': 'goods_rental',
+      'concession': 'public_works_concession',
+      'public_services_concession': 'public_services_concession',
+      'other': 'other'
+    };
+    return mapping[type] || type;
+  }
+
+  toggleEstimatedAmount(): void {
+    this.contractFormData.use_estimated_amount = !this.contractFormData.use_estimated_amount;
+    if (this.contractFormData.use_estimated_amount && this.selectedNeed) {
+      this.contractFormData.total_amount = this.selectedNeed.estimated_amount;
+    }
+  }
 
   closeGenerateContractModal(): void {
     this.showGenerateContractModal = false;
@@ -306,15 +310,14 @@ toggleEstimatedAmount(): void {
   }
 
   onContractTypeChange(selectedTypeId: string): void {
-  const selectedType = this.contractTypes.find(t => t.id === selectedTypeId);
-  if (selectedType?.requiresSpecification) {
-    this.showSpecificationField = true;
-  } else {
-    this.showSpecificationField = false;
-    this.contractFormData.contract_type_specification = '';
+    const selectedType = this.contractTypes.find(t => t.id === selectedTypeId);
+    if (selectedType?.requires_specification) {
+      this.showSpecificationField = true;
+    } else {
+      this.showSpecificationField = false;
+      this.contractFormData.contract_type_specification = '';
+    }
   }
-}
-  
 
   loadEntities(): void {
     this.loadingEntities = true;
@@ -329,146 +332,105 @@ toggleEstimatedAmount(): void {
     });
   }
 
+  // ✅ CARREGAR TIPOS DE CONTRATO DO BACKEND
   loadContractTypes(): void {
-  // Carregar do backend em vez de usar dados mock
-  this.contractService.getContractTypes().subscribe({
-    next: (response: any) => {
-      this.contractTypes = response.data || response;
-      
-      // Após carregar, tentar pré-selecionar o tipo
-      if (this.selectedNeed && this.selectedNeed.contract_type) {
-        const matchedType = this.contractTypes.find(t => 
-          t.code === this.selectedNeed!.contract_type || 
-          t.code === this.mapContractType(this.selectedNeed!.contract_type)
-        );
-        if (matchedType) {
-          this.contractFormData.contract_type_id = matchedType.id;
+    this.contractService.getContractTypes().subscribe({
+      next: (response: any) => {
+        this.contractTypes = response.data || response;
+        // Após carregar, tentar pré-selecionar o tipo
+        if (this.selectedNeed && this.selectedNeed.contract_type) {
+          const matchedType = this.contractTypes.find(t =>
+            t.code === this.selectedNeed!.contract_type ||
+            t.code === this.mapContractType(this.selectedNeed!.contract_type)
+          );
+          if (matchedType) {
+            this.contractFormData.contract_type_id = matchedType.id;
+          }
         }
+      },
+      error: (err) => {
+        console.error('Erro ao carregar tipos de contrato:', err);
+        // Fallback para dados mock apenas em caso de erro
+        this.contractTypes = [
+          { id: 'db23f5df-29cb-4556-a4b8-05601835e5f4', code: 'public_works', name: 'Empreitada de obras públicas', requires_specification: false },
+          { id: '7990d7cb-8e03-4eb5-83e5-6d027af103e5', code: 'goods_acquisition', name: 'Aquisição de bens móveis', requires_specification: false },
+          { id: '4a9a493b-eb39-43b8-a853-b16ac365a51b', code: 'services_acquisition', name: 'Aquisição de serviços', requires_specification: false },
+          { id: '2e2a098d-41a5-44bb-ae55-a3f2f12bd497', code: 'consultancy', name: 'Serviços de consultoria', requires_specification: false },
+          { id: 'e79ec9ce-ab99-4d42-ac45-a294cc3cec23', code: 'goods_rental', name: 'Locação de bens móveis', requires_specification: false },
+          { id: '829305cb-f177-4559-a081-cbcc4f7298f5', code: 'public_works_concession', name: 'Concessão de obras públicas', requires_specification: false },
+          { id: '0cadc327-0ca2-4c7c-b6b9-6494d43116a7', code: 'public_services_concession', name: 'Concessão de serviços públicos', requires_specification: false },
+          { id: 'a7ac93e7-4d02-41e6-a504-a1c669bb412a', code: 'other', name: 'Outro', requires_specification: true }
+        ];
       }
-    },
-    error: (err) => {
-      console.error('Erro ao carregar tipos de contrato:', err);
-      // Fallback para dados mock apenas em caso de erro
-      this.contractTypes = [
-       
-        { id: 'db23f5df-29cb-4556-a4b8-05601835e5f4', code: 'public_works', name: 'Empreitada de obras públicas', requires_specification: false },
-        { id: '7990d7cb-8e03-4eb5-83e5-6d027af103e5', code: 'goods_acquisition', name: 'Aquisição de bens móveis', requires_specification: false },
-        { id: '4a9a493b-eb39-43b8-a853-b16ac365a51b', code: 'services_acquisition', name: 'Aquisição de serviços', requires_specification: false },
-        { id: '2e2a098d-41a5-44bb-ae55-a3f2f12bd497', code: 'consultancy', name: 'Serviços de consultoria', requires_specification: false },
-        { id: 'e79ec9ce-ab99-4d42-ac45-a294cc3cec23', code: 'goods_rental', name: 'Locação de bens móveis', requires_specification: false },
-        { id: '829305cb-f177-4559-a081-cbcc4f7298f5', code: 'public_works_concession', name: 'Concessão de obras públicas', requires_specification: false },
-        { id: '0cadc327-0ca2-4c7c-b6b9-6494d43116a7', code: 'public_services_concession', name: 'Concessão de serviços públicos', requires_specification: false },
-        { id: 'a7ac93e7-4d02-41e6-a504-a1c669bb412a', code: 'other', name: 'Outro', requires_specification: true }
-      ];
+    });
+  }
+
+  generateContract(): void {
+    if (!this.selectedNeed) return;
+
+    // Validações
+    if (!this.contractFormData.counterparty_id) {
+      this.actionError = 'Por favor, selecione uma contraparte';
+      return;
     }
-  });
-}
-
-//   loadContractTypes(): void {
-//   this.contractService.getContractTypes?.().subscribe({
-//     next: (response: any) => {
-//       this.contractTypes = response.data || response;
-      
-//       // Tenta pré-selecionar o tipo com base na necessidade do PAC
-//       const needType = this.selectedNeed?.contract_type; // ex: 'works', 'services'
-//       const matched = this.contractTypes.find((t: any) => 
-//         t.code === needType || t.name?.toLowerCase().includes(needType === 'works' ? 'empreitada' : needType)
-//       );
-      
-//       if (matched) {
-//         this.contractFormData.contract_type_id = matched.id;
-//       }
-//     },
-//     error: () => {
-//       this.contractTypes = [];
-//     }
-//   });
-// }
-
-    generateContract(): void {
-  if (!this.selectedNeed) return;
-
-  // Validações
-  if (!this.contractFormData.counterparty_id) {
-    this.actionError = 'Por favor, selecione uma contraparte';
-    return;
-  }
-  if (!this.contractFormData.start_date || !this.contractFormData.end_date) {
-    this.actionError = 'Por favor, indique as datas de início e fim';
-    return;
-  }
-  if (!this.contractFormData.total_amount || this.contractFormData.total_amount <= 0) {
-    this.actionError = 'Por favor, indique o valor do contrato';
-    return;
-  }
-
-  // 🔥 VALIDAR PAYMENT_MODEL
-  if (!this.contractFormData.payment_model) {
-    this.actionError = 'Por favor, selecione um modelo de pagamento';
-    return;
-  }
-
-  this.isGeneratingContract = true;
-  this.actionError = '';
-
-  // MAPEAMENTO DOS TIPOS DE CONTRATO
-  const contractTypeMapping: { [key: string]: string } = {
-    'works': 'public_works',
-    'services': 'services_acquisition',
-    'supply': 'goods_acquisition',
-    'consultancy': 'consultancy',
-    'lease': 'goods_rental',
-    'concession': 'public_works_concession',
-    'public_services_concession': 'public_services_concession',
-    'other': 'other'
-  };
-
-  const contractTypeCode = contractTypeMapping[this.selectedNeed.contract_type] || this.selectedNeed.contract_type;
-
-  // 🔥 GARANTIR QUE PAYMENT_MODEL TEM VALOR
-  const paymentModel = this.contractFormData.payment_model || 'single';
-
-  const payload = {
-    title: this.selectedNeed.title,
-    object: this.selectedNeed.description || this.selectedNeed.title,
-    counterparty_id: this.contractFormData.counterparty_id,
-    contract_type: contractTypeCode,
-    procedure_type: this.selectedNeed.procedure_type,
-    total_amount: this.contractFormData.total_amount,
-    start_date: this.contractFormData.start_date,
-    end_date: this.contractFormData.end_date,
-    signature_date: this.contractFormData.signature_date || null,
-    vat_rate: this.contractFormData.vat_rate || 14,
-    withholding_tax_rate: this.contractFormData.withholding_tax_rate || 2,
-    payment_model: paymentModel, // 🔥 CAMPO OBRIGATÓRIO
-    notes: this.contractFormData.notes || ''
-  };
-
-  console.log('Payload a ser enviado:', payload); // 🔥 DEBUG
-
-  this.pacService.generateContract(this.selectedNeed.id, payload).subscribe({
-    next: (response: any) => {
-      this.isGeneratingContract = false;
-      this.actionMessage = `Contrato ${response.data.contract_number} gerado com sucesso!`;
-      this.showGenerateContractModal = false;
-      this.selectedNeed = null;
-      this.refreshPlan();
-      setTimeout(() => this.actionMessage = '', 4000);
-    },
-    error: (err: { error?: { message: string } }) => {
-      this.isGeneratingContract = false;
-      this.actionError = err.error?.message || 'Erro ao gerar contrato';
-      console.error('Erro detalhado:', err); // 🔥 DEBUG
+    if (!this.contractFormData.start_date || !this.contractFormData.end_date) {
+      this.actionError = 'Por favor, indique as datas de início e fim';
+      return;
     }
-  });
-}
+    if (!this.contractFormData.total_amount || this.contractFormData.total_amount <= 0) {
+      this.actionError = 'Por favor, indique o valor do contrato';
+      return;
+    }
+    if (!this.contractFormData.payment_model) {
+      this.actionError = 'Por favor, selecione um modelo de pagamento';
+      return;
+    }
+
+    this.isGeneratingContract = true;
+    this.actionError = '';
+
+    const contractTypeCode = this.mapContractType(this.selectedNeed.contract_type);
+    const paymentModel = this.contractFormData.payment_model || 'single';
+
+    const payload = {
+      title: this.selectedNeed.title,
+      object: this.selectedNeed.description || this.selectedNeed.title,
+      counterparty_id: this.contractFormData.counterparty_id,
+      contract_type: contractTypeCode,
+      procedure_type: this.selectedNeed.procedure_type,
+      total_amount: this.contractFormData.total_amount,
+      start_date: this.contractFormData.start_date,
+      end_date: this.contractFormData.end_date,
+      signature_date: this.contractFormData.signature_date || null,
+      vat_rate: this.contractFormData.vat_rate || 14,
+      withholding_tax_rate: this.contractFormData.withholding_tax_rate || 2,
+      payment_model: paymentModel,
+      notes: this.contractFormData.notes || ''
+    };
+
+    this.pacService.generateContract(this.selectedNeed.id, payload).subscribe({
+      next: (response: any) => {
+        this.isGeneratingContract = false;
+        this.actionMessage = `Contrato ${response.data.contract_number} gerado com sucesso!`;
+        this.showGenerateContractModal = false;
+        this.selectedNeed = null;
+        this.refreshPlan();
+        setTimeout(() => this.actionMessage = '', 4000);
+      },
+      error: (err: { error?: { message: string } }) => {
+        this.isGeneratingContract = false;
+        this.actionError = err.error?.message || 'Erro ao gerar contrato';
+        console.error('Erro detalhado:', err);
+      }
+    });
+  }
 
   private refreshPlan(): void {
-  this.pacService.get(this.plan.id).subscribe({
-    next: (response) => {
-      this.plan = response.data;
-      this.refresh.emit();
-    }
-  });
-}
+    this.pacService.get(this.plan.id).subscribe({
+      next: (response) => {
+        this.plan = response.data;
+        this.refresh.emit();
+      }
+    });
+  }
 }

@@ -290,14 +290,18 @@
         <div class="form-group">
           <label>Tipo de Contrato *</label>
           <select [(ngModel)]="needFormData.contract_type" class="form-select">
-            <option *ngFor="let type of contractTypes" [value]="type.value">{{ type.label }}</option>
+            <option value="">Selecionar tipo...</option>
+            <option *ngFor="let type of contractTypesList" [value]="type.value">{{ type.label }}</option>
           </select>
         </div>
 
         <div class="form-group">
           <label>Tipo de Procedimento *</label>
           <select [(ngModel)]="needFormData.procedure_type" class="form-select">
-            <option *ngFor="let proc of procedureTypes" [value]="proc.value">{{ proc.label }}</option>
+            <option value="">Selecionar procedimento...</option>
+            <option *ngFor="let proc of procedureTypes" [value]="proc.value">
+              {{ proc.label }} ({{ proc.code }})
+            </option>
           </select>
         </div>
       </div>
@@ -423,12 +427,16 @@
         </div>
 
                 <!-- Tipo de Contrato -->
-        <div class="form-group">
-  <label>Tipo de Contrato *</label>
-    <select [(ngModel)]="contractFormData.contract_type_id" 
-      (change)="onContractTypeChange($any($event.target).value)"
-          class="form-select">
-    <option value="">Selecionar...</option>
+        <!-- Tipo de Contrato -->
+<div class="form-group">
+  <label for="contractType">Tipo de Contrato *</label>
+  <select 
+    id="contractType" 
+    class="form-select" 
+    [(ngModel)]="contractFormData.contract_type_id" 
+    (ngModelChange)="onContractTypeChange($event)"
+    required>
+    <option value="" disabled>Selecionar...</option>
     <option *ngFor="let type of contractTypes" [value]="type.id">
       {{ type.name }}
     </option>

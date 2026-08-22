@@ -9,7 +9,7 @@ import { PaymentService, Payment } from '../../../core/services/payment.service'
   imports: [CommonModule, FormsModule],
   templateUrl: './payment-detail.html',
   styleUrls: ['./payment-detail.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class PaymentDetailComponent {
   private paymentService = inject(PaymentService);

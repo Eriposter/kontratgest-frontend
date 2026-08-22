@@ -62,20 +62,24 @@ export interface PACListResponse {
   providedIn: 'root'
 })
 export class PACService extends ApiService {
-  
   list(params?: { year?: number; status?: string; search?: string; per_page?: number }): Observable<PACListResponse> {
     return super.get<PACListResponse>('pacs', params);
   }
-  
-  // Usando override para sobrescrever o método da classe base
+
+  // ✅ CORRIGIDO: Override para adicionar include automaticamente
   override get<T = any>(endpoint: string, params?: any): Observable<T> {
-    // Se o endpoint for para buscar um PAC específico, adiciona include
+    // Se o endpoint for para buscar um PAC específico (ex: pacs/uuid-aqui)
     if (endpoint.startsWith('pacs/') && !endpoint.includes('available-needs')) {
       const id = endpoint.split('/')[1];
-      if (id && !isNaN(Number(id)) && !params) {
-        params = { include: 'needs.contract' };
-      } else if (id && !isNaN(Number(id)) && params) {
-        params = { ...params, include: 'needs.contract' };
+      // UUIDs têm formato específico (8-4-4-4-12 caracteres hex)
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      
+      if (isUUID) {
+        if (!params) {
+          params = { include: 'needs.contract' };
+        } else if (!params.include) {
+          params = { ...params, include: 'needs.contract' };
+        }
       }
     }
     return super.get<T>(endpoint, params);
@@ -106,7 +110,7 @@ export class PACService extends ApiService {
     return super.post<{ data: AnnualContractPlan }>(`pacs/${id}/cancel`, {});
   }
 
-  // ─── Necessidades ──────────────────────────────────────
+  // ─── Necessidades ─────────────────────────────────────
   addNeed(planId: string, data: any): Observable<{ data: PlanNeed }> {
     return super.post<{ data: PlanNeed }>(`pacs/${planId}/needs`, data);
   }

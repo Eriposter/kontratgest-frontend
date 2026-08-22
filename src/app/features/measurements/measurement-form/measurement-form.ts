@@ -11,7 +11,7 @@ import { ContractService, Contract } from '../../../core/services/contract.servi
   imports: [CommonModule, FormsModule],
   templateUrl: './measurement-form.html',
   styleUrls: ['./measurement-form.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class MeasurementFormComponent implements OnInit, AfterViewInit {
   private measurementService = inject(MeasurementService);

@@ -9,7 +9,7 @@ import { EntityService, Entity, EntityFormData } from '../../../core/services/en
   imports: [CommonModule, FormsModule],
   templateUrl: './entity-form.html',
   styleUrls: ['./entity-form.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class EntityFormComponent implements OnInit {
   private entityService = inject(EntityService);
