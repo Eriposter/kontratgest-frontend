@@ -18,6 +18,22 @@ export interface PlanNeed {
   planned_quarter: number | null;
   status: string;
   status_label: string;
+  // Datas do procedimento de contratação
+  procurement_start_date: string | null;
+  procurement_end_date: string | null;
+  // Entidade vencedora
+  winning_entity: {
+    id: string;
+    name: string;
+    nif: string;
+  } | null;
+  // Documentos comprovativos do procedimento
+  procurement_documents: {
+    id: string;
+    name: string;
+    url: string;
+    type: string;
+  }[];
   contract: {
     id: string;
     contract_number: string;

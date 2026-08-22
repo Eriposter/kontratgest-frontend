@@ -36,8 +36,8 @@ export class GuaranteeFormComponent implements OnInit {
   ];
 
   guaranteePurposes = [
-    { value: 'performance', label: 'Boa Execução' },
-    { value: 'advance_payment', label: 'Adiantamento' },
+    { value: 'performance', label: 'Boa Execução (1-5%)' },
+    { value: 'advance_payment', label: 'Adiantamento (5-15%)' },
     { value: 'bid', label: 'Proposta' },
     { value: 'retention', label: 'Retenção' },
     { value: 'warranty', label: 'Garantia' }

@@ -50,6 +50,13 @@ export interface Payment {
     id: string | null;
     number: string | null;
   } | null;
+  // Documento comprovativo de pagamento
+  proof_document: {
+    id: string;
+    name: string;
+    url: string;
+    uploaded_at: string;
+  } | null;
   can_be_approved: boolean;
   can_be_paid: boolean;
   can_be_rejected: boolean;
