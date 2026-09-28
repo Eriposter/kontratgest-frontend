@@ -141,20 +141,36 @@
             </div>
           </td>
           <td>
-            <div class="due-info">
-              <p class="due-date" *ngIf="payment.dates?.due">
-                {{ payment.dates.due | date:'dd/MM/yyyy' }}
-              </p>
-              <p class="due-date" *ngIf="!payment.dates?.due">—</p>
-              <span 
-                *ngIf="getDueDateInfo(payment) as dueInfo" 
-                class="due-badge" 
-                [ngClass]="dueInfo.class"
-              >
-                {{ dueInfo.text }}
-              </span>
-            </div>
-          </td>
+  <div class="due-info">
+    <!-- Mostrar data de vencimento apenas se não estiver pago/cancelado/rejeitado -->
+    <ng-container *ngIf="payment.status !== 'paid' && payment.status !== 'cancelled' && payment.status !== 'rejected'">
+      <p class="due-date" *ngIf="payment.dates?.due">
+        {{ payment.dates.due | date:'dd/MM/yyyy' }}
+      </p>
+      <p class="due-date" *ngIf="!payment.dates?.due">—</p>
+      <span
+        *ngIf="getDueDateInfo(payment) as dueInfo"
+        class="due-badge"
+        [ngClass]="dueInfo.class"
+      >
+        {{ dueInfo.text }}
+      </span>
+    </ng-container>
+
+    <!-- Mostrar mensagem quando já está pago -->
+<ng-container *ngIf="payment.status === 'paid'">
+  <p class="due-date due-date--paid">Pago</p>
+  <span class="due-badge due-badge--paid" *ngIf="payment.dates?.payment">
+    {{ payment.dates.payment | date:'dd/MM/yyyy' }}
+  </span>
+</ng-container>
+
+    <!-- Mostrar mensagem quando cancelado/rejeitado -->
+    <ng-container *ngIf="payment.status === 'cancelled' || payment.status === 'rejected'">
+      <p class="due-date due-date--inactive">—</p>
+    </ng-container>
+  </div>
+</td>
           <td>
             <span class="status-badge" [ngClass]="getStatusInfo(payment.status).class">
               {{ getStatusInfo(payment.status).label }}

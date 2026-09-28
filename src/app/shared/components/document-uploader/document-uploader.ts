@@ -58,32 +58,35 @@ export class DocumentUploaderComponent implements OnInit {
     });
   }
 
-  private getGetMethod(): (id: string) => any {
-    switch (this.entityType) {
-      case 'entity': return this.documentService.getEntityDocuments.bind(this.documentService);
-      case 'contract': return this.documentService.getContractDocuments.bind(this.documentService);
-      case 'guarantee': return this.documentService.getGuaranteeDocuments.bind(this.documentService);
-      default: return this.documentService.getEntityDocuments.bind(this.documentService);
-    }
+    private getGetMethod(): (id: string) => any {
+  switch (this.entityType) {
+    case 'entity': return this.documentService.getEntityDocuments.bind(this.documentService);
+    case 'contract': return this.documentService.getContractDocuments.bind(this.documentService);
+    case 'guarantee': return this.documentService.getGuaranteeDocuments.bind(this.documentService);
+    case 'procurement': return this.documentService.getProcurementDocuments.bind(this.documentService); // ✅ ADICIONADO
+    default: return this.documentService.getEntityDocuments.bind(this.documentService);
   }
+}
 
-  private getUploadMethod(): (id: string, formData: FormData) => any {
-    switch (this.entityType) {
-      case 'entity': return this.documentService.uploadEntityDocument.bind(this.documentService);
-      case 'contract': return this.documentService.uploadContractDocument.bind(this.documentService);
-      case 'guarantee': return this.documentService.uploadGuaranteeDocument.bind(this.documentService);
-      default: return this.documentService.uploadEntityDocument.bind(this.documentService);
-    }
+private getUploadMethod(): (id: string, formData: FormData) => any {
+  switch (this.entityType) {
+    case 'entity': return this.documentService.uploadEntityDocument.bind(this.documentService);
+    case 'contract': return this.documentService.uploadContractDocument.bind(this.documentService);
+    case 'guarantee': return this.documentService.uploadGuaranteeDocument.bind(this.documentService);
+    case 'procurement': return this.documentService.uploadProcurementDocument.bind(this.documentService); // ✅ ADICIONADO
+    default: return this.documentService.uploadEntityDocument.bind(this.documentService);
   }
+}
 
-  private getDeleteMethod(): (id: string, docId: string) => any {
-    switch (this.entityType) {
-      case 'entity': return this.documentService.deleteEntityDocument.bind(this.documentService);
-      case 'contract': return this.documentService.deleteContractDocument.bind(this.documentService);
-      case 'guarantee': return this.documentService.deleteGuaranteeDocument.bind(this.documentService);
-      default: return this.documentService.deleteEntityDocument.bind(this.documentService);
-    }
+private getDeleteMethod(): (id: string, docId: string) => any {
+  switch (this.entityType) {
+    case 'entity': return this.documentService.deleteEntityDocument.bind(this.documentService);
+    case 'contract': return this.documentService.deleteContractDocument.bind(this.documentService);
+    case 'guarantee': return this.documentService.deleteGuaranteeDocument.bind(this.documentService);
+    case 'procurement': return this.documentService.deleteProcurementDocument.bind(this.documentService); // ✅ ADICIONADO
+    default: return this.documentService.deleteEntityDocument.bind(this.documentService);
   }
+}
 
   onFileSelected(event: any): void {
     const file = event.target.files[0];

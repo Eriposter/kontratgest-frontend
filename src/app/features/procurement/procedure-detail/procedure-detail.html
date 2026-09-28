@@ -1,0 +1,282 @@
+<div *ngIf="loading" class="loading-state">
+  <div class="spinner"></div>
+  <p>A carregar procedimento...</p>
+</div>
+
+<div *ngIf="error" class="error-state">
+  <p>{{ error }}</p>
+  <button (click)="loadProcedure(procedure?.id || '')" class="btn-secondary">Tentar novamente</button>
+</div>
+
+<div *ngIf="!loading && !error && procedure" class="procedure-detail-page">
+  <!-- Header -->
+  <div class="detail-header">
+    <div class="header-content">
+      <div>
+        <span class="procedure-type">{{ procedure.procedure_type_label }}</span>
+        <h1>{{ procedure.need?.title }}</h1>
+        <p class="procedure-amount">{{ formatCurrency(procedure.estimated_amount || 0) }}</p>
+      </div>
+      <div class="header-actions">
+        <span class="status-badge" [ngClass]="'status--' + procedure.status">
+          {{ getStatusInfo(procedure.status).icon }} {{ procedure.status_label }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-section">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="procedure.progress_percentage"></div>
+      </div>
+      <p class="progress-text">
+        {{ procedure.completed_phases_count }} de {{ procedure.total_phases_count }} fases concluídas ({{ procedure.progress_percentage }}%)
+      </p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="detail-tabs">
+    <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="activeTab = 'overview'">
+      Visão Geral
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'phases'" (click)="activeTab = 'phases'">
+      Fases ({{ procedure.phases?.length || 0 }})
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'candidates'" (click)="activeTab = 'candidates'">
+      Candidatos ({{ procedure.candidates?.length || 0 }})
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'documents'" (click)="activeTab = 'documents'">
+      Documentos
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="detail-body">
+    <!-- Overview Tab -->
+    <div *ngIf="activeTab === 'overview'" class="tab-content">
+      <div class="info-grid">
+        <div class="info-section">
+          <h3>Informações Gerais</h3>
+          <div class="info-row">
+            <span class="info-label">Necessidade:</span>
+            <span class="info-value">{{ procedure.need?.title }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Valor Estimado:</span>
+            <span class="info-value">{{ formatCurrency(procedure.estimated_amount || 0) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Duração:</span>
+            <span class="info-value">{{ procedure.duration_days || 0 }} dias</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Criado por:</span>
+            <span class="info-value">{{ procedure.created_by || '—' }}</span>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>Datas</h3>
+          <div class="info-row">
+            <span class="info-label">Início do Procedimento:</span>
+            <span class="info-value">{{ procedure.procedure_start_date | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Fim do Procedimento:</span>
+            <span class="info-value">{{ procedure.procedure_end_date | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-row" *ngIf="procedure.confirmed_start_date">
+            <span class="info-label">Início Confirmado:</span>
+            <span class="info-value">{{ procedure.confirmed_start_date | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-row" *ngIf="procedure.confirmed_end_date">
+            <span class="info-label">Fim Confirmado:</span>
+            <span class="info-value">{{ procedure.confirmed_end_date | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+
+        <div class="info-section" *ngIf="procedure.winning_entity">
+          <h3>Entidade Vencedora</h3>
+          <div class="winner-card">
+            <div class="winner-icon">🏆</div>
+            <div class="winner-info">
+              <p class="winner-name">{{ procedure.winning_entity?.name }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section" *ngIf="procedure.adjudication_notes">
+        <h3>Notas de Adjudicação</h3>
+        <p class="info-text">{{ procedure.adjudication_notes }}</p>
+      </div>
+
+      <div class="info-section" *ngIf="procedure.notes">
+        <h3>Observações</h3>
+        <p class="info-text">{{ procedure.notes }}</p>
+      </div>
+    </div>
+
+    <!-- Phases Tab -->
+    <div *ngIf="activeTab === 'phases'" class="tab-content">
+      <div class="phases-timeline">
+        <div *ngFor="let phase of procedure.phases" class="phase-item" [ngClass]="'phase--' + phase.status">
+          <div class="phase-number">{{ phase.sequence_order }}</div>
+          <div class="phase-content">
+            <div class="phase-header">
+              <h4>{{ phase.phase_name }}</h4>
+              <span class="phase-status" [ngClass]="'status--' + phase.status">{{ phase.status_label }}</span>
+            </div>
+            <div class="phase-dates" *ngIf="phase.start_date || phase.end_date">
+              <span *ngIf="phase.start_date">Início: {{ phase.start_date | date:'dd/MM/yyyy' }}</span>
+              <span *ngIf="phase.end_date">Fim: {{ phase.end_date | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <p class="phase-notes" *ngIf="phase.notes">{{ phase.notes }}</p>
+            
+            <!-- Botão para concluir fase (apenas se estiver 'ongoing') -->
+            <button *ngIf="phase.status === 'ongoing'" class="btn-complete-phase" (click)="openCompletePhaseModal(phase)">
+              ✅ Concluir esta Fase
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Candidates Tab -->
+    <div *ngIf="activeTab === 'candidates'" class="tab-content">
+      <div *ngIf="(procedure.candidates?.length || 0) === 0" class="empty-state">
+        <p>Nenhum candidato registado</p>
+      </div>
+
+      <div *ngIf="(procedure.candidates?.length || 0) > 0" class="candidates-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Entidade</th>
+              <th>Estado</th>
+              <th>Valor Proposto</th>
+              <th>Score Técnico</th>
+              <th>Score Financeiro</th>
+              <th>Score Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let candidate of procedure.candidates">
+              <td>{{ candidate.entity_name }}</td>
+              <td>
+                <span class="candidate-status" [ngClass]="'status--' + candidate.status">
+                  {{ candidate.status_label }}
+                </span>
+              </td>
+              <td>{{ candidate.proposed_amount ? formatCurrency(candidate.proposed_amount) : '—' }}</td>
+              <td>{{ candidate.technical_score || '—' }}</td>
+              <td>{{ candidate.financial_score || '—' }}</td>
+              <td>{{ candidate.total_score || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Documents Tab -->
+    <div *ngIf="activeTab === 'documents'" class="tab-content">
+      <app-document-uploader
+        [entityType]="'procurement'"
+        [entityId]="procedure.id"
+        [documentTypes]="[
+          { value: 'announcement', label: 'Anúncio' },
+          { value: 'program', label: 'Programa do Concurso' },
+          { value: 'specifications', label: 'Caderno de Encargos' },
+          { value: 'minutes', label: 'Acta' },
+          { value: 'report', label: 'Relatório' },
+          { value: 'award', label: 'Adjudicação' },
+          { value: 'contract', label: 'Contrato' },
+          { value: 'other', label: 'Outro' }
+        ]">
+      </app-document-uploader>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="detail-footer">
+    <div class="footer-actions">
+      <button *ngIf="procedure.status === 'planned'" class="btn-primary" (click)="startProcedure()">
+        ▶️ Iniciar Procedimento
+      </button>
+      <button *ngIf="procedure.status === 'evaluation'" class="btn-success" (click)="openAdjudicateModal()">
+        ✅ Finalizar e Adjudicar
+      </button>
+      <button *ngIf="procedure.status !== 'completed' && procedure.status !== 'cancelled'" class="btn-danger" (click)="openCancelModal()">
+        🚫 Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Concluir Fase -->
+<div *ngIf="showCompletePhaseModal" class="modal-overlay" (click)="showCompletePhaseModal = false">
+  <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Concluir Fase: {{ selectedPhase?.phase_name }}</h2>
+      <button class="close-btn" (click)="showCompletePhaseModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Observações / Notas da Fase</label>
+        <textarea [(ngModel)]="phaseNotes" class="form-textarea" rows="3" placeholder="Detalhes sobre a conclusão..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showCompletePhaseModal = false">Cancelar</button>
+      <button class="btn-primary" (click)="confirmCompletePhase()">Confirmar Conclusão</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Adjudicar -->
+<div *ngIf="showAdjudicateModal" class="modal-overlay" (click)="showAdjudicateModal = false">
+  <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Adjudicação do Procedimento</h2>
+      <button class="close-btn" (click)="showAdjudicateModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Entidade Vencedora *</label>
+        <select [(ngModel)]="adjudicationData.winning_entity_id" class="form-select">
+          <option value="">Selecionar candidato...</option>
+          <option *ngFor="let c of procedure?.candidates || []" [value]="c.entity_id">{{ c.entity_name }} (Score: {{ c.total_score }})</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Notas de Adjudicação</label>
+        <textarea [(ngModel)]="adjudicationData.adjudication_notes" class="form-textarea" rows="3" placeholder="Motivos da decisão..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showAdjudicateModal = false">Cancelar</button>
+      <button class="btn-success" (click)="confirmAdjudicate()">Confirmar Adjudicação</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Cancelar -->
+<div *ngIf="showCancelModal" class="modal-overlay" (click)="showCancelModal = false">
+  <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Cancelar Procedimento</h2>
+      <button class="close-btn" (click)="showCancelModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Motivo do Cancelamento *</label>
+        <textarea [(ngModel)]="cancelReason" class="form-textarea" rows="3" placeholder="Indique o motivo..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showCancelModal = false">Cancelar</button>
+      <button class="btn-danger" (click)="confirmCancel()">Confirmar Cancelamento</button>
+    </div>
+  </div>
+</div>

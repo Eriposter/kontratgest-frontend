@@ -168,24 +168,41 @@
               </div>
             </div>
 
-            <div class="need-contract" *ngIf="need.contract">
+            <!-- <div class="need-contract" *ngIf="need.contract">
               <span class="contract-link">
                 📄 Contrato: {{ need.contract.contract_number }}
               </span>
-            </div>
+            </div> -->
 
-            <div class="need-actions" *ngIf="plan.status === 'draft' || plan.status === 'approved'">
-              <button (click)="editNeed(need)" class="action-btn" title="Editar">
-                ✏️
-              </button>
-              <button *ngIf="need.status === 'planned' && !need.contract" (click)="openGenerateContractModal(need)"
-                class="action-btn action-btn--success" title="Gerar Contrato">
-                📄
-              </button>
-              <button (click)="deleteNeed(need)" class="action-btn action-btn--danger" title="Eliminar">
-                🗑️
-              </button>
-            </div>
+            <div class="need-actions">
+  <!-- Gerar Contrato (apenas se não houver procedimento) -->
+  <button *ngIf="need.status === 'planned' && !need.procurement_procedure" 
+          (click)="openGenerateContractModal(need)" 
+          class="action-btn" 
+          title="Gerar Contrato Diretamente">
+    📄
+  </button>
+  
+  <!-- ✅ Iniciar Procedimento (Abre o Modal) -->
+  <button *ngIf="need.status === 'planned' && !need.procurement_procedure" 
+          (click)="openCreateProcedureModal(need)" 
+          class="action-btn action-btn--primary" 
+          title="Iniciar Procedimento de Contratação">
+    📋
+  </button>
+  
+  <!-- ✅ Ver Procedimento (Redireciona para a página dedicada) -->
+  <a *ngIf="need.procurement_procedure" 
+     [routerLink]="['/procurement', need.procurement_procedure.id]" 
+     class="action-btn" 
+     title="Gerir Procedimento (Fases, Candidatos, Documentos)">
+    🔍
+  </a>
+  
+  <!-- Editar e Eliminar -->
+  <button (click)="editNeed(need)" class="action-btn" title="Editar">✏️</button>
+  <button (click)="deleteNeed(need)" class="action-btn action-btn--danger" title="Eliminar">🗑️</button>
+</div>
           </div>
         </div>
 
@@ -290,14 +307,18 @@
         <div class="form-group">
           <label>Tipo de Contrato *</label>
           <select [(ngModel)]="needFormData.contract_type" class="form-select">
-            <option *ngFor="let type of contractTypes" [value]="type.value">{{ type.label }}</option>
+            <option value="">Selecionar tipo...</option>
+            <option *ngFor="let type of contractTypesList" [value]="type.value">{{ type.label }}</option>
           </select>
         </div>
 
         <div class="form-group">
           <label>Tipo de Procedimento *</label>
           <select [(ngModel)]="needFormData.procedure_type" class="form-select">
-            <option *ngFor="let proc of procedureTypes" [value]="proc.value">{{ proc.label }}</option>
+            <option value="">Selecionar procedimento...</option>
+            <option *ngFor="let proc of procedureTypes" [value]="proc.value">
+              {{ proc.label }} ({{ proc.code }})
+            </option>
           </select>
         </div>
       </div>
@@ -400,6 +421,18 @@
             <span class="meta-label">Trimestre Previsto</span>
             <span class="meta-value">Q{{ selectedNeed.planned_quarter }}</span>
           </div>
+          <div class="form-row two-cols">
+  <div class="form-group">
+    <label>Data Proposta de Início</label>
+    <input type="date" [(ngModel)]="needFormData.proposed_start_date" 
+           class="form-input" name="proposed_start_date">
+  </div>
+  <div class="form-group">
+    <label>Data Proposta de Fim</label>
+    <input type="date" [(ngModel)]="needFormData.proposed_end_date" 
+           class="form-input" name="proposed_end_date">
+  </div>
+</div>
         </div>
       </div>
 
@@ -423,12 +456,16 @@
         </div>
 
                 <!-- Tipo de Contrato -->
-        <div class="form-group">
-  <label>Tipo de Contrato *</label>
-    <select [(ngModel)]="contractFormData.contract_type_id" 
-      (change)="onContractTypeChange($any($event.target).value)"
-          class="form-select">
-    <option value="">Selecionar...</option>
+        <!-- Tipo de Contrato -->
+<div class="form-group">
+  <label for="contractType">Tipo de Contrato *</label>
+  <select 
+    id="contractType" 
+    class="form-select" 
+    [(ngModel)]="contractFormData.contract_type_id" 
+    (ngModelChange)="onContractTypeChange($event)"
+    required>
+    <option value="" disabled>Selecionar...</option>
     <option *ngFor="let type of contractTypes" [value]="type.id">
       {{ type.name }}
     </option>
@@ -644,6 +681,62 @@
       <button class="btn-success" (click)="generateContract()" [disabled]="isGeneratingContract">
         <span *ngIf="!isGeneratingContract">📄 Gerar Contrato</span>
         <span *ngIf="isGeneratingContract">A gerar...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ✅ MODAL DE CRIAÇÃO DE PROCEDIMENTO -->
+<div *ngIf="showProcedureCreateModal" class="modal-overlay" (click)="showProcedureCreateModal = false; selectedNeedForProcedure = null">
+  <div class="modal-content modal-content--medium" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2>Iniciar Procedimento de Contratação</h2>
+        <p *ngIf="selectedNeedForProcedure" class="modal-subtitle">{{ selectedNeedForProcedure.title }}</p>
+      </div>
+      <button class="close-btn" (click)="showProcedureCreateModal = false; selectedNeedForProcedure = null">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div *ngIf="procedureCreateError" class="error-message">
+        {{ procedureCreateError }}
+      </div>
+
+      <form (ngSubmit)="submitCreateProcedure()" class="form-content">
+        <div class="form-group">
+          <label class="form-label">Tipo de Procedimento *</label>
+          <select [(ngModel)]="procedureCreateFormData.procedure_type" name="procedure_type" class="form-select" required>
+            <option *ngFor="let proc of procedureTypes" [value]="proc.value">
+              {{ proc.label }} ({{ proc.code }})
+            </option>
+          </select>
+          <p class="form-hint">As fases do procedimento serão geradas automaticamente com base nesta escolha.</p>
+        </div>
+
+        <div class="form-row two-cols">
+          <div class="form-group">
+            <label class="form-label">Data de Início Prevista *</label>
+            <input type="date" [(ngModel)]="procedureCreateFormData.procedure_start_date" name="start_date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data de Fim Prevista *</label>
+            <input type="date" [(ngModel)]="procedureCreateFormData.procedure_end_date" name="end_date" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Observações Iniciais</label>
+          <textarea [(ngModel)]="procedureCreateFormData.notes" name="notes" class="form-textarea" rows="3" placeholder="Notas sobre o lançamento do procedimento..."></textarea>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" (click)="showProcedureCreateModal = false; selectedNeedForProcedure = null" class="btn-secondary">Cancelar</button>
+      <button type="button" (click)="submitCreateProcedure()" [disabled]="isCreatingProcedure" class="btn-primary">
+        <span *ngIf="!isCreatingProcedure">Criar Procedimento</span>
+        <span *ngIf="isCreatingProcedure">A criar...</span>
       </button>
     </div>
   </div>

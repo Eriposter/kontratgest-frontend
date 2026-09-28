@@ -12,7 +12,7 @@ import { DocumentUploaderComponent } from '../../shared/components/document-uplo
   imports: [CommonModule, FormsModule, ContractDetailComponent, ContractFormComponent, DocumentUploaderComponent],
   templateUrl: './contracts.html',
   styleUrls: ['./contracts.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class ContractsComponent implements OnInit {
   private contractService = inject(ContractService);
@@ -155,9 +155,9 @@ export class ContractsComponent implements OnInit {
   getStatusInfo(status: string): { label: string; class: string; icon: string } {
     const statuses: { [key: string]: { label: string; class: string; icon: string } } = {
       'draft': { label: 'Rascunho', class: 'status--draft', icon: '📝' },
-      'pending_approval': { label: 'Pendente', class: 'status--pending', icon: '⏳' },
+      'pending_approval': { label: 'Pendente de Aprovação', class: 'status--pending', icon: '⏳' },
       'approved': { label: 'Aprovado', class: 'status--approved', icon: '✅' },
-      'active': { label: 'Ativo', class: 'status--active', icon: '🟢' },
+      'active': { label: 'Em Execução', class: 'status--active', icon: '🟢' },
       'suspended': { label: 'Suspenso', class: 'status--suspended', icon: '⏸️' },
       'terminated': { label: 'Rescindido', class: 'status--terminated', icon: '🚫' },
       'expired': { label: 'Expirado', class: 'status--expired', icon: '⏰' },

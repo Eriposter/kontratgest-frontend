@@ -12,7 +12,7 @@ import { EntityDetailComponent } from './entity-detail/entity-detail';
   imports: [CommonModule, FormsModule, EntityFormComponent, EntityDetailComponent],
   templateUrl: './entities.html',
   styleUrls: ['./entities.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class EntitiesComponent implements OnInit {
   private entityService = inject(EntityService);

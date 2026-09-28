@@ -1,0 +1,138 @@
+<div class="procedure-detail">
+  <div class="form-header">
+    <div>
+      <h2>Procedimento de Contratação</h2>
+      <p *ngIf="procedure.need">{{ procedure.need.title }}</p>
+    </div>
+    <button class="close-btn" (click)="close.emit()">×</button>
+  </div>
+
+  <div *ngIf="actionMessage" class="success-message">{{ actionMessage }}</div>
+  <div *ngIf="actionError" class="error-message">{{ actionError }}</div>
+
+  <div class="form-scroll-container">
+    <div class="detail-content">
+      <!-- Status -->
+      <div class="status-badge" [ngClass]="getStatusInfo(procedure.status).class">
+        {{ getStatusInfo(procedure.status).icon }} {{ getStatusInfo(procedure.status).label }}
+      </div>
+
+      <!-- Informações Gerais -->
+      <div class="detail-section">
+        <h3 class="section-title">Informações Gerais</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Necessidade</span>
+            <span class="detail-value">{{ procedure.need?.title || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Valor Estimado</span>
+            <span class="detail-value">{{ formatCurrency(procedure.need?.estimated_amount || 0) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Duração</span>
+            <span class="detail-value">{{ procedure.duration_days || 0 }} dias</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Criado por</span>
+            <span class="detail-value">{{ procedure.created_by || '—' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Datas -->
+      <div class="detail-section">
+        <h3 class="section-title">Datas</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Início do Procedimento</span>
+            <span class="detail-value">{{ procedure.procedure_start_date | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Fim do Procedimento</span>
+            <span class="detail-value">{{ procedure.procedure_end_date | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="procedure.confirmed_start_date">
+            <span class="detail-label">Início Confirmado</span>
+            <span class="detail-value">{{ procedure.confirmed_start_date | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="procedure.confirmed_end_date">
+            <span class="detail-label">Fim Confirmado</span>
+            <span class="detail-value">{{ procedure.confirmed_end_date | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entidade Vencedora -->
+      <div class="detail-section" *ngIf="procedure.winning_entity">
+        <h3 class="section-title">Entidade Vencedora</h3>
+        <div class="entity-card">
+          <div class="entity-icon">🏢</div>
+          <div class="entity-info">
+            <p class="entity-name">{{ procedure.winning_entity.name }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notas de Adjudicação -->
+      <div class="detail-section" *ngIf="procedure.adjudication_notes">
+        <h3 class="section-title">Notas de Adjudicação</h3>
+        <p class="notes-text">{{ procedure.adjudication_notes }}</p>
+      </div>
+
+      <!-- Observações -->
+      <div class="detail-section" *ngIf="procedure.notes">
+        <h3 class="section-title">Observações</h3>
+        <p class="notes-text">{{ procedure.notes }}</p>
+      </div>
+
+      <!-- Contrato Gerado -->
+      <div class="detail-section" *ngIf="procedure.contract">
+        <h3 class="section-title">Contrato Gerado</h3>
+        <div class="contract-link">
+          <span class="contract-icon">📄</span>
+          <span>{{ procedure.contract.contract_number }} - {{ procedure.contract.title }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ações -->
+  <div class="form-footer">
+    <button type="button" (click)="close.emit()" class="btn-secondary">Fechar</button>
+    <div class="form-actions">
+      <button *ngIf="procedure.status === 'planned'" (click)="startProcedure()" [disabled]="isLoading" class="btn-primary">
+        ▶️ Iniciar Procedimento
+      </button>
+      <button *ngIf="procedure.status === 'in_progress'" (click)="moveToEvaluation()" [disabled]="isLoading" class="btn-primary">
+        🔍 Mover para Avaliação
+      </button>
+      <button *ngIf="procedure.status === 'evaluation' && procedure.winning_entity_id" (click)="completeProcedure()" [disabled]="isLoading" class="btn-success">
+        ✅ Finalizar e Adjudicar
+      </button>
+      <button *ngIf="procedure.status !== 'cancelled' && procedure.status !== 'completed'" (click)="openCancelModal()" [disabled]="isLoading" class="btn-danger">
+        🚫 Cancelar
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal de Cancelamento -->
+  <div *ngIf="showCancelModal" class="modal-overlay" (click)="showCancelModal = false">
+    <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Cancelar Procedimento</h3>
+        <button class="close-btn" (click)="showCancelModal = false">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Motivo do Cancelamento *</label>
+          <textarea [(ngModel)]="cancelReason" class="form-textarea" rows="3" placeholder="Indique o motivo..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button (click)="showCancelModal = false" class="btn-secondary">Cancelar</button>
+        <button (click)="cancelProcedure()" [disabled]="isLoading" class="btn-danger">Confirmar Cancelamento</button>
+      </div>
+    </div>
+  </div>
+</div>

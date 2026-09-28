@@ -10,7 +10,7 @@ import { DocumentUploaderComponent } from '../../../shared/components/document-u
   imports: [CommonModule, FormsModule, DocumentUploaderComponent],
   templateUrl: './guarantee-detail.html',
   styleUrls: ['./guarantee-detail.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class GuaranteeDetailComponent {
   private guaranteeService = inject(GuaranteeService);

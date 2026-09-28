@@ -10,7 +10,7 @@ import { DocumentUploaderComponent } from '../../../shared/components/document-u
   imports: [CommonModule, FormsModule, DocumentUploaderComponent],
   templateUrl: './measurement-detail.html',
   styleUrls: ['./measurement-detail.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class MeasurementDetailComponent {
   private measurementService = inject(MeasurementService);

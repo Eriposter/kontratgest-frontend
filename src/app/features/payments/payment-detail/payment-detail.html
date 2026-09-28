@@ -25,28 +25,20 @@
 
     <!-- Tabs -->
     <div class="detail-tabs">
-      <button 
-        (click)="activeTab = 'overview'" 
-        [class.active]="activeTab === 'overview'"
-        class="tab-btn"
-      >
-        Visão Geral
-      </button>
-      <button 
-        (click)="activeTab = 'financial'" 
-        [class.active]="activeTab === 'financial'"
-        class="tab-btn"
-      >
-        Financeiro
-      </button>
-      <button 
-        (click)="activeTab = 'timeline'" 
-        [class.active]="activeTab === 'timeline'"
-        class="tab-btn"
-      >
-        Histórico
-      </button>
-    </div>
+  <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="activeTab = 'overview'">
+    Visão Geral
+  </button>
+  <button class="tab-btn" [class.active]="activeTab === 'financial'" (click)="activeTab = 'financial'">
+    Financeiro
+  </button>
+  <button class="tab-btn" [class.active]="activeTab === 'history'" (click)="activeTab = 'history'">
+    Histórico
+  </button>
+  <!-- 🆕 NOVA TAB: DOCUMENTOS -->
+  <button class="tab-btn" [class.active]="activeTab === 'documents'" (click)="activeTab = 'documents'">
+    Documentos
+  </button>
+</div>
 
     <!-- Tab Content -->
     <div class="detail-body">
@@ -217,6 +209,30 @@
           </div>
         </div>
       </div>
+
+      <!-- ✅ CONTEÚDO DA TAB DOCUMENTOS -->
+<div *ngIf="activeTab === 'documents'" class="tab-content">
+  <div class="info-section" style="border: none; background: transparent; padding: 0;">
+    <h3 style="margin-bottom: 1rem; font-size: 1rem; color: #0f172a;">
+      Comprovativos e Anexos do Pagamento
+    </h3>
+    <p style="font-size: 0.875rem; color: #64748b; margin-bottom: 1.5rem;">
+      Faça o upload do comprovativo de transferência, fatura ou outros documentos relevantes.
+    </p>
+    
+    <app-document-uploader 
+      [entityType]="'payments'" 
+      [entityId]="payment.id"
+      [documentTypes]="[
+        { value: 'payment_proof', label: 'Comprovativo de Pagamento' },
+        { value: 'invoice', label: 'Fatura' },
+        { value: 'receipt', label: 'Recibo' },
+        { value: 'contract', label: 'Contrato' },
+        { value: 'other', label: 'Outro' }
+      ]">
+    </app-document-uploader>
+  </div>
+</div>
     </div>
 
     <!-- Footer com Ações -->

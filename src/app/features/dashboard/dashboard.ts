@@ -8,7 +8,7 @@ import { DashboardService, DashboardOverview } from '../../core/services/dashboa
   standalone: true,
   imports: [CommonModule],
   templateUrl: './dashboard.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class DashboardComponent implements OnInit {
   authService = inject(AuthService);

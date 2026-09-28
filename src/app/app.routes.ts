@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/login/login';
 import { MainLayoutComponent } from './layout/main-layout/main-layout';
 import { authGuard } from './core/guards/auth.guard';
+import { ProcedureDetailComponent } from './features/procurement/procedure-detail/procedure-detail';
+import { ProcedureListComponent } from './features/procurement/procedure-list/procedure-list';
 
 export const routes: Routes = [
   // Rota pública
@@ -26,6 +28,14 @@ export const routes: Routes = [
         path: 'entities', 
         loadComponent: () => import('./features/entities/entities').then(m => m.EntitiesComponent) 
       },
+
+      {
+  path: 'procurement',
+  children: [
+    { path: '', component: ProcedureListComponent },
+    { path: ':id', component: ProcedureDetailComponent }
+  ]
+},
       { 
         path: 'contracts', 
         loadComponent: () => import('./features/contracts/contracts').then(m => m.ContractsComponent) 

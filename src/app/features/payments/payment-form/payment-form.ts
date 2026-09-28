@@ -12,7 +12,7 @@ import { MeasurementService, Measurement } from '../../../core/services/measurem
   imports: [CommonModule, FormsModule],
   templateUrl: './payment-form.html',
   styleUrls: ['./payment-form.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class PaymentFormComponent implements OnInit, AfterViewInit {
   private paymentService = inject(PaymentService);

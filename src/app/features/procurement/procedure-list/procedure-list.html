@@ -1,0 +1,67 @@
+<div class="procurement-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Procedimentos de Contratação</h1>
+      <p class="page-subtitle">Gestão e acompanhamento de concursos e procedimentos</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>A carregar procedimentos...</p>
+  </div>
+
+  <div *ngIf="error" class="error-state">
+    <p>{{ error }}</p>
+    <button (click)="loadProcedures()" class="btn-secondary">Tentar novamente</button>
+  </div>
+
+  <div *ngIf="!loading && !error && procedures.length === 0" class="empty-state">
+    <div class="empty-icon">📋</div>
+    <h3>Nenhum procedimento encontrado</h3>
+    <p>Crie um procedimento a partir de uma necessidade do PAC</p>
+  </div>
+
+  <div *ngIf="!loading && !error && procedures.length > 0" class="procedures-table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Procedimento / Necessidade</th>
+          <th>Tipo</th>
+          <th>Valor Estimado</th>
+          <th>Progresso</th>
+          <th>Estado</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let proc of procedures" class="table-row">
+          <td>
+            <div class="entity-info">
+              <p class="entity-name">{{ proc.need?.title || 'Sem necessidade vinculada' }}</p>
+              <p class="entity-sub">{{ proc.procedure_start_date | date:'dd/MM/yyyy' }} - {{ proc.procedure_end_date | date:'dd/MM/yyyy' }}</p>
+            </div>
+          </td>
+          <td><span class="type-badge">{{ proc.procedure_type_label }}</span></td>
+          <td class="mono">{{ formatCurrency(proc.estimated_amount || 0) }}</td>
+          <td>
+            <div class="progress-mini">
+              <div class="progress-fill" [style.width.%]="proc.progress_percentage"></div>
+            </div>
+            <span class="progress-text">{{ proc.completed_phases_count }}/{{ proc.total_phases_count }} fases</span>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="'status--' + proc.status">
+              {{ getStatusInfo(proc.status).icon }} {{ proc.status_label }}
+            </span>
+          </td>
+          <td class="text-right">
+            <a [routerLink]="['/procurement', proc.id]" class="btn-icon" title="Ver Detalhes">
+              
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

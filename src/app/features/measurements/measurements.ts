@@ -11,7 +11,7 @@ import { MeasurementFormComponent } from './measurement-form/measurement-form';
   imports: [CommonModule, FormsModule, MeasurementDetailComponent, MeasurementFormComponent],
   templateUrl: './measurements.html',
   styleUrls: ['./measurements.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class MeasurementsComponent implements OnInit {
   private measurementService = inject(MeasurementService);

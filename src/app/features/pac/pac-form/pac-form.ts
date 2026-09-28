@@ -9,7 +9,7 @@ import { PACService, AnnualContractPlan } from '../../../core/services/pac.servi
   imports: [CommonModule, FormsModule],
   templateUrl: './pac-form.html',
   styleUrls: ['./pac-form.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class PACFormComponent {
   private pacService = inject(PACService);

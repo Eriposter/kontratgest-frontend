@@ -10,7 +10,7 @@ import { AuthService } from '../../../core/auth/auth.service';
   imports: [CommonModule, FormsModule],
   templateUrl: './login.html',
   styleUrls: ['./login.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class LoginComponent {
   private authService = inject(AuthService);

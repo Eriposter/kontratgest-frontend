@@ -26,7 +26,7 @@ interface SettingsSection {
   ],
   templateUrl: './settings.html',
   styleUrls: ['./settings.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+   
 })
 export class SettingsComponent implements OnInit {
   activeSection = 'company';

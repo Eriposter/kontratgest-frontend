@@ -16,7 +16,8 @@ export interface Document {
   uploaded_at: string;
 }
 
-export type EntityType = 'entity' | 'contract' | 'guarantee' | 'measurement';
+// ✅ 'payments' já está aqui, perfeito!
+export type EntityType = 'entity' | 'contract' | 'guarantee' | 'measurement' | 'payments' | 'procurement';
 
 @Injectable({
   providedIn: 'root'
@@ -62,11 +63,31 @@ export class DocumentService extends ApiService {
     return this.delete<void>(`guarantees/${guaranteeId}/documents/${documentId}`);
   }
 
-  // ─── Autos de Medição (via upload genérico) ──────────────
-  // Nota: Autos não têm tabela própria de documentos no backend,
-  // então vamos usar o endpoint genérico de contratos (o auto pertence a um contrato)
-  // ou criar um endpoint específico se necessário.
-  
+  // 🆕 ─── Pagamentos ───────────────────────────────────────
+  uploadPaymentDocument(paymentId: string, formData: FormData): Observable<{ data: Document }> {
+    return this.post<{ data: Document }>(`documents/payments/${paymentId}/upload`, formData);
+  }
+
+  getPaymentDocuments(paymentId: string): Observable<{ data: Document[] }> {
+    return this.get<{ data: Document[] }>(`documents/payments/${paymentId}`);
+  }
+
+  deletePaymentDocument(paymentId: string, documentId: string): Observable<void> {
+    return this.delete<void>(`documents/payments/${paymentId}/${documentId}`);
+  }
+
+  uploadProcurementDocument(procurementId: string, formData: FormData): Observable<{ data: Document }> {
+  return this.post<{ data: Document }>(`documents/procurement/${procurementId}/upload`, formData);
+}
+
+getProcurementDocuments(procurementId: string): Observable<{ data: Document[] }> {
+  return this.get<{ data: Document[] }>(`documents/procurement/${procurementId}`);
+}
+
+deleteProcurementDocument(procurementId: string, documentId: string): Observable<void> {
+  return this.delete<void>(`documents/procurement/${procurementId}/${documentId}`);
+}
+
   // ─── Download genérico ───────────────────────────────────
   downloadDocument(type: EntityType, id: string): Observable<Blob> {
     return this.get<Blob>(`documents/${type}/${id}/download`, {}, { responseType: 'blob' } as any);
