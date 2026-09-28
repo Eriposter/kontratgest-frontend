@@ -242,22 +242,28 @@ export class PaymentsComponent implements OnInit {
   }
 
   getDueDateInfo(payment: Payment): { text: string; class: string } | null {
-    if (!payment.dates) return null;
-    
-    if (payment.dates.is_overdue) {
-      return { text: `Atrasado ${payment.dates.days_overdue || 0}d`, class: 'due--overdue' };
-    }
-    if (payment.dates.days_until_due !== null && payment.dates.days_until_due !== undefined) {
-      if (payment.dates.days_until_due <= 7) {
-        return { text: `Vence em ${payment.dates.days_until_due}d`, class: 'due--urgent' };
-      }
-      if (payment.dates.days_until_due <= 30) {
-        return { text: `Vence em ${payment.dates.days_until_due}d`, class: 'due--warning' };
-      }
-    }
+  // 🔥 CORREÇÃO: Se o pagamento já está pago, cancelado ou rejeitado, não mostrar info de vencimento
+  if (payment.status === 'paid' || payment.status === 'cancelled' || payment.status === 'rejected') {
     return null;
   }
 
+  if (!payment.dates) return null;
+
+  if (payment.dates.is_overdue) {
+    return { text: `Atrasado ${payment.dates.days_overdue || 0}d`, class: 'due--overdue' };
+  }
+
+  if (payment.dates.days_until_due !== null && payment.dates.days_until_due !== undefined) {
+    if (payment.dates.days_until_due <= 7) {
+      return { text: `Vence em ${payment.dates.days_until_due}d`, class: 'due--urgent' };
+    }
+    if (payment.dates.days_until_due <= 30) {
+      return { text: `Vence em ${payment.dates.days_until_due}d`, class: 'due--warning' };
+    }
+  }
+
+  return null;
+}
   formatCurrency(value: number, currency: string = 'AOA'): string {
     if (!value) return `0,00 ${currency}`;
     if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B ${currency}`;

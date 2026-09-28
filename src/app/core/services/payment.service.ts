@@ -56,6 +56,9 @@ export interface Payment {
   can_be_cancelled: boolean;
   created_at: string;
   updated_at: string;
+  payment_proof_path?: string | null;
+  payment_proof_url?: string | null;
+  supporting_documents?: any[];
 }
 
 export interface PaymentListResponse {
@@ -116,7 +119,40 @@ export class PaymentService extends ApiService {
     return this.get<{ data: Payment[]; meta: any }>('payments/pending');
   }
 
-  getApproved(): Observable<{ data: Payment[]; meta: any }> {
+ getApproved(): Observable<{ data: Payment[]; meta: any }> {
     return this.get<{ data: Payment[]; meta: any }>('payments/approved');
+  }
+
+  // ==========================================
+  // 🆕 MÉTODOS PARA COMPROVATIVO DE PAGAMENTO
+  // ==========================================
+
+  /**
+   * Upload de comprovativo de pagamento (usa FormData)
+   */
+  uploadProof(paymentId: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // O endpoint deve corresponder à rota criada no DocumentUploadController
+    return this.post<any>(`payments/${paymentId}/upload-proof`, formData);
+  }
+
+  /**
+   * Download do comprovativo de pagamento
+   */
+  downloadProof(paymentId: string): void {
+    // Abre o ficheiro numa nova aba para download/visualização
+    window.open(`${this.apiUrl}/payments/${paymentId}/download-proof`, '_blank');
+  }
+
+  /**
+   * Marcar como pago ENVIANDO TAMBÉM o ficheiro do comprovativo (FormData)
+   */
+  markAsPaidWithProof(
+    paymentId: string,
+    formData: FormData
+  ): Observable<{ data: Payment }> {
+    return this.post<{ data: Payment }>(`payments/${paymentId}/mark-as-paid`, formData);
   }
 }

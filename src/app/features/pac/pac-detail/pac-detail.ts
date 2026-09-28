@@ -4,11 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { PACService, AnnualContractPlan, PlanNeed } from '../../../core/services/pac.service';
 import { ContractService } from '../../../core/services/contract.service';
 import { EntityService, Entity } from '../../../core/services/entity.service';
+import { ContractingProcedure } from '../../../core/services/pac.service';
+import { ProcedureFormComponent } from '../procedure-form/procedure-form';
+import { ProcedureDetailComponent } from '../procedure-detail/procedure-detail';
+import { ProcurementService } from '../../../core/services/procurement.service';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-pac-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule], // ← Removido o duplicado
   templateUrl: './pac-detail.html',
   styleUrls: ['./pac-detail.scss']
 })
@@ -16,6 +21,8 @@ export class PACDetailComponent {
   private pacService = inject(PACService);
   private contractService = inject(ContractService);
   private entityService = inject(EntityService);
+    private procurementService = inject(ProcurementService); // ✅ NOVO
+  private router = inject(Router);
 
   @Input() plan!: AnnualContractPlan;
   @Output() close = new EventEmitter<void>();
@@ -40,6 +47,18 @@ export class PACDetailComponent {
   contractTypes: any[] = [];
   loadingEntities = false;
 
+  showProcedureCreateModal = false;
+  selectedNeedForProcedure: PlanNeed | null = null;
+  isCreatingProcedure = false;
+  procedureCreateError = '';
+
+  procedureCreateFormData = {
+    procedure_type: 'cp',
+    procedure_start_date: '',
+    procedure_end_date: '',
+    notes: ''
+  };
+
   // Formulário de necessidade
   needFormData = {
     contract_type: 'public_works',
@@ -49,7 +68,9 @@ export class PACDetailComponent {
     justification: '',
     estimated_amount: 0,
     priority: 'medium',
-    planned_quarter: null as number | null
+    planned_quarter: null as number | null,
+    proposed_start_date: '',     // ← NOVO
+  proposed_end_date: '',     // ← NOVO
   };
 
   contractFormData = {
@@ -203,7 +224,9 @@ export class PACDetailComponent {
       justification: '',
       estimated_amount: 0,
       priority: 'medium',
-      planned_quarter: null
+      planned_quarter: null,
+      proposed_start_date: '',
+    proposed_end_date: '',
     };
     this.showNeedFormModal = true;
   }
@@ -218,7 +241,10 @@ export class PACDetailComponent {
       justification: need.justification || '',
       estimated_amount: need.estimated_amount,
       priority: need.priority,
-      planned_quarter: need.planned_quarter
+      planned_quarter: need.planned_quarter,
+      proposed_start_date: need.proposed_start_date || '',
+    proposed_end_date: need.proposed_end_date || '',
+      
     };
     this.showNeedFormModal = true;
   }
@@ -433,4 +459,59 @@ export class PACDetailComponent {
       }
     });
   }
+  // ✅ NOVO: Abrir modal de criação
+  openCreateProcedureModal(need: PlanNeed): void {
+    this.selectedNeedForProcedure = need;
+    this.procedureCreateFormData = {
+      procedure_type: need.procedure_type || 'cp',
+      procedure_start_date: need.proposed_start_date || '',
+      procedure_end_date: need.proposed_end_date || '',
+      notes: ''
+    };
+    this.procedureCreateError = '';
+    this.showProcedureCreateModal = true;
+  }
+
+  // ✅ NOVO: Submeter criação do procedimento
+  submitCreateProcedure(): void {
+    if (!this.selectedNeedForProcedure) return;
+    if (!this.procedureCreateFormData.procedure_start_date || !this.procedureCreateFormData.procedure_end_date) {
+      this.procedureCreateError = 'As datas de início e fim são obrigatórias.';
+      return;
+    }
+
+    this.isCreatingProcedure = true;
+    this.procedureCreateError = '';
+
+    const payload = {
+      plan_need_id: this.selectedNeedForProcedure.id,
+      procedure_type: this.procedureCreateFormData.procedure_type,
+      procedure_start_date: this.procedureCreateFormData.procedure_start_date,
+      procedure_end_date: this.procedureCreateFormData.procedure_end_date,
+      notes: this.procedureCreateFormData.notes
+    };
+
+    this.procurementService.create(payload).subscribe({
+      next: (response) => {
+        this.isCreatingProcedure = false;
+        this.showProcedureCreateModal = false;
+        this.selectedNeedForProcedure = null;
+        
+        // Opcional: Redirecionar imediatamente para a página de gestão do procedimento
+        this.router.navigate(['/procurement', response.data.id]);
+        
+        // Ou, se preferires ficar no PAC: this.refreshPlan();
+      },
+      error: (err) => {
+        this.isCreatingProcedure = false;
+        this.procedureCreateError = err.error?.message || 'Erro ao criar procedimento';
+      }
+    });
+  }
+
+  // ✅ NOVO: Ver procedimento existente (redireciona para a página dedicada)
+  viewProcedure(procedureId: string): void {
+    this.router.navigate(['/procurement', procedureId]);
+  }
+
 }

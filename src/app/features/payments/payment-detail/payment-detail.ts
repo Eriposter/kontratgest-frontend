@@ -2,11 +2,12 @@ import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaymentService, Payment } from '../../../core/services/payment.service';
+import { DocumentUploaderComponent } from '../../../shared/components/document-uploader/document-uploader';
 
 @Component({
   selector: 'app-payment-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DocumentUploaderComponent],
   templateUrl: './payment-detail.html',
   styleUrls: ['./payment-detail.scss'],
    

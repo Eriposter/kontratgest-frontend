@@ -3,6 +3,9 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 
 export interface Contract {
+currency: any;
+  contract_type: any;
+  total_amount: number;
   internal_notes: string;
   tribunal_de_contas_visto: boolean;
   bna_registration_number: string;

@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { ProcurementProcedure } from './procurement.service';
 
 export interface PlanNeed {
+procurement_procedure: any;
   id: string;
   contract_type: string;
   contract_type_label: string;
@@ -18,6 +20,9 @@ export interface PlanNeed {
   planned_quarter: number | null;
   status: string;
   status_label: string;
+  proposed_start_date: string | null;
+  proposed_end_date: string | null;
+ contracting_procedure?: ContractingProcedure | null;
   contract: {
     id: string;
     contract_number: string;
@@ -56,6 +61,47 @@ export interface PACListResponse {
     per_page: number;
     total: number;
   };
+}
+
+// Adiciona no topo, junto das outras interfaces
+export interface ContractingProcedure {
+  id: string;
+  plan_need_id: string;
+  contract_id: string | null;
+  winning_entity_id: string | null;
+  procedure_start_date: string;
+  procedure_end_date: string;
+  confirmed_start_date: string | null;
+  confirmed_end_date: string | null;
+  status: string;
+  status_label: string;
+  duration_days: number | null;
+  documents: any[] | null;
+  notes: string | null;
+  adjudication_notes: string | null;
+  created_by: string | null;
+  completed_at: string | null;
+  need?: {
+    id: string;
+    title: string;
+    estimated_amount: number;
+    plan?: { year: number; title: string };
+  };
+  contract?: {
+    id: string;
+    contract_number: string;
+    title: string;
+  };
+  winning_entity?: {
+    id: string;
+    name: string;
+  };
+  created_at: string;
+}
+
+export interface ContractingProcedureListResponse {
+  data: ContractingProcedure[];
+  meta: { current_page: number; last_page: number; per_page: number; total: number };
 }
 
 @Injectable({
@@ -130,4 +176,38 @@ export class PACService extends ApiService {
   generateContract(needId: string, data: any): Observable<{ data: any }> {
     return super.post<{ data: any }>(`pacs/needs/${needId}/generate-contract`, data);
   }
+
+
+  // ─── Procedimentos de Contratação ──────────────────────
+listProcedures(params?: { status?: string; per_page?: number }): Observable<ContractingProcedureListResponse> {
+  return super.get<ContractingProcedureListResponse>('contracting-procedures', params);
+}
+
+getProcedure(id: string): Observable<{ data: ContractingProcedure }> {
+  return super.get<{ data: ContractingProcedure }>(`contracting-procedures/${id}`);
+}
+
+createProcedure(data: any): Observable<{ data: ContractingProcedure }> {
+  return super.post<{ data: ContractingProcedure }>('contracting-procedures', data);
+}
+
+updateProcedure(id: string, data: any): Observable<{ data: ContractingProcedure }> {
+  return super.put<{ data: ContractingProcedure }>(`contracting-procedures/${id}`, data);
+}
+
+startProcedure(id: string): Observable<{ data: ContractingProcedure }> {
+  return super.post<{ data: ContractingProcedure }>(`contracting-procedures/${id}/start`, {});
+}
+
+moveToEvaluation(id: string): Observable<{ data: ContractingProcedure }> {
+  return super.post<{ data: ContractingProcedure }>(`contracting-procedures/${id}/evaluation`, {});
+}
+
+completeProcedure(id: string, data: { winning_entity_id: string; adjudication_notes?: string }): Observable<{ data: ContractingProcedure }> {
+  return super.post<{ data: ContractingProcedure }>(`contracting-procedures/${id}/complete`, data);
+}
+
+cancelProcedure(id: string, reason: string): Observable<{ data: ContractingProcedure }> {
+  return super.post<{ data: ContractingProcedure }>(`contracting-procedures/${id}/cancel`, { reason });
+}
 }

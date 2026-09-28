@@ -618,3 +618,21 @@
     max-width: 800px;
   }
 }
+.due-date--paid {
+  color: #16a34a; // Verde
+  font-weight: 600;
+}
+
+.due-badge--paid {
+  background: #dcfce7;
+  color: #166534;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.due-date--inactive {
+  color: #9ca3af; // Cinzento
+  font-style: italic;
+}

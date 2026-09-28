@@ -192,23 +192,33 @@ contractTypes: any[] = [];
     };
   }
 
-  nextStep(): void {
-    if (this.currentStep < this.totalSteps) {
-      this.currentStep++;
-    }
+ nextStep(): void {
+  if (this.currentStep < this.totalSteps) {
+    this.currentStep++;
+    this.scrollToTop();
   }
+}
 
-  previousStep(): void {
-    if (this.currentStep > 1) {
-      this.currentStep--;
-    }
+previousStep(): void {
+  if (this.currentStep > 1) {
+    this.currentStep--;
+    this.scrollToTop();
   }
+}
 
-  goToStep(step: number): void {
-    if (step >= 1 && step <= this.totalSteps) {
-      this.currentStep = step;
-    }
+goToStep(step: number): void {
+  if (step >= 1 && step <= this.totalSteps) {
+    this.currentStep = step;
+    this.scrollToTop();
   }
+}
+
+scrollToTop(): void {
+  const container = document.querySelector('.form-scroll-container');
+  if (container) {
+    container.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 
   onCurrencyChange(): void {
     this.formData.requires_bna_registration = this.formData.currency !== 'AOA';
