@@ -107,4 +107,5 @@ export class GuaranteeService extends ApiService {
   getExpired(): Observable<{ data: Guarantee[]; meta: any }> {
     return this.get<{ data: Guarantee[]; meta: any }>('guarantees/expired');
   }
+  
 }

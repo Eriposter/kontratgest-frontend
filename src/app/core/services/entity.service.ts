@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 
 export interface Entity {
+  name: string;
   id: string;
   type: string;
   type_label: string;

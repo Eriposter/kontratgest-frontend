@@ -76,7 +76,8 @@ export class DocumentService extends ApiService {
     return this.delete<void>(`documents/payments/${paymentId}/${documentId}`);
   }
 
-  uploadProcurementDocument(procurementId: string, formData: FormData): Observable<{ data: Document }> {
+// ─── Procurement (Procedimentos de Contratação) ──────────
+uploadProcurementDocument(procurementId: string, formData: FormData): Observable<{ data: Document }> {
   return this.post<{ data: Document }>(`documents/procurement/${procurementId}/upload`, formData);
 }
 

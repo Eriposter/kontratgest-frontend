@@ -99,7 +99,6 @@
         <div class="info-section" *ngIf="procedure.winning_entity">
           <h3>Entidade Vencedora</h3>
           <div class="winner-card">
-            <div class="winner-icon">🏆</div>
             <div class="winner-info">
               <p class="winner-name">{{ procedure.winning_entity?.name }}</p>
             </div>
@@ -145,39 +144,62 @@
 
     <!-- Candidates Tab -->
     <div *ngIf="activeTab === 'candidates'" class="tab-content">
-      <div *ngIf="(procedure.candidates?.length || 0) === 0" class="empty-state">
-        <p>Nenhum candidato registado</p>
-      </div>
+  <div class="tab-header-actions">
+    <button *ngIf="procedure.status !== 'completed' && procedure.status !== 'cancelled'" 
+            class="btn-primary btn-sm" 
+            (click)="openAddCandidateModal()">
+      ➕ Adicionar Candidato
+    </button>
+  </div>
 
-      <div *ngIf="(procedure.candidates?.length || 0) > 0" class="candidates-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Entidade</th>
-              <th>Estado</th>
-              <th>Valor Proposto</th>
-              <th>Score Técnico</th>
-              <th>Score Financeiro</th>
-              <th>Score Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let candidate of procedure.candidates">
-              <td>{{ candidate.entity_name }}</td>
-              <td>
-                <span class="candidate-status" [ngClass]="'status--' + candidate.status">
-                  {{ candidate.status_label }}
-                </span>
-              </td>
-              <td>{{ candidate.proposed_amount ? formatCurrency(candidate.proposed_amount) : '—' }}</td>
-              <td>{{ candidate.technical_score || '—' }}</td>
-              <td>{{ candidate.financial_score || '—' }}</td>
-              <td>{{ candidate.total_score || '—' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+  <div *ngIf="(procedure.candidates?.length || 0) === 0" class="empty-state">
+    <p>Nenhum candidato registado. Adicione candidatos para iniciar a avaliação.</p>
+  </div>
+
+  <div *ngIf="(procedure.candidates?.length || 0) > 0" class="candidates-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Entidade</th>
+          <th>Proposta (AOA)</th>
+          <th>Score Téc. (70%)</th>
+          <th>Score Fin. (30%)</th>
+          <th>Score Total</th>
+          <th>Estado</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let candidate of procedure.candidates" [class.row--winner]="candidate.status === 'winner'">
+          <td class="entity-name">{{ candidate.entity_name }}</td>
+          <td class="mono">{{ candidate.proposed_amount ? formatCurrency(candidate.proposed_amount) : '—' }}</td>
+          <td>{{ candidate.technical_score || '—' }}</td>
+          <td>{{ candidate.financial_score || '—' }}</td>
+          <td class="mono highlight">{{ candidate.total_score ? (candidate.total_score | number:'1.2-2') : '—' }}</td>
+          <td>
+            <span class="candidate-status" [ngClass]="'status--' + candidate.status">
+              {{ candidate.status_label }}
+            </span>
+          </td>
+          <td>
+            <button *ngIf="procedure.status !== 'completed' && procedure.status !== 'cancelled'"
+                    class="btn-icon" 
+                    (click)="openEditCandidateModal(candidate)" 
+                    title="Editar">
+              ✏️
+            </button>
+            <button *ngIf="procedure.status !== 'completed' && procedure.status !== 'cancelled'"
+                    class="btn-icon btn-icon--danger" 
+                    (click)="deleteCandidate(candidate)" 
+                    title="Remover">
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
     <!-- Documents Tab -->
     <div *ngIf="activeTab === 'documents'" class="tab-content">
@@ -277,6 +299,56 @@
     <div class="modal-footer">
       <button class="btn-secondary" (click)="showCancelModal = false">Cancelar</button>
       <button class="btn-danger" (click)="confirmCancel()">Confirmar Cancelamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Adicionar/Editar Candidato -->
+<div *ngIf="showAddCandidateModal" class="modal-overlay" (click)="showAddCandidateModal = false">
+  <div class="modal-content modal-content--medium" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ editingCandidate ? 'Editar Candidato' : 'Adicionar Candidato' }}</h2>
+      <button class="close-btn" (click)="showAddCandidateModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div *ngIf="actionError" class="alert alert--error">{{ actionError }}</div>
+      
+      <div class="form-group">
+        <label>Entidade *</label>
+        <select [(ngModel)]="candidateFormData.entity_id" class="form-select" [disabled]="!!editingCandidate">
+          <option value="">Selecionar entidade...</option>
+          <option *ngFor="let entity of entities" [value]="entity.id">
+            {{ entity.identification.name }} (NIF: {{ entity.identification?.nif }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Valor da Proposta (AOA)</label>
+        <input type="number" [(ngModel)]="candidateFormData.proposed_amount" class="form-input" placeholder="0.00">
+      </div>
+
+      <div class="form-row two-cols">
+        <div class="form-group">
+          <label>Score Técnico (0-100)</label>
+          <input type="number" [(ngModel)]="candidateFormData.technical_score" class="form-input" min="0" max="100" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Score Financeiro (0-100)</label>
+          <input type="number" [(ngModel)]="candidateFormData.financial_score" class="form-input" min="0" max="100" placeholder="0">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Observações</label>
+        <textarea [(ngModel)]="candidateFormData.notes" class="form-textarea" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showAddCandidateModal = false">Cancelar</button>
+      <button class="btn-primary" (click)="saveCandidate()">
+        {{ editingCandidate ? 'Atualizar' : 'Adicionar' }} Candidato
+      </button>
     </div>
   </div>
 </div>

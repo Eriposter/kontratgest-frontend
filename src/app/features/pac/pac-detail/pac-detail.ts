@@ -93,8 +93,8 @@ export class PACDetailComponent {
     { value: 'cp', label: 'Concurso Público', code: 'CP' },
     { value: 'clpq', label: 'Concurso Limitado por Prévia Qualificação', code: 'CLPQ' },
     { value: 'clc', label: 'Concurso Limitado por Convite', code: 'CLC' },
-    { value: 'cs', label: 'Contratação Simplificada', code: 'CS' },
-    { value: 'cde', label: 'Procedimento Dinâmico Electrónico', code: 'CDE' },
+    { value: 'pcs', label: 'Procedimento de Contratação Simplificada', code: 'PCS' }, // ✅ Corrigido de 'cs' para 'pcs'
+    { value: 'pde', label: 'Procedimento Dinâmico Electrónico', code: 'PDE' },       // ✅ Corrigido de 'cde' para 'pde'
     { value: 'pce', label: 'Procedimento de Contratação Emergencial', code: 'PCE' }
   ];
 

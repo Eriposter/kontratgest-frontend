@@ -166,4 +166,8 @@ createFromPAC(needId: string, data: any): Observable<{ data: Contract }> {
 getContractTypes(): Observable<any> {
   return this.get<any>('contract-types'); // Ajusta o endpoint se for diferente no teu sistema
 }
+
+getContractsForGuarantee(): Observable<{ data: any[] }> {
+  return this.get('contracts/eligible-for-guarantee'); // Ajusta a rota conforme o backend
+}
 }

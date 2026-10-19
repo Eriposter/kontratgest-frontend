@@ -2,8 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProcurementService, ProcurementProcedure, ProcurementPhase } from '../../../core/services/procurement.service';
+import { ProcurementService, ProcurementProcedure, ProcurementPhase, ProcurementCandidate } from '../../../core/services/procurement.service';
 import { DocumentUploaderComponent } from '../../../shared/components/document-uploader/document-uploader';
+import { Entity, EntityService } from '../../../core/services/entity.service';
 
 @Component({
   selector: 'app-procedure-detail',
@@ -14,6 +15,7 @@ import { DocumentUploaderComponent } from '../../../shared/components/document-u
 })
 export class ProcedureDetailComponent implements OnInit {
   private procurementService = inject(ProcurementService);
+  private entityService = inject(EntityService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -41,6 +43,19 @@ export class ProcedureDetailComponent implements OnInit {
   };
   cancelReason = '';
 
+  // Adiciona propriedades:
+showAddCandidateModal = false;
+editingCandidate: ProcurementCandidate | null = null;
+candidateFormData = {
+  entity_id: '',
+  proposed_amount: 0,
+  technical_score: null as number | null,
+  financial_score: null as number | null,
+  notes: ''
+};
+entities: Entity[] = [];
+loadingEntities = false;
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -66,13 +81,13 @@ export class ProcedureDetailComponent implements OnInit {
   getStatusInfo(status: string): { label: string; class: string; icon: string } {
     const statuses: any = {
       'planned': { label: 'Planeado', class: 'status--planned', icon: '' },
-      'in_progress': { label: 'Em Curso', class: 'status--in-progress', icon: '⏳' },
-      'evaluation': { label: 'Em Avaliação', class: 'status--evaluation', icon: '🔍' },
-      'completed': { label: 'Finalizado', class: 'status--completed', icon: '✅' },
+      'in_progress': { label: 'Em Curso', class: 'status--in-progress', icon: '' },
+      'evaluation': { label: 'Em Avaliação', class: 'status--evaluation', icon: '' },
+      'completed': { label: 'Finalizado', class: 'status--completed', icon: '' },
       'cancelled': { label: 'Cancelado', class: 'status--cancelled', icon: '' },
-      'failed': { label: 'Deserto', class: 'status--failed', icon: '❌' }
+      'failed': { label: 'Deserto', class: 'status--failed', icon: '' }
     };
-    return statuses[status] || { label: status, class: '', icon: '❓' };
+    return statuses[status] || { label: status, class: '', icon: '' };
   }
 
   getPhaseStatusInfo(status: string): { label: string; class: string } {
@@ -211,4 +226,88 @@ export class ProcedureDetailComponent implements OnInit {
     if (value >= 1_000) return `${(value / 1_000).toFixed(2)}K AOA`;
     return `${value.toFixed(2)} AOA`;
   }
+
+
+  // Adiciona método para carregar entidades:
+loadEntities(): void {
+  this.loadingEntities = true;
+  this.entityService.list({ per_page: 100, status: 'active' }).subscribe({
+    next: (response) => {
+      this.entities = response.data;
+      this.loadingEntities = false;
+    },
+    error: () => {
+      this.loadingEntities = false;
+    }
+  });
+}
+
+// Adiciona métodos de candidatos:
+openAddCandidateModal(): void {
+  this.editingCandidate = null;
+  this.candidateFormData = {
+    entity_id: '',
+    proposed_amount: 0,
+    technical_score: null,
+    financial_score: null,
+    notes: ''
+  };
+  this.showAddCandidateModal = true;
+  if (this.entities.length === 0) {
+    this.loadEntities();
+  }
+}
+
+openEditCandidateModal(candidate: ProcurementCandidate): void {
+  this.editingCandidate = candidate;
+  this.candidateFormData = {
+    entity_id: candidate.entity_id,
+    proposed_amount: candidate.proposed_amount || 0,
+    technical_score: candidate.technical_score,
+    financial_score: candidate.financial_score,
+    notes: candidate.notes || ''
+  };
+  this.showAddCandidateModal = true;
+  if (this.entities.length === 0) {
+    this.loadEntities();
+  }
+}
+
+saveCandidate(): void {
+  if (!this.candidateFormData.entity_id) {
+    this.actionError = 'Selecione uma entidade';
+    return;
+  }
+
+  const operation = this.editingCandidate
+    ? this.procurementService.updateCandidate(this.procedure!.id, this.editingCandidate.id, this.candidateFormData)
+    : this.procurementService.addCandidate(this.procedure!.id, this.candidateFormData);
+
+  operation.subscribe({
+    next: () => {
+      this.showAddCandidateModal = false;
+      this.loadProcedure(this.procedure!.id);
+      this.actionMessage = this.editingCandidate ? 'Candidato atualizado!' : 'Candidato adicionado!';
+      setTimeout(() => this.actionMessage = '', 3000);
+    },
+    error: (err) => {
+      this.actionError = err.error?.message || 'Erro ao guardar candidato';
+    }
+  });
+}
+
+deleteCandidate(candidate: ProcurementCandidate): void {
+  if (!confirm(`Remover o candidato ${candidate.entity_name}?`)) return;
+  
+  this.procurementService.deleteCandidate(this.procedure!.id, candidate.id).subscribe({
+    next: () => {
+      this.loadProcedure(this.procedure!.id);
+      this.actionMessage = 'Candidato removido!';
+      setTimeout(() => this.actionMessage = '', 3000);
+    },
+    error: (err) => {
+      this.actionError = err.error?.message || 'Erro ao remover candidato';
+    }
+  });
+}
 }

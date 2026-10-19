@@ -27,6 +27,7 @@ export interface ProcurementCandidate {
   technical_score: number | null;
   financial_score: number | null;
   total_score: number | null;
+  notes: string | null;
 }
 
 export interface ProcurementProcedure {
@@ -113,4 +114,21 @@ export class ProcurementService extends ApiService {
   cancel(id: string, reason: string): Observable<{ data: ProcurementProcedure }> {
     return super.post<{ data: ProcurementProcedure }>(`procurement-procedures/${id}/cancel`, { reason });
   }
+
+
+  getCandidates(procedureId: string): Observable<{ data: ProcurementCandidate[] }> {
+  return super.get<{ data: ProcurementCandidate[] }>(`procurement-procedures/${procedureId}/candidates`);
+}
+
+addCandidate(procedureId: string, data: any): Observable<{ data: ProcurementCandidate }> {
+  return super.post<{ data: ProcurementCandidate }>(`procurement-procedures/${procedureId}/candidates`, data);
+}
+
+updateCandidate(procedureId: string, candidateId: string, data: any): Observable<{ data: ProcurementCandidate }> {
+  return super.put<{ data: ProcurementCandidate }>(`procurement-procedures/${procedureId}/candidates/${candidateId}`, data);
+}
+
+deleteCandidate(procedureId: string, candidateId: string): Observable<void> {
+  return super.delete<void>(`procurement-procedures/${procedureId}/candidates/${candidateId}`);
+}
 }

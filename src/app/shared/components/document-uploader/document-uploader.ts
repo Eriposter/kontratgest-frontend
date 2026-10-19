@@ -63,6 +63,8 @@ export class DocumentUploaderComponent implements OnInit {
     case 'entity': return this.documentService.getEntityDocuments.bind(this.documentService);
     case 'contract': return this.documentService.getContractDocuments.bind(this.documentService);
     case 'guarantee': return this.documentService.getGuaranteeDocuments.bind(this.documentService);
+    case 'measurement': return this.documentService.getPaymentDocuments.bind(this.documentService);
+    case 'payments': return this.documentService.getPaymentDocuments.bind(this.documentService);
     case 'procurement': return this.documentService.getProcurementDocuments.bind(this.documentService); // ✅ ADICIONADO
     default: return this.documentService.getEntityDocuments.bind(this.documentService);
   }
@@ -73,6 +75,8 @@ private getUploadMethod(): (id: string, formData: FormData) => any {
     case 'entity': return this.documentService.uploadEntityDocument.bind(this.documentService);
     case 'contract': return this.documentService.uploadContractDocument.bind(this.documentService);
     case 'guarantee': return this.documentService.uploadGuaranteeDocument.bind(this.documentService);
+    case 'measurement': return this.documentService.uploadPaymentDocument.bind(this.documentService);
+    case 'payments': return this.documentService.uploadPaymentDocument.bind(this.documentService);
     case 'procurement': return this.documentService.uploadProcurementDocument.bind(this.documentService); // ✅ ADICIONADO
     default: return this.documentService.uploadEntityDocument.bind(this.documentService);
   }
@@ -83,6 +87,8 @@ private getDeleteMethod(): (id: string, docId: string) => any {
     case 'entity': return this.documentService.deleteEntityDocument.bind(this.documentService);
     case 'contract': return this.documentService.deleteContractDocument.bind(this.documentService);
     case 'guarantee': return this.documentService.deleteGuaranteeDocument.bind(this.documentService);
+    case 'measurement': return this.documentService.deletePaymentDocument.bind(this.documentService);
+    case 'payments': return this.documentService.deletePaymentDocument.bind(this.documentService);
     case 'procurement': return this.documentService.deleteProcurementDocument.bind(this.documentService); // ✅ ADICIONADO
     default: return this.documentService.deleteEntityDocument.bind(this.documentService);
   }

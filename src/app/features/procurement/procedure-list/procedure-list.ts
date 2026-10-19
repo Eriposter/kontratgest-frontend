@@ -37,14 +37,14 @@ export class ProcedureListComponent implements OnInit {
 
   getStatusInfo(status: string): { label: string; class: string; icon: string } {
     const statuses: any = {
-      'planned': { label: 'Planeado', class: 'status--planned', icon: '📋' },
-      'in_progress': { label: 'Em Curso', class: 'status--in-progress', icon: '⏳' },
-      'evaluation': { label: 'Em Avaliação', class: 'status--evaluation', icon: '🔍' },
-      'completed': { label: 'Finalizado', class: 'status--completed', icon: '✅' },
-      'cancelled': { label: 'Cancelado', class: 'status--cancelled', icon: '🚫' },
+      'planned': { label: 'Planeado', class: 'status--planned', icon: '' },
+      'in_progress': { label: 'Em Curso', class: 'status--in-progress', icon: '' },
+      'evaluation': { label: 'Em Avaliação', class: 'status--evaluation', icon: '' },
+      'completed': { label: 'Finalizado', class: 'status--completed', icon: '' },
+      'cancelled': { label: 'Cancelado', class: 'status--cancelled', icon: '' },
       'failed': { label: 'Deserto', class: 'status--failed', icon: '' }
     };
-    return statuses[status] || { label: status, class: '', icon: '❓' };
+    return statuses[status] || { label: status, class: '', icon: '' };
   }
 
   formatCurrency(value: number): string {

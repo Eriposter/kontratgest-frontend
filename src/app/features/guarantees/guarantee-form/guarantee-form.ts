@@ -74,7 +74,7 @@ export class GuaranteeFormComponent implements OnInit {
 
   loadContracts(): void {
     this.isLoading = true;
-    this.contractService.list({ status: 'active', per_page: 100 }).subscribe({
+    this.contractService.getContractsForGuarantee().subscribe({
       next: (response) => {
         this.contracts = response.data;
         this.isLoading = false;

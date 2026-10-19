@@ -266,21 +266,16 @@
 
   <!-- Footer (FORA do scroll container) -->
   <div class="form-footer">
-    <button type="button" (click)="close.emit()" class="btn-secondary">Cancelar</button>
+  <button type="button" (click)="close.emit()" class="btn-secondary">Cancelar</button>
+  <div class="form-actions">
+    <button type="button" *ngIf="currentStep > 1" (click)="previousStep()" class="btn-secondary">← Anterior</button>
+    <button type="button" *ngIf="currentStep < totalSteps" (click)="nextStep()" class="btn-primary">Próximo →</button>
     
-    <div class="form-actions">
-      <button type="button" *ngIf="currentStep > 1" (click)="previousStep()" class="btn-secondary">
-        ← Anterior
-      </button>
-      
-      <button type="button" *ngIf="currentStep < totalSteps" (click)="nextStep()" class="btn-primary">
-        Próximo →
-      </button>
-      
-      <button type="submit" *ngIf="currentStep === totalSteps" [disabled]="isSaving" class="btn-primary">
-        <span *ngIf="!isSaving">Criar Caução</span>
-        <span *ngIf="isSaving">A criar...</span>
-      </button>
-    </div>
+    <!-- ✅ Mudança: type="button" + (click)="onSubmit()" -->
+    <button type="button" *ngIf="currentStep === totalSteps" (click)="onSubmit()" [disabled]="isSaving" class="btn-primary">
+      <span *ngIf="!isSaving">Criar Caução</span>
+      <span *ngIf="isSaving">A criar...</span>
+    </button>
   </div>
+</div>
 </div>
